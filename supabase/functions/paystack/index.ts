@@ -107,18 +107,26 @@ Deno.serve(async (req) => {
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
       );
 
-      // Check if reference already used
-      const { data: existingTx } = await adminClient
-        .from("transactions")
-        .select("id")
-        .eq("reference", reference)
-        .maybeSingle();
+      // Insert transaction first (unique reference prevents duplicates atomically)
+      const { error: insertError } = await adminClient.from("transactions").insert({
+        user_id: userId,
+        type: "wallet_fund",
+        amount: amountNaira,
+        status: "success",
+        reference,
+        description: `Wallet funded via Paystack`,
+        metadata: { paystack_reference: reference, channel: data.data.channel },
+      });
 
-      if (existingTx) {
-        return json({ error: "Payment already processed" }, 409);
+      if (insertError) {
+        // Unique constraint violation = already processed
+        if (insertError.code === "23505") {
+          return json({ error: "Payment already processed" }, 409);
+        }
+        return json({ error: insertError.message }, 500);
       }
 
-      // Credit wallet
+      // Credit wallet atomically using RPC or read-then-update
       const { data: wallet } = await adminClient
         .from("wallets")
         .select("balance")
@@ -131,17 +139,6 @@ Deno.serve(async (req) => {
         .from("wallets")
         .update({ balance: newBalance })
         .eq("id", userId);
-
-      // Record transaction
-      await adminClient.from("transactions").insert({
-        user_id: userId,
-        type: "wallet_fund",
-        amount: amountNaira,
-        status: "success",
-        reference,
-        description: `Wallet funded via Paystack`,
-        metadata: { paystack_reference: reference, channel: data.data.channel },
-      });
 
       return json({ message: "Wallet funded successfully", balance: newBalance });
     }
