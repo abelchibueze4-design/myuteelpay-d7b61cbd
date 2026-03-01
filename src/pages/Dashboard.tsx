@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap,
-  Gift, ArrowRight, Bell,
+  Gift, ArrowRight, Bell, Mail, MessageCircle, Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -93,6 +93,68 @@ const Dashboard = () => {
           ) : (
             <div className="p-8 text-center text-sm text-muted-foreground">No transactions yet</div>
           )}
+        </div>
+
+        {/* Footer Section - Support & Community */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {/* Customer Support Card */}
+          <div className="bg-card rounded-2xl p-6 shadow-card">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <MessageCircle className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="font-bold text-lg">Customer Support</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">Get help or reach out to us</p>
+            <div className="space-y-3">
+              <a 
+                href="mailto:support@uteelpay.com"
+                className="flex items-center gap-3 p-3 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors"
+              >
+                <Mail className="w-5 h-5 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Email Support</p>
+                  <p className="text-xs text-muted-foreground">support@uteelpay.com</p>
+                </div>
+              </a>
+              <a 
+                href="https://wa.me/2348000000000"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors"
+              >
+                <MessageCircle className="w-5 h-5 text-green-600" />
+                <div>
+                  <p className="text-sm font-medium">WhatsApp Chat</p>
+                  <p className="text-xs text-muted-foreground">Chat with us on WhatsApp</p>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          {/* Join Community Card */}
+          <div className="bg-card rounded-2xl p-6 shadow-card">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-green-600/10 flex items-center justify-center">
+                <Users className="w-5 h-5 text-green-600" />
+              </div>
+              <h3 className="font-bold text-lg">Join Our Community</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">Stay updated with exclusive offers</p>
+            <a 
+              href="https://whatsapp.com/channel/uteelpay"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 p-3 bg-green-600/10 rounded-lg hover:bg-green-600/20 transition-colors border border-green-600/30 w-full"
+            >
+              <MessageCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium">WhatsApp Channel</p>
+                <p className="text-xs text-muted-foreground">Join for updates & offers</p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-green-600 ml-auto flex-shrink-0" />
+            </a>
+          </div>
         </div>
       </div>
     </div>
