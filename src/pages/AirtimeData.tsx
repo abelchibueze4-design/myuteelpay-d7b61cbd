@@ -1,17 +1,19 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Smartphone, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useCreateTransaction } from "@/hooks/useTransactions";
+import { toast } from "sonner";
 
 const networks = ["MTN", "Glo", "Airtel", "9mobile"];
 const dataPlans = [
-  { label: "1GB - 30 days", value: "1gb", price: "₦500" },
-  { label: "2GB - 30 days", value: "2gb", price: "₦1,000" },
-  { label: "5GB - 30 days", value: "5gb", price: "₦2,000" },
-  { label: "10GB - 30 days", value: "10gb", price: "₦3,500" },
+  { label: "1GB - 30 days", value: "1gb", price: 500 },
+  { label: "2GB - 30 days", value: "2gb", price: 1000 },
+  { label: "5GB - 30 days", value: "5gb", price: 2000 },
+  { label: "10GB - 30 days", value: "10gb", price: 3500 },
 ];
 
 const AirtimeData = () => {
@@ -22,10 +24,22 @@ const AirtimeData = () => {
   const [amount, setAmount] = useState("");
   const [plan, setPlan] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const createTransaction = useCreateTransaction();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowSuccess(true);
+    const txAmount = tab === "airtime" ? Number(amount) : (dataPlans.find(p => p.value === plan)?.price ?? 0);
+    try {
+      await createTransaction.mutateAsync({
+        type: tab === "airtime" ? "airtime" : "data",
+        amount: txAmount,
+        description: `${network} ${tab === "airtime" ? "Airtime" : dataPlans.find(p => p.value === plan)?.label} - ${phone}`,
+        metadata: { network, phone, plan: tab === "data" ? plan : undefined },
+      });
+      setShowSuccess(true);
+    } catch {
+      toast.error("Transaction failed. Please try again.");
+    }
   };
 
   return (
@@ -40,18 +54,12 @@ const AirtimeData = () => {
       </header>
 
       <div className="container mx-auto px-4 -mt-2">
-        {/* Tabs */}
         <div className="flex gap-2 mb-6">
           {(["airtime", "data"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
+            <button key={t} onClick={() => setTab(t)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                 tab === t ? "gradient-primary text-primary-foreground shadow-primary" : "bg-card text-muted-foreground"
-              }`}
-            >
-              {t === "airtime" ? "Airtime" : "Data"}
-            </button>
+              }`}>{t === "airtime" ? "Airtime" : "Data"}</button>
           ))}
         </div>
 
@@ -60,12 +68,9 @@ const AirtimeData = () => {
             <label className="text-sm font-medium">Network</label>
             <Select value={network} onValueChange={setNetwork}>
               <SelectTrigger><SelectValue placeholder="Select network" /></SelectTrigger>
-              <SelectContent>
-                {networks.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
-              </SelectContent>
+              <SelectContent>{networks.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-
           <div className="space-y-2">
             <label className="text-sm font-medium">Phone Number</label>
             <div className="relative">
@@ -73,7 +78,6 @@ const AirtimeData = () => {
               <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="080X XXX XXXX" className="pl-10" type="tel" required />
             </div>
           </div>
-
           {tab === "airtime" ? (
             <div className="space-y-2">
               <label className="text-sm font-medium">Amount</label>
@@ -84,14 +88,13 @@ const AirtimeData = () => {
               <label className="text-sm font-medium">Data Plan</label>
               <Select value={plan} onValueChange={setPlan}>
                 <SelectTrigger><SelectValue placeholder="Select plan" /></SelectTrigger>
-                <SelectContent>
-                  {dataPlans.map((p) => <SelectItem key={p.value} value={p.value}>{p.label} — {p.price}</SelectItem>)}
-                </SelectContent>
+                <SelectContent>{dataPlans.map((p) => <SelectItem key={p.value} value={p.value}>{p.label} — ₦{p.price.toLocaleString()}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           )}
-
-          <Button type="submit" variant="hero" className="w-full">Pay Now</Button>
+          <Button type="submit" variant="hero" className="w-full" disabled={createTransaction.isPending}>
+            {createTransaction.isPending ? "Processing..." : "Pay Now"}
+          </Button>
         </form>
       </div>
 

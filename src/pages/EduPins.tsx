@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, GraduationCap, Check } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useCreateTransaction } from "@/hooks/useTransactions";
+import { toast } from "sonner";
 
 const exams = [
-  { name: "WAEC", price: "₦3,500" },
-  { name: "NECO", price: "₦1,800" },
+  { name: "WAEC", price: 3500 },
+  { name: "NECO", price: 1800 },
 ];
 
 const EduPins = () => {
@@ -15,8 +17,26 @@ const EduPins = () => {
   const [exam, setExam] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [showSuccess, setShowSuccess] = useState(false);
+  const createTransaction = useCreateTransaction();
 
   const selected = exams.find((e) => e.name === exam);
+  const total = selected ? selected.price * parseInt(quantity) : 0;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selected) return;
+    try {
+      await createTransaction.mutateAsync({
+        type: "edu_pin",
+        amount: total,
+        description: `${exam} Pin x${quantity}`,
+        metadata: { exam, quantity: parseInt(quantity) },
+      });
+      setShowSuccess(true);
+    } catch {
+      toast.error("Transaction failed. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-secondary">
@@ -30,37 +50,29 @@ const EduPins = () => {
       </header>
 
       <div className="container mx-auto px-4 -mt-2">
-        <form onSubmit={(e) => { e.preventDefault(); setShowSuccess(true); }} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
+        <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Exam Type</label>
             <Select value={exam} onValueChange={setExam}>
               <SelectTrigger><SelectValue placeholder="Select exam" /></SelectTrigger>
-              <SelectContent>
-                {exams.map((e) => <SelectItem key={e.name} value={e.name}>{e.name} — {e.price}</SelectItem>)}
-              </SelectContent>
+              <SelectContent>{exams.map((e) => <SelectItem key={e.name} value={e.name}>{e.name} — ₦{e.price.toLocaleString()}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-
           <div className="space-y-2">
             <label className="text-sm font-medium">Quantity</label>
             <Select value={quantity} onValueChange={setQuantity}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {[1, 2, 3, 4, 5].map((n) => <SelectItem key={n} value={String(n)}>{n} pin{n > 1 ? "s" : ""}</SelectItem>)}
-              </SelectContent>
+              <SelectContent>{[1, 2, 3, 4, 5].map((n) => <SelectItem key={n} value={String(n)}>{n} pin{n > 1 ? "s" : ""}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-
           {selected && (
             <div className="bg-secondary rounded-lg p-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total</span>
-                <span className="font-bold text-gradient">₦{(parseInt(selected.price.replace(/[₦,]/g, "")) * parseInt(quantity)).toLocaleString()}</span>
-              </div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Total</span><span className="font-bold text-gradient">₦{total.toLocaleString()}</span></div>
             </div>
           )}
-
-          <Button type="submit" variant="hero" className="w-full">Purchase Pin</Button>
+          <Button type="submit" variant="hero" className="w-full" disabled={createTransaction.isPending}>
+            {createTransaction.isPending ? "Processing..." : "Purchase Pin"}
+          </Button>
         </form>
       </div>
 

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useCreateTransaction } from "@/hooks/useTransactions";
+import { toast } from "sonner";
 
 const discos = ["IKEDC", "EKEDC", "AEDC", "KEDCO", "PHEDC", "BEDC", "IBEDC", "JEDC", "KAEDCO"];
 
@@ -15,6 +17,22 @@ const Electricity = () => {
   const [meter, setMeter] = useState("");
   const [amount, setAmount] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const createTransaction = useCreateTransaction();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await createTransaction.mutateAsync({
+        type: "electricity",
+        amount: Number(amount),
+        description: `${disco} ${type} - Meter ${meter}`,
+        metadata: { disco, meter, type },
+      });
+      setShowSuccess(true);
+    } catch {
+      toast.error("Transaction failed. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-secondary">
@@ -30,29 +48,21 @@ const Electricity = () => {
       <div className="container mx-auto px-4 -mt-2">
         <div className="flex gap-2 mb-6">
           {(["prepaid", "postpaid"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setType(t)}
+            <button key={t} onClick={() => setType(t)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all ${
                 type === t ? "gradient-primary text-primary-foreground shadow-primary" : "bg-card text-muted-foreground"
-              }`}
-            >
-              {t}
-            </button>
+              }`}>{t}</button>
           ))}
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); setShowSuccess(true); }} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
+        <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Distribution Company</label>
             <Select value={disco} onValueChange={setDisco}>
               <SelectTrigger><SelectValue placeholder="Select disco" /></SelectTrigger>
-              <SelectContent>
-                {discos.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-              </SelectContent>
+              <SelectContent>{discos.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-
           <div className="space-y-2">
             <label className="text-sm font-medium">Meter Number</label>
             <div className="relative">
@@ -60,13 +70,13 @@ const Electricity = () => {
               <Input value={meter} onChange={(e) => setMeter(e.target.value)} placeholder="Enter meter number" className="pl-10" required />
             </div>
           </div>
-
           <div className="space-y-2">
             <label className="text-sm font-medium">Amount</label>
             <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₦500 minimum" type="number" required />
           </div>
-
-          <Button type="submit" variant="hero" className="w-full">Pay Now</Button>
+          <Button type="submit" variant="hero" className="w-full" disabled={createTransaction.isPending}>
+            {createTransaction.isPending ? "Processing..." : "Pay Now"}
+          </Button>
         </form>
       </div>
 

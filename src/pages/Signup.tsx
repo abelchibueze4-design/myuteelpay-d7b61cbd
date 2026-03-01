@@ -1,16 +1,30 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Phone, User, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const Signup = () => {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", referralCode: "" });
+  const [loading, setLoading] = useState(false);
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
 
   const update = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    const { error } = await signUp(form.email, form.password, form.name, form.phone, form.referralCode);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Account created! Please check your email to verify.");
+      navigate("/login");
+    }
   };
 
   const fields = [
@@ -45,8 +59,16 @@ const Signup = () => {
               </div>
             </div>
           ))}
-          <Button type="submit" className="w-full" variant="hero">
-            Create Account <ArrowRight className="w-4 h-4" />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Referral Code (Optional)</label>
+            <Input
+              value={form.referralCode}
+              onChange={(e) => update("referralCode", e.target.value)}
+              placeholder="Enter referral code"
+            />
+          </div>
+          <Button type="submit" className="w-full" variant="hero" disabled={loading}>
+            {loading ? "Creating Account..." : "Create Account"} <ArrowRight className="w-4 h-4" />
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             Already have an account? <Link to="/login" className="text-primary font-semibold hover:underline">Sign In</Link>

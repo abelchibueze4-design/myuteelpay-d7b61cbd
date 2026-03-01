@@ -1,16 +1,28 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Mail, Lock, Phone, ArrowRight } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, Lock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Will integrate with Supabase auth
+    setLoading(true);
+    const { error } = await signIn(email, password);
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -36,8 +48,8 @@ const Login = () => {
               <Input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pl-10" type="password" required />
             </div>
           </div>
-          <Button type="submit" className="w-full" variant="hero">
-            Sign In <ArrowRight className="w-4 h-4" />
+          <Button type="submit" className="w-full" variant="hero" disabled={loading}>
+            {loading ? "Signing In..." : "Sign In"} <ArrowRight className="w-4 h-4" />
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             Don't have an account? <Link to="/signup" className="text-primary font-semibold hover:underline">Sign Up</Link>
