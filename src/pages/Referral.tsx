@@ -46,7 +46,7 @@ const Referral = () => {
   };
 
   const totalReferrals = referredUsers?.length ?? 0;
-  const totalEarnings = totalReferrals * 200;
+  const totalEarnings = totalReferrals * 10;
 
   return (
     <div className="min-h-screen bg-secondary">
@@ -76,7 +76,7 @@ const Referral = () => {
 
         <div className="bg-card rounded-2xl p-6 shadow-card mb-6">
           <h2 className="font-bold mb-1">Your Referral Link</h2>
-          <p className="text-xs text-muted-foreground mb-3">Share and earn ₦200 for each signup</p>
+          <p className="text-xs text-muted-foreground mb-3">Share and earn ₦10 for each signup</p>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-secondary rounded-lg px-3 py-2.5 text-sm font-mono truncate">
               {refLink || "Loading..."}
@@ -101,7 +101,7 @@ const Referral = () => {
                     <p className="text-xs text-muted-foreground">{format(new Date(r.created_at), "MMM d, yyyy")}</p>
                   </div>
                 </div>
-                <span className="text-sm font-bold text-accent">₦200</span>
+                <span className="text-sm font-bold text-accent">₦10</span>
               </div>
             ))
           ) : (
