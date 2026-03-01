@@ -2,11 +2,7 @@ import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap,
-<<<<<<< HEAD
-  Gift, ArrowRight, Bell, Mail, MessageCircle, Users,
-=======
-  Gift, ArrowRight,
->>>>>>> 5014fa118e4f8f949d6f23552f1936f75bdaf0d4
+  Gift, ArrowRight, Mail, MessageCircle, Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
