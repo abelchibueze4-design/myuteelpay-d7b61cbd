@@ -6,9 +6,10 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, phone: string, referralCode?: string) => Promise<{ error: Error | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, phone: string, username: string, address: string, referralCode?: string) => Promise<{ error: Error | null }>;
+  signIn: (username: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, phone: string, referralCode?: string) => {
+  const signUp = async (email: string, password: string, fullName: string, phone: string, username: string, address: string, referralCode?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -42,6 +43,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         data: {
           full_name: fullName,
           phone_number: phone,
+          username,
+          address,
           referral_code: referralCode || undefined,
         },
         emailRedirectTo: window.location.origin,
@@ -50,8 +53,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error as Error | null };
   };
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const signIn = async (username: string, password: string) => {
+    // Look up email by username using the database function
+    const { data: emailData, error: lookupError } = await supabase.rpc("get_email_by_username", { p_username: username });
+    
+    if (lookupError || !emailData) {
+      return { error: new Error("Invalid username or password") };
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email: emailData as string, password });
+    return { error: error as Error | null };
+  };
+
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
     return { error: error as Error | null };
   };
 
@@ -60,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );

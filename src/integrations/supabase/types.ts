@@ -16,25 +16,31 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          address: string | null
           created_at: string
           full_name: string
           id: string
           phone_number: string | null
           updated_at: string
+          username: string | null
         }
         Insert: {
+          address?: string | null
           created_at?: string
           full_name?: string
           id: string
           phone_number?: string | null
           updated_at?: string
+          username?: string | null
         }
         Update: {
+          address?: string | null
           created_at?: string
           full_name?: string
           id?: string
           phone_number?: string | null
           updated_at?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -178,7 +184,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_email_by_username: { Args: { p_username: string }; Returns: string }
     }
     Enums: {
       transaction_status: "pending" | "success" | "failed"
