@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, MessageSquare, Check } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useCreateTransaction } from "@/hooks/useTransactions";
+import { toast } from "sonner";
 
 const BulkSMS = () => {
   const navigate = useNavigate();
@@ -12,9 +14,26 @@ const BulkSMS = () => {
   const [recipients, setRecipients] = useState("");
   const [message, setMessage] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const createTransaction = useCreateTransaction();
 
   const recipientCount = recipients.split(",").filter((r) => r.trim()).length;
   const charCount = message.length;
+  const totalCost = recipientCount * 2.5;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await createTransaction.mutateAsync({
+        type: "bulk_sms",
+        amount: totalCost,
+        description: `Bulk SMS to ${recipientCount} recipients`,
+        metadata: { sender, recipientCount },
+      });
+      setShowSuccess(true);
+    } catch {
+      toast.error("Transaction failed. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-secondary">
@@ -28,37 +47,29 @@ const BulkSMS = () => {
       </header>
 
       <div className="container mx-auto px-4 -mt-2">
-        <form onSubmit={(e) => { e.preventDefault(); setShowSuccess(true); }} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
+        <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Sender Name</label>
             <Input value={sender} onChange={(e) => setSender(e.target.value)} placeholder="Your brand name" maxLength={11} required />
             <p className="text-xs text-muted-foreground">Max 11 characters</p>
           </div>
-
           <div className="space-y-2">
             <label className="text-sm font-medium">Recipients</label>
             <Textarea value={recipients} onChange={(e) => setRecipients(e.target.value)} placeholder="Enter numbers separated by commas" rows={3} required />
             <p className="text-xs text-muted-foreground">{recipientCount} recipient{recipientCount !== 1 ? "s" : ""}</p>
           </div>
-
           <div className="space-y-2">
             <label className="text-sm font-medium">Message</label>
             <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type your message here..." rows={4} maxLength={160} required />
             <p className="text-xs text-muted-foreground">{charCount}/160 characters</p>
           </div>
-
           <div className="bg-secondary rounded-lg p-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Cost per SMS</span>
-              <span className="font-semibold">₦2.50</span>
-            </div>
-            <div className="flex justify-between mt-1">
-              <span className="text-muted-foreground">Total Cost</span>
-              <span className="font-bold text-gradient">₦{(recipientCount * 2.5).toFixed(2)}</span>
-            </div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Cost per SMS</span><span className="font-semibold">₦2.50</span></div>
+            <div className="flex justify-between mt-1"><span className="text-muted-foreground">Total Cost</span><span className="font-bold text-gradient">₦{totalCost.toFixed(2)}</span></div>
           </div>
-
-          <Button type="submit" variant="hero" className="w-full">Send Messages</Button>
+          <Button type="submit" variant="hero" className="w-full" disabled={createTransaction.isPending}>
+            {createTransaction.isPending ? "Sending..." : "Send Messages"}
+          </Button>
         </form>
       </div>
 

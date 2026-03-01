@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useCreateTransaction } from "@/hooks/useTransactions";
+import { toast } from "sonner";
 
 const providers = [
-  { name: "DSTV", plans: ["Padi ₦2,500", "Yanga ₦3,500", "Confam ₦6,200", "Compact ₦10,500", "Premium ₦24,500"] },
-  { name: "GOTV", plans: ["Smallie ₦1,300", "Jinja ₦2,700", "Jolli ₦3,950", "Max ₦5,700"] },
-  { name: "StarTimes", plans: ["Nova ₦1,200", "Basic ₦2,600", "Smart ₦3,800", "Classic ₦5,500"] },
+  { name: "DSTV", plans: [{ label: "Padi", price: 2500 }, { label: "Yanga", price: 3500 }, { label: "Confam", price: 6200 }, { label: "Compact", price: 10500 }, { label: "Premium", price: 24500 }] },
+  { name: "GOTV", plans: [{ label: "Smallie", price: 1300 }, { label: "Jinja", price: 2700 }, { label: "Jolli", price: 3950 }, { label: "Max", price: 5700 }] },
+  { name: "StarTimes", plans: [{ label: "Nova", price: 1200 }, { label: "Basic", price: 2600 }, { label: "Smart", price: 3800 }, { label: "Classic", price: 5500 }] },
 ];
 
 const CableTV = () => {
@@ -18,8 +20,26 @@ const CableTV = () => {
   const [plan, setPlan] = useState("");
   const [smartcard, setSmartcard] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const createTransaction = useCreateTransaction();
 
   const selectedProvider = providers.find((p) => p.name === provider);
+  const selectedPlan = selectedProvider?.plans.find(p => p.label === plan);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPlan) return;
+    try {
+      await createTransaction.mutateAsync({
+        type: "cable_tv",
+        amount: selectedPlan.price,
+        description: `${provider} ${selectedPlan.label} - ${smartcard}`,
+        metadata: { provider, plan, smartcard },
+      });
+      setShowSuccess(true);
+    } catch {
+      toast.error("Transaction failed. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-secondary">
@@ -33,29 +53,23 @@ const CableTV = () => {
       </header>
 
       <div className="container mx-auto px-4 -mt-2">
-        <form onSubmit={(e) => { e.preventDefault(); setShowSuccess(true); }} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
+        <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Provider</label>
             <Select value={provider} onValueChange={(v) => { setProvider(v); setPlan(""); }}>
               <SelectTrigger><SelectValue placeholder="Select provider" /></SelectTrigger>
-              <SelectContent>
-                {providers.map((p) => <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>)}
-              </SelectContent>
+              <SelectContent>{providers.map((p) => <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-
           {selectedProvider && (
             <div className="space-y-2">
               <label className="text-sm font-medium">Plan</label>
               <Select value={plan} onValueChange={setPlan}>
                 <SelectTrigger><SelectValue placeholder="Select plan" /></SelectTrigger>
-                <SelectContent>
-                  {selectedProvider.plans.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                </SelectContent>
+                <SelectContent>{selectedProvider.plans.map((p) => <SelectItem key={p.label} value={p.label}>{p.label} ₦{p.price.toLocaleString()}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           )}
-
           <div className="space-y-2">
             <label className="text-sm font-medium">Smartcard / IUC Number</label>
             <div className="relative">
@@ -63,8 +77,9 @@ const CableTV = () => {
               <Input value={smartcard} onChange={(e) => setSmartcard(e.target.value)} placeholder="Enter number" className="pl-10" required />
             </div>
           </div>
-
-          <Button type="submit" variant="hero" className="w-full">Pay Now</Button>
+          <Button type="submit" variant="hero" className="w-full" disabled={createTransaction.isPending}>
+            {createTransaction.isPending ? "Processing..." : "Pay Now"}
+          </Button>
         </form>
       </div>
 

@@ -1,9 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import {
   Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap,
-  Gift, ArrowRight, Bell, LogOut, ChevronRight
+  Gift, ArrowRight, Bell, LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useWallet } from "@/hooks/useWallet";
+import { useTransactions } from "@/hooks/useTransactions";
+import { format } from "date-fns";
 
 const quickActions = [
   { icon: Smartphone, label: "Airtime & Data", path: "/services/airtime", color: "bg-primary/10 text-primary" },
@@ -14,30 +18,38 @@ const quickActions = [
   { icon: Gift, label: "Refer & Earn", path: "/referral", color: "bg-accent/20 text-accent-foreground" },
 ];
 
-const transactions = [
-  { id: 1, type: "MTN Airtime", amount: "₦500", date: "Today, 2:30 PM", status: "Success" },
-  { id: 2, type: "DSTV Compact", amount: "₦10,500", date: "Yesterday, 11:00 AM", status: "Success" },
-  { id: 3, type: "IKEDC Prepaid", amount: "₦5,000", date: "Feb 27, 9:15 AM", status: "Success" },
-  { id: 4, type: "GLO Data 2GB", amount: "₦1,000", date: "Feb 26, 4:00 PM", status: "Pending" },
-];
-
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const { data: wallet } = useWallet();
+  const { data: transactions } = useTransactions(5);
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  const formatAmount = (amount: number) =>
+    `₦${Math.abs(amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
+
+  const formatType = (type: string) =>
+    type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
     <div className="min-h-screen bg-secondary">
-      {/* Header */}
       <header className="gradient-hero px-4 pt-6 pb-16">
         <div className="container mx-auto flex items-center justify-between">
           <div>
             <p className="text-primary-foreground/70 text-sm">Welcome back,</p>
-            <h1 className="text-xl font-bold text-primary-foreground">Chinedu 👋</h1>
+            <h1 className="text-xl font-bold text-primary-foreground">{displayName} 👋</h1>
           </div>
           <div className="flex items-center gap-3">
             <button className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
               <Bell className="w-5 h-5 text-primary-foreground" />
             </button>
-            <button onClick={() => navigate("/")} className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+            <button onClick={handleLogout} className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
               <LogOut className="w-5 h-5 text-primary-foreground" />
             </button>
           </div>
@@ -50,7 +62,9 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm text-muted-foreground">Wallet Balance</p>
-              <p className="text-3xl font-extrabold">₦24,500<span className="text-lg">.00</span></p>
+              <p className="text-3xl font-extrabold">
+                ₦{(wallet?.balance ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}
+              </p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
               <Wallet className="w-6 h-6 text-accent" />
@@ -77,21 +91,26 @@ const Dashboard = () => {
         {/* Recent Transactions */}
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-bold text-lg">Recent Transactions</h2>
-          <button className="text-sm text-primary font-medium">View All</button>
         </div>
         <div className="bg-card rounded-2xl shadow-card divide-y mb-8">
-          {transactions.map((t) => (
-            <div key={t.id} className="flex items-center justify-between p-4">
-              <div>
-                <p className="font-semibold text-sm">{t.type}</p>
-                <p className="text-xs text-muted-foreground">{t.date}</p>
+          {transactions && transactions.length > 0 ? (
+            transactions.map((t) => (
+              <div key={t.id} className="flex items-center justify-between p-4">
+                <div>
+                  <p className="font-semibold text-sm">{t.description || formatType(t.type)}</p>
+                  <p className="text-xs text-muted-foreground">{format(new Date(t.created_at), "MMM d, h:mm a")}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-sm">{formatAmount(t.amount)}</p>
+                  <p className={`text-xs font-medium ${t.status === "success" ? "text-green-600" : t.status === "failed" ? "text-destructive" : "text-accent"}`}>
+                    {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="font-bold text-sm">{t.amount}</p>
-                <p className={`text-xs font-medium ${t.status === "Success" ? "text-green-600" : "text-accent"}`}>{t.status}</p>
-              </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div className="p-8 text-center text-sm text-muted-foreground">No transactions yet</div>
+          )}
         </div>
       </div>
     </div>
