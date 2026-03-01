@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 async function callPaystack(action: string, body: Record<string, unknown>) {
   const { data: { session } } = await supabase.auth.getSession();
@@ -27,6 +27,7 @@ async function callPaystack(action: string, body: Record<string, unknown>) {
 
 export function useFundWallet() {
   const queryClient = useQueryClient();
+  const verifiedRefs = useRef(new Set<string>());
 
   const initMutation = useMutation({
     mutationFn: async (amount: number) => {
@@ -44,9 +45,14 @@ export function useFundWallet() {
 
   const verifyMutation = useMutation({
     mutationFn: async (reference: string) => {
+      if (verifiedRefs.current.has(reference)) {
+        return { skipped: true };
+      }
+      verifiedRefs.current.add(reference);
       return callPaystack("verify", { reference });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
+      if (data?.skipped) return;
       toast.success(`Wallet funded! New balance: ₦${Number(data.balance).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`);
       queryClient.invalidateQueries({ queryKey: ["wallet"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
