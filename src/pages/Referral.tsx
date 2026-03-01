@@ -1,5 +1,4 @@
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Copy, Gift, Users } from "lucide-react";
+import { Copy, Gift, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
 const Referral = () => {
-  const navigate = useNavigate();
+  
   const { user } = useAuth();
 
   const { data: referralCode } = useQuery({
@@ -51,14 +50,11 @@ const Referral = () => {
 
   return (
     <div className="min-h-screen bg-secondary">
-      <header className="gradient-hero px-4 py-6">
-        <div className="container mx-auto flex items-center gap-3">
-          <button onClick={() => navigate("/dashboard")} className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-            <ArrowLeft className="w-5 h-5 text-primary-foreground" />
-          </button>
+      <div className="gradient-hero px-4 py-6">
+        <div className="container mx-auto">
           <h1 className="text-lg font-bold text-primary-foreground">Refer & Earn</h1>
         </div>
-      </header>
+      </div>
 
       <div className="container mx-auto px-4 -mt-2">
         <div className="grid grid-cols-2 gap-3 mb-6">

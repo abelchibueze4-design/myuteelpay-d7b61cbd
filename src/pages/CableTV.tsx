@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Tv, Check } from "lucide-react";
+import { Tv, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -43,14 +43,11 @@ const CableTV = () => {
 
   return (
     <div className="min-h-screen bg-secondary">
-      <header className="gradient-hero px-4 py-6">
-        <div className="container mx-auto flex items-center gap-3">
-          <button onClick={() => navigate("/dashboard")} className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-            <ArrowLeft className="w-5 h-5 text-primary-foreground" />
-          </button>
+      <div className="gradient-hero px-4 py-6">
+        <div className="container mx-auto">
           <h1 className="text-lg font-bold text-primary-foreground">Cable TV</h1>
         </div>
-      </header>
+      </div>
 
       <div className="container mx-auto px-4 -mt-2">
         <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">

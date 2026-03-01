@@ -5,9 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import DashboardLayout from "@/components/DashboardLayout";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import AirtimeData from "./pages/AirtimeData";
 import CableTV from "./pages/CableTV";
@@ -18,6 +21,12 @@ import Referral from "./pages/Referral";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+const ProtectedWithLayout = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute>
+    <DashboardLayout>{children}</DashboardLayout>
+  </ProtectedRoute>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -30,13 +39,15 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/services/airtime" element={<ProtectedRoute><AirtimeData /></ProtectedRoute>} />
-            <Route path="/services/cable" element={<ProtectedRoute><CableTV /></ProtectedRoute>} />
-            <Route path="/services/electricity" element={<ProtectedRoute><Electricity /></ProtectedRoute>} />
-            <Route path="/services/sms" element={<ProtectedRoute><BulkSMS /></ProtectedRoute>} />
-            <Route path="/services/edu" element={<ProtectedRoute><EduPins /></ProtectedRoute>} />
-            <Route path="/referral" element={<ProtectedRoute><Referral /></ProtectedRoute>} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/dashboard" element={<ProtectedWithLayout><Dashboard /></ProtectedWithLayout>} />
+            <Route path="/services/airtime" element={<ProtectedWithLayout><AirtimeData /></ProtectedWithLayout>} />
+            <Route path="/services/cable" element={<ProtectedWithLayout><CableTV /></ProtectedWithLayout>} />
+            <Route path="/services/electricity" element={<ProtectedWithLayout><Electricity /></ProtectedWithLayout>} />
+            <Route path="/services/sms" element={<ProtectedWithLayout><BulkSMS /></ProtectedWithLayout>} />
+            <Route path="/services/edu" element={<ProtectedWithLayout><EduPins /></ProtectedWithLayout>} />
+            <Route path="/referral" element={<ProtectedWithLayout><Referral /></ProtectedWithLayout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

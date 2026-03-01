@@ -1,7 +1,7 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap,
-  Gift, ArrowRight, Bell, LogOut
+  Gift, ArrowRight, Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,17 +19,11 @@ const quickActions = [
 ];
 
 const Dashboard = () => {
-  const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { data: wallet } = useWallet();
   const { data: transactions } = useTransactions(5);
 
-  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate("/");
-  };
+  const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
 
   const formatAmount = (amount: number) =>
     `₦${Math.abs(amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
@@ -38,23 +32,13 @@ const Dashboard = () => {
     type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
-    <div className="min-h-screen bg-secondary">
-      <header className="gradient-hero px-4 pt-6 pb-16">
-        <div className="container mx-auto flex items-center justify-between">
-          <div>
-            <p className="text-primary-foreground/70 text-sm">Welcome back,</p>
-            <h1 className="text-xl font-bold text-primary-foreground">{displayName} 👋</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-              <Bell className="w-5 h-5 text-primary-foreground" />
-            </button>
-            <button onClick={handleLogout} className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-              <LogOut className="w-5 h-5 text-primary-foreground" />
-            </button>
-          </div>
+    <div className="bg-secondary min-h-full">
+      <div className="gradient-hero px-4 pt-6 pb-16">
+        <div className="container mx-auto">
+          <p className="text-primary-foreground/70 text-sm">Welcome back,</p>
+          <h1 className="text-xl font-bold text-primary-foreground">{displayName} 👋</h1>
         </div>
-      </header>
+      </div>
 
       <div className="container mx-auto px-4 -mt-10">
         {/* Wallet Card */}
@@ -89,9 +73,7 @@ const Dashboard = () => {
         </div>
 
         {/* Recent Transactions */}
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-bold text-lg">Recent Transactions</h2>
-        </div>
+        <h2 className="font-bold text-lg mb-3">Recent Transactions</h2>
         <div className="bg-card rounded-2xl shadow-card divide-y mb-8">
           {transactions && transactions.length > 0 ? (
             transactions.map((t) => (
