@@ -118,7 +118,7 @@ const Dashboard = () => {
                 </div>
               </a>
               <a 
-                href="https://wa.me/2348000000000"
+                href="https://wa.me/2347036006762"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors"
