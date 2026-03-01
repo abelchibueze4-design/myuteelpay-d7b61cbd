@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useCreateTransaction } from "@/hooks/useTransactions";
+import { useKvdata } from "@/hooks/useKvdata";
 import { toast } from "sonner";
 
 const networks = ["MTN", "Glo", "Airtel", "9mobile"];
 const dataPlans = [
-  { label: "1GB - 30 days", value: "1gb", price: 500 },
-  { label: "2GB - 30 days", value: "2gb", price: 1000 },
-  { label: "5GB - 30 days", value: "5gb", price: 2000 },
-  { label: "10GB - 30 days", value: "10gb", price: 3500 },
+  { label: "1GB - 30 days", plan_id: 1, price: 500 },
+  { label: "2GB - 30 days", plan_id: 2, price: 1000 },
+  { label: "5GB - 30 days", plan_id: 3, price: 2000 },
+  { label: "10GB - 30 days", plan_id: 4, price: 3500 },
 ];
 
 const AirtimeData = () => {
@@ -24,21 +24,36 @@ const AirtimeData = () => {
   const [amount, setAmount] = useState("");
   const [plan, setPlan] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
-  const createTransaction = useCreateTransaction();
+  const kvdata = useKvdata();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const txAmount = tab === "airtime" ? Number(amount) : (dataPlans.find(p => p.value === plan)?.price ?? 0);
+    if (!network || !phone) return;
+
     try {
-      await createTransaction.mutateAsync({
-        type: tab === "airtime" ? "airtime" : "data",
-        amount: txAmount,
-        description: `${network} ${tab === "airtime" ? "Airtime" : dataPlans.find(p => p.value === plan)?.label} - ${phone}`,
-        metadata: { network, phone, plan: tab === "data" ? plan : undefined },
-      });
+      if (tab === "airtime") {
+        if (!amount) return;
+        await kvdata.mutateAsync({
+          action: "buy_airtime",
+          network,
+          phone,
+          amount: Number(amount),
+        });
+      } else {
+        const selectedPlan = dataPlans.find((p) => String(p.plan_id) === plan);
+        if (!selectedPlan) return;
+        await kvdata.mutateAsync({
+          action: "buy_data",
+          network,
+          phone,
+          plan_id: selectedPlan.plan_id,
+          plan_label: selectedPlan.label,
+          amount: selectedPlan.price,
+        });
+      }
       setShowSuccess(true);
     } catch {
-      toast.error("Transaction failed. Please try again.");
+      // error handled by hook
     }
   };
 
@@ -85,12 +100,12 @@ const AirtimeData = () => {
               <label className="text-sm font-medium">Data Plan</label>
               <Select value={plan} onValueChange={setPlan}>
                 <SelectTrigger><SelectValue placeholder="Select plan" /></SelectTrigger>
-                <SelectContent>{dataPlans.map((p) => <SelectItem key={p.value} value={p.value}>{p.label} — ₦{p.price.toLocaleString()}</SelectItem>)}</SelectContent>
+                <SelectContent>{dataPlans.map((p) => <SelectItem key={p.plan_id} value={String(p.plan_id)}>{p.label} — ₦{p.price.toLocaleString()}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           )}
-          <Button type="submit" variant="hero" className="w-full" disabled={createTransaction.isPending}>
-            {createTransaction.isPending ? "Processing..." : "Pay Now"}
+          <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
+            {kvdata.isPending ? "Processing..." : "Pay Now"}
           </Button>
         </form>
       </div>
@@ -103,7 +118,7 @@ const AirtimeData = () => {
           <h2 className="text-xl font-bold">Transaction Successful!</h2>
           <p className="text-sm text-muted-foreground">Your {tab} purchase was completed successfully.</p>
           <div className="flex gap-3 mt-4">
-            <Button variant="outline" className="flex-1" onClick={() => setShowSuccess(false)}>Download Receipt</Button>
+            <Button variant="outline" className="flex-1" onClick={() => setShowSuccess(false)}>New Purchase</Button>
             <Button variant="hero" className="flex-1" onClick={() => navigate("/dashboard")}>Done</Button>
           </div>
         </DialogContent>

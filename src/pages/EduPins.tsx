@@ -4,8 +4,7 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useCreateTransaction } from "@/hooks/useTransactions";
-import { toast } from "sonner";
+import { useKvdata } from "@/hooks/useKvdata";
 
 const exams = [
   { name: "WAEC", price: 3500 },
@@ -17,7 +16,8 @@ const EduPins = () => {
   const [exam, setExam] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [showSuccess, setShowSuccess] = useState(false);
-  const createTransaction = useCreateTransaction();
+  const [pinData, setPinData] = useState<any>(null);
+  const kvdata = useKvdata();
 
   const selected = exams.find((e) => e.name === exam);
   const total = selected ? selected.price * parseInt(quantity) : 0;
@@ -26,15 +26,16 @@ const EduPins = () => {
     e.preventDefault();
     if (!selected) return;
     try {
-      await createTransaction.mutateAsync({
-        type: "edu_pin",
+      const res = await kvdata.mutateAsync({
+        action: "buy_edu_pin",
+        exam_name: exam,
+        quantity: parseInt(quantity),
         amount: total,
-        description: `${exam} Pin x${quantity}`,
-        metadata: { exam, quantity: parseInt(quantity) },
       });
+      setPinData(res?.kvdata);
       setShowSuccess(true);
     } catch {
-      toast.error("Transaction failed. Please try again.");
+      // error handled by hook
     }
   };
 
@@ -67,8 +68,8 @@ const EduPins = () => {
               <div className="flex justify-between"><span className="text-muted-foreground">Total</span><span className="font-bold text-gradient">₦{total.toLocaleString()}</span></div>
             </div>
           )}
-          <Button type="submit" variant="hero" className="w-full" disabled={createTransaction.isPending}>
-            {createTransaction.isPending ? "Processing..." : "Purchase Pin"}
+          <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
+            {kvdata.isPending ? "Processing..." : "Purchase Pin"}
           </Button>
         </form>
       </div>
@@ -80,13 +81,17 @@ const EduPins = () => {
           </div>
           <h2 className="text-xl font-bold">Pin Generated!</h2>
           <p className="text-sm text-muted-foreground mb-2">Your {exam} pin has been generated.</p>
-          <div className="bg-secondary rounded-lg p-3">
-            <p className="text-xs text-muted-foreground">PIN</p>
-            <p className="text-lg font-mono font-bold tracking-wider">WAEC-8374-2947-1038</p>
-            <p className="text-xs text-muted-foreground mt-1">Serial: WRN-2026-0384756</p>
-          </div>
+          {pinData && (
+            <div className="bg-secondary rounded-lg p-3">
+              <p className="text-xs text-muted-foreground">PIN</p>
+              <p className="text-lg font-mono font-bold tracking-wider">{pinData.pin || pinData.Pin || JSON.stringify(pinData)}</p>
+              {(pinData.serial || pinData.Serial) && (
+                <p className="text-xs text-muted-foreground mt-1">Serial: {pinData.serial || pinData.Serial}</p>
+              )}
+            </div>
+          )}
           <div className="flex gap-3 mt-4">
-            <Button variant="outline" className="flex-1" onClick={() => setShowSuccess(false)}>Download Receipt</Button>
+            <Button variant="outline" className="flex-1" onClick={() => setShowSuccess(false)}>New Purchase</Button>
             <Button variant="hero" className="flex-1" onClick={() => navigate("/dashboard")}>Done</Button>
           </div>
         </DialogContent>

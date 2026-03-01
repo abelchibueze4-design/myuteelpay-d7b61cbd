@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS idx_transactions_reference_unique ON public.transactions (reference) WHERE reference IS NOT NULL;
