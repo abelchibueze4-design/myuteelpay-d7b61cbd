@@ -1,13 +1,21 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap,
-  Gift, ArrowRight, Bell,
+  Gift, ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWallet } from "@/hooks/useWallet";
 import { useTransactions } from "@/hooks/useTransactions";
+import { useFundWallet } from "@/hooks/useFundWallet";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 const quickActions = [
   { icon: Smartphone, label: "Airtime & Data", path: "/services/airtime", color: "bg-primary/10 text-primary" },
@@ -22,6 +30,11 @@ const Dashboard = () => {
   const { user } = useAuth();
   const { data: wallet } = useWallet();
   const { data: transactions } = useTransactions(5);
+  const { initializePayment, verifyPayment, isInitializing, isVerifying } = useFundWallet();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [fundOpen, setFundOpen] = useState(false);
+  const [amount, setAmount] = useState("");
 
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
 
@@ -30,6 +43,26 @@ const Dashboard = () => {
 
   const formatType = (type: string) =>
     type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+  // Handle Paystack callback
+  useEffect(() => {
+    const reference = searchParams.get("reference");
+    if (reference) {
+      // Clear the query param
+      setSearchParams({}, { replace: true });
+      verifyPayment(reference);
+    }
+  }, [searchParams, setSearchParams, verifyPayment]);
+
+  const handleFund = () => {
+    const val = Number(amount);
+    if (!val || val < 100) {
+      toast.error("Minimum amount is ₦100");
+      return;
+    }
+    setFundOpen(false);
+    initializePayment(val);
+  };
 
   return (
     <div className="bg-secondary min-h-full">
@@ -54,9 +87,53 @@ const Dashboard = () => {
               <Wallet className="w-6 h-6 text-accent" />
             </div>
           </div>
-          <Button variant="hero" size="sm" className="w-full sm:w-auto">
-            Fund Wallet <ArrowRight className="w-4 h-4" />
-          </Button>
+
+          <Dialog open={fundOpen} onOpenChange={setFundOpen}>
+            <DialogTrigger asChild>
+              <Button variant="hero" size="sm" className="w-full sm:w-auto">
+                Fund Wallet <ArrowRight className="w-4 h-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Fund Wallet</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+                    Amount (₦)
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="e.g. 1000"
+                    min={100}
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Minimum: ₦100</p>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {[500, 1000, 2000, 5000].map((v) => (
+                    <Button
+                      key={v}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setAmount(String(v))}
+                    >
+                      ₦{v.toLocaleString()}
+                    </Button>
+                  ))}
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={handleFund}
+                  disabled={isInitializing}
+                >
+                  {isInitializing ? "Processing..." : "Pay with Paystack"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Quick Actions */}
