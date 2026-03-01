@@ -1,1 +1,7 @@
 project_id = "thhbrznetqliogjxruml"
+
+[functions.paystack]
+verify_jwt = false
+
+[functions.kvdata]
+verify_jwt = false

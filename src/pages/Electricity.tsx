@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useCreateTransaction } from "@/hooks/useTransactions";
-import { toast } from "sonner";
+import { useKvdata } from "@/hooks/useKvdata";
 
 const discos = ["IKEDC", "EKEDC", "AEDC", "KEDCO", "PHEDC", "BEDC", "IBEDC", "JEDC", "KAEDCO"];
 
@@ -17,20 +16,39 @@ const Electricity = () => {
   const [meter, setMeter] = useState("");
   const [amount, setAmount] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
-  const createTransaction = useCreateTransaction();
+  const [token, setToken] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const kvdata = useKvdata();
+
+  const handleValidateMeter = async () => {
+    if (!meter || !disco) return;
+    try {
+      const res = await kvdata.mutateAsync({
+        action: "validate_meter",
+        meter_number: meter,
+        disco_name: disco,
+        meter_type: type,
+      });
+      setCustomerName(res?.Customer_Name || res?.name || "Validated");
+    } catch {
+      setCustomerName("");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createTransaction.mutateAsync({
-        type: "electricity",
+      const res = await kvdata.mutateAsync({
+        action: "buy_electricity",
+        disco_name: disco,
+        meter_number: meter,
+        meter_type: type,
         amount: Number(amount),
-        description: `${disco} ${type} - Meter ${meter}`,
-        metadata: { disco, meter, type },
       });
+      setToken(res?.kvdata?.token || res?.kvdata?.Token || "");
       setShowSuccess(true);
     } catch {
-      toast.error("Transaction failed. Please try again.");
+      // error handled by hook
     }
   };
 
@@ -64,15 +82,16 @@ const Electricity = () => {
             <label className="text-sm font-medium">Meter Number</label>
             <div className="relative">
               <Zap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input value={meter} onChange={(e) => setMeter(e.target.value)} placeholder="Enter meter number" className="pl-10" required />
+              <Input value={meter} onChange={(e) => { setMeter(e.target.value); setCustomerName(""); }} placeholder="Enter meter number" className="pl-10" required onBlur={handleValidateMeter} />
             </div>
+            {customerName && <p className="text-xs text-primary font-medium">✓ {customerName}</p>}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Amount</label>
             <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₦500 minimum" type="number" required />
           </div>
-          <Button type="submit" variant="hero" className="w-full" disabled={createTransaction.isPending}>
-            {createTransaction.isPending ? "Processing..." : "Pay Now"}
+          <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
+            {kvdata.isPending ? "Processing..." : "Pay Now"}
           </Button>
         </form>
       </div>
@@ -84,12 +103,14 @@ const Electricity = () => {
           </div>
           <h2 className="text-xl font-bold">Payment Successful!</h2>
           <p className="text-sm text-muted-foreground">Your electricity token has been generated.</p>
-          <div className="bg-secondary rounded-lg p-3 my-3">
-            <p className="text-xs text-muted-foreground">Token</p>
-            <p className="text-lg font-mono font-bold tracking-wider">1234-5678-9012-3456</p>
-          </div>
+          {token && (
+            <div className="bg-secondary rounded-lg p-3 my-3">
+              <p className="text-xs text-muted-foreground">Token</p>
+              <p className="text-lg font-mono font-bold tracking-wider">{token}</p>
+            </div>
+          )}
           <div className="flex gap-3">
-            <Button variant="outline" className="flex-1" onClick={() => setShowSuccess(false)}>Download Receipt</Button>
+            <Button variant="outline" className="flex-1" onClick={() => setShowSuccess(false)}>New Purchase</Button>
             <Button variant="hero" className="flex-1" onClick={() => navigate("/dashboard")}>Done</Button>
           </div>
         </DialogContent>
