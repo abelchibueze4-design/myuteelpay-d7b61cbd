@@ -47,7 +47,7 @@ export const DangerZone = () => {
 
     try {
       // Call a backend function to delete user
-      const { error: rpcError } = await supabase.rpc("delete_user_account", {
+      const { error: rpcError } = await (supabase.rpc as any)("delete_user_account", {
         auth_uid: user.id,
       });
 

@@ -20,13 +20,13 @@ export const useTransactionPinVerification = () => {
       // Fetch the stored PIN hash
       const { data, error: fetchError } = await supabase
         .from("profiles")
-        .select("transaction_pin_hash, transaction_pin_enabled")
+        .select("transaction_pin_hash, transaction_pin_enabled" as any)
         .eq("id", user.id)
         .single();
 
       if (fetchError) throw fetchError;
 
-      if (!data?.transaction_pin_enabled) {
+      if (!(data as any)?.transaction_pin_enabled) {
         setError("Transaction PIN is not enabled");
         return false;
       }
@@ -37,7 +37,7 @@ export const useTransactionPinVerification = () => {
         .join("");
 
       // Compare hashes
-      if (hashedInput !== data.transaction_pin_hash) {
+      if (hashedInput !== (data as any).transaction_pin_hash) {
         setError("Incorrect PIN");
         return false;
       }
@@ -59,12 +59,12 @@ export const useTransactionPinVerification = () => {
     try {
       const { data, error: fetchError } = await supabase
         .from("profiles")
-        .select("transaction_pin_enabled")
+        .select("transaction_pin_enabled" as any)
         .eq("id", user.id)
         .single();
 
       if (fetchError) throw fetchError;
-      return data?.transaction_pin_enabled ?? false;
+      return (data as any)?.transaction_pin_enabled ?? false;
     } catch (err) {
       console.error("Error checking PIN requirement:", err);
       return false;

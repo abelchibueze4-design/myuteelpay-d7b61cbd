@@ -83,12 +83,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("transaction_pin_enabled")
+        .select("transaction_pin_enabled" as any)
         .eq("id", user.id)
         .single();
 
       if (error) throw error;
-      return !data?.transaction_pin_enabled;
+      return !(data as any)?.transaction_pin_enabled;
     } catch (err) {
       console.error("Error checking PIN requirement:", err);
       return false;

@@ -60,28 +60,26 @@ export const useNotificationPreferences = () => {
 
     try {
       const { data, error: fetchError } = await supabase
-        .from("notification_preferences")
+        .from("notification_preferences" as any)
         .select("*")
         .eq("user_id", user.id)
         .single();
 
       if (fetchError && fetchError.code !== "PGRST116") {
-        // PGRST116 = no rows found
         throw fetchError;
       }
 
       if (data) {
-        setPreferences(data);
+        setPreferences(data as any);
       } else {
-        // Create default preferences if not found
         const { data: newPrefs, error: createError } = await supabase
-          .from("notification_preferences")
+          .from("notification_preferences" as any)
           .insert([{ user_id: user.id, ...DEFAULT_PREFERENCES }])
           .select()
           .single();
 
         if (createError) throw createError;
-        if (newPrefs) setPreferences(newPrefs);
+        if (newPrefs) setPreferences(newPrefs as any);
       }
     } catch (err) {
       const message =
@@ -106,7 +104,7 @@ export const useNotificationPreferences = () => {
 
     try {
       const { error: updateError } = await supabase
-        .from("notification_preferences")
+        .from("notification_preferences" as any)
         .update({
           ...updates,
           updated_at: new Date().toISOString(),
