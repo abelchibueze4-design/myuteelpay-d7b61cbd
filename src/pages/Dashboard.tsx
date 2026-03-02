@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
+import { DashboardTopBar } from "@/components/DashboardTopBar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWallet } from "@/hooks/useWallet";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -65,7 +66,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="bg-secondary min-h-full">
+    <div className="bg-secondary min-h-full flex flex-col">
+      <DashboardTopBar />
+      
       <div className="gradient-hero px-4 pt-6 pb-16">
         <div className="container mx-auto">
           <p className="text-primary-foreground/70 text-sm">Welcome back,</p>
