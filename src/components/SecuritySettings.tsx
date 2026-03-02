@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff, Lock, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,10 @@ export const SecuritySettings = () => {
 
   // 2FA state
   const [twoFaEnabled, setTwoFaEnabled] = useState(settings.twoFaEnabled);
+
+  useEffect(() => {
+    setTwoFaEnabled(settings.twoFaEnabled);
+  }, [settings.twoFaEnabled]);
 
   const validatePasswordChange = (): boolean => {
     const errors: Record<string, string> = {};

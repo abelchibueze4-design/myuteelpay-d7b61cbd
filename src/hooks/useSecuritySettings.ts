@@ -62,8 +62,11 @@ export const useSecuritySettings = () => {
     setError(null);
 
     try {
-      // Hash the PIN (in production, use a proper backend)
-      const hashedPin = btoa(pin); // Base64 encode for demo (use proper hashing in production)
+      // In a real production app, PIN should be hashed on the backend
+      // For now, create a simple hash-like transformation
+      const hashedPin = Array.from(pin)
+        .map((char) => String.fromCharCode(char.charCodeAt(0) ^ 123))
+        .join("");
 
       const { error: updateError } = await supabase
         .from("profiles")
@@ -74,13 +77,17 @@ export const useSecuritySettings = () => {
         })
         .eq("id", user.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("Update error:", updateError);
+        throw updateError;
+      }
 
       setSettings((prev) => ({ ...prev, transactionPinEnabled: true }));
       return true;
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to set transaction PIN";
+      console.error("PIN setup error:", err);
       setError(message);
       return false;
     } finally {

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Settings, Upload } from "lucide-react";
+import { Settings } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SecuritySettings } from "@/components/SecuritySettings";
 import { NotificationPreferences } from "@/components/NotificationPreferences";
+import { DangerZone } from "@/components/DangerZone";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { toast } from "sonner";
@@ -24,7 +25,7 @@ interface AccountSettingsProps {
 
 export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) => {
   const { user } = useAuth();
-  const { updateProfile, uploadAvatar, isLoading, error: hookError } = useUpdateProfile();
+  const { updateProfile, isLoading, error: hookError } = useUpdateProfile();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isOpen, setIsOpen] = useState(open ?? false);
@@ -32,9 +33,6 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string>("");
-  const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Initialize form with user data
@@ -44,10 +42,6 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
       setEmail(user.email || "");
       setPhone(user.user_metadata?.phone_number || "");
       setAddress(user.user_metadata?.address || "");
-      setAvatarUrl(user.user_metadata?.avatar_url || null);
-      if (user.user_metadata?.avatar_url) {
-        setAvatarPreview(user.user_metadata.avatar_url);
-      }
     }
   }, [user, isOpen]);
 
@@ -72,42 +66,6 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size must be less than 5MB");
-      return;
-    }
-
-    // Preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setAvatarPreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-
-    // Upload
-    setIsUploading(true);
-    const url = await uploadAvatar(file);
-    setIsUploading(false);
-
-    if (url) {
-      setAvatarUrl(url);
-      toast.success("Avatar uploaded successfully");
-    } else {
-      toast.error(hookError || "Failed to upload avatar");
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -119,7 +77,6 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
       full_name: fullName,
       phone_number: phone,
       address: address,
-      avatar_url: avatarUrl || undefined,
     });
 
     if (success) {
@@ -153,47 +110,23 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 mb-0">
+            <TabsTrigger value="profile" className="text-xs sm:text-sm">Profile</TabsTrigger>
+            <TabsTrigger value="security" className="text-xs sm:text-sm">Security</TabsTrigger>
+            <TabsTrigger value="notifications" className="text-xs sm:text-sm">Notifications</TabsTrigger>
+            <TabsTrigger value="danger" className="text-xs sm:text-sm text-destructive">Danger</TabsTrigger>
           </TabsList>
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6 mt-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Avatar Upload */}
+              {/* Avatar Display */}
               <div className="flex flex-col items-center">
-                <div className="relative mb-4">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
-                    {avatarPreview ? (
-                      <img
-                        src={avatarPreview}
-                        alt="Avatar preview"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      fullName[0]?.toUpperCase()
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading}
-                    className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 disabled:opacity-50"
-                  >
-                    <Upload className="w-4 h-4" />
-                  </button>
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white text-2xl font-bold">
+                  {fullName[0]?.toUpperCase() || "U"}
                 </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarSelect}
-                  className="hidden"
-                />
-                <p className="text-xs text-muted-foreground text-center">
-                  {isUploading ? "Uploading..." : "Click camera to upload profile picture"}
+                <p className="text-xs text-muted-foreground text-center mt-3">
+                  {fullName || "User"}
                 </p>
               </div>
 
@@ -284,7 +217,7 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isLoading || isUploading}
+                  disabled={isLoading}
                   className="flex-1"
                 >
                   {isLoading ? "Saving..." : "Save Changes"}
@@ -301,6 +234,11 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
           {/* Notifications Tab */}
           <TabsContent value="notifications" className="mt-6">
             <NotificationPreferences />
+          </TabsContent>
+
+          {/* Danger Zone Tab */}
+          <TabsContent value="danger" className="mt-6">
+            <DangerZone />
           </TabsContent>
         </Tabs>
       </DialogContent>

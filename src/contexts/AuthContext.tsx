@@ -10,6 +10,7 @@ interface AuthContextType {
   signIn: (username: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  checkPinRequired: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -76,8 +77,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
   };
 
+  const checkPinRequired = async (): Promise<boolean> => {
+    if (!user?.id) return false;
+
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("transaction_pin_enabled")
+        .eq("id", user.id)
+        .single();
+
+      if (error) throw error;
+      return !data?.transaction_pin_enabled;
+    } catch (err) {
+      console.error("Error checking PIN requirement:", err);
+      return false;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, resetPassword }}>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, resetPassword, checkPinRequired }}>
       {children}
     </AuthContext.Provider>
   );
