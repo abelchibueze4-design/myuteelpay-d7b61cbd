@@ -4,6 +4,7 @@ import {
   Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap,
   Gift, ArrowRight, Mail, MessageCircle, Users,
 } from "lucide-react";
+import TransactionHistory from "@/components/TransactionHistory";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -33,10 +34,10 @@ const Dashboard = () => {
   const { data: transactions } = useTransactions(5);
   const { initializePayment, verifyPayment, isInitializing, isVerifying } = useFundWallet();
   const [searchParams, setSearchParams] = useSearchParams();
-
   const [fundOpen, setFundOpen] = useState(false);
   const [amount, setAmount] = useState("");
 
+  const activeTab = searchParams.get("tab");
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
 
   const formatAmount = (amount: number) =>
@@ -49,11 +50,15 @@ const Dashboard = () => {
   useEffect(() => {
     const reference = searchParams.get("reference");
     if (reference) {
-      // Clear the query param
       setSearchParams({}, { replace: true });
       verifyPayment(reference);
     }
   }, [searchParams, setSearchParams, verifyPayment]);
+
+  // Render history tab
+  if (activeTab === "history") {
+    return <TransactionHistory />;
+  }
 
   const handleFund = () => {
     const val = Number(amount);
