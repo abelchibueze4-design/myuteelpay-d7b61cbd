@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Settings, Upload, X } from "lucide-react";
+import { Settings, Upload } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -7,9 +7,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SecuritySettings } from "@/components/SecuritySettings";
+import { NotificationPreferences } from "@/components/NotificationPreferences";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { toast } from "sonner";
@@ -144,141 +147,162 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
           <Settings className="w-5 h-5 text-foreground" />
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Account Settings</DialogTitle>
+          <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Avatar Upload */}
-          <div className="flex flex-col items-center">
-            <div className="relative mb-4">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
-                {avatarPreview ? (
-                  <img
-                    src={avatarPreview}
-                    alt="Avatar preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  fullName[0]?.toUpperCase()
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          </TabsList>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="space-y-6 mt-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Avatar Upload */}
+              <div className="flex flex-col items-center">
+                <div className="relative mb-4">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
+                    {avatarPreview ? (
+                      <img
+                        src={avatarPreview}
+                        alt="Avatar preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      fullName[0]?.toUpperCase()
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    <Upload className="w-4 h-4" />
+                  </button>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarSelect}
+                  className="hidden"
+                />
+                <p className="text-xs text-muted-foreground text-center">
+                  {isUploading ? "Uploading..." : "Click camera to upload profile picture"}
+                </p>
+              </div>
+
+              {/* Full Name */}
+              <div>
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  value={fullName}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    if (errors.fullName) {
+                      setErrors({ ...errors, fullName: "" });
+                    }
+                  }}
+                  className={errors.fullName ? "border-destructive" : ""}
+                  placeholder="Enter your full name"
+                />
+                {errors.fullName && (
+                  <p className="text-xs text-destructive mt-1">{errors.fullName}</p>
                 )}
               </div>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 disabled:opacity-50"
-              >
-                <Upload className="w-4 h-4" />
-              </button>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarSelect}
-              className="hidden"
-            />
-            <p className="text-xs text-muted-foreground text-center">
-              {isUploading ? "Uploading..." : "Click camera to upload profile picture"}
-            </p>
-          </div>
 
-          {/* Full Name */}
-          <div>
-            <Label htmlFor="fullName">Full Name</Label>
-            <Input
-              id="fullName"
-              value={fullName}
-              onChange={(e) => {
-                setFullName(e.target.value);
-                if (errors.fullName) {
-                  setErrors({ ...errors, fullName: "" });
-                }
-              }}
-              className={errors.fullName ? "border-destructive" : ""}
-              placeholder="Enter your full name"
-            />
-            {errors.fullName && (
-              <p className="text-xs text-destructive mt-1">{errors.fullName}</p>
-            )}
-          </div>
+              {/* Email (Read-only) */}
+              <div>
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  value={email}
+                  disabled
+                  className="bg-muted"
+                  placeholder="Your email"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Email cannot be changed here. Contact support to update.
+                </p>
+              </div>
 
-          {/* Email (Read-only) */}
-          <div>
-            <Label htmlFor="email">Email Address</Label>
-            <Input
-              id="email"
-              value={email}
-              disabled
-              className="bg-muted"
-              placeholder="Your email"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Email cannot be changed here. Contact support to update.
-            </p>
-          </div>
+              {/* Phone Number */}
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    if (errors.phone) {
+                      setErrors({ ...errors, phone: "" });
+                    }
+                  }}
+                  className={errors.phone ? "border-destructive" : ""}
+                  placeholder="e.g., 07036006762"
+                />
+                {errors.phone && (
+                  <p className="text-xs text-destructive mt-1">{errors.phone}</p>
+                )}
+              </div>
 
-          {/* Phone Number */}
-          <div>
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input
-              id="phone"
-              value={phone}
-              onChange={(e) => {
-                setPhone(e.target.value);
-                if (errors.phone) {
-                  setErrors({ ...errors, phone: "" });
-                }
-              }}
-              className={errors.phone ? "border-destructive" : ""}
-              placeholder="e.g., 07036006762"
-            />
-            {errors.phone && (
-              <p className="text-xs text-destructive mt-1">{errors.phone}</p>
-            )}
-          </div>
+              {/* Address */}
+              <div>
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={address}
+                  onChange={(e) => {
+                    setAddress(e.target.value);
+                    if (errors.address) {
+                      setErrors({ ...errors, address: "" });
+                    }
+                  }}
+                  className={errors.address ? "border-destructive" : ""}
+                  placeholder="Your address"
+                />
+                {errors.address && (
+                  <p className="text-xs text-destructive mt-1">{errors.address}</p>
+                )}
+              </div>
 
-          {/* Address */}
-          <div>
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              value={address}
-              onChange={(e) => {
-                setAddress(e.target.value);
-                if (errors.address) {
-                  setErrors({ ...errors, address: "" });
-                }
-              }}
-              className={errors.address ? "border-destructive" : ""}
-              placeholder="Your address"
-            />
-            {errors.address && (
-              <p className="text-xs text-destructive mt-1">{errors.address}</p>
-            )}
-          </div>
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading || isUploading}
+                  className="flex-1"
+                >
+                  {isLoading ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isLoading || isUploading}
-              className="flex-1"
-            >
-              {isLoading ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
-        </form>
+          {/* Security Tab */}
+          <TabsContent value="security" className="mt-6">
+            <SecuritySettings />
+          </TabsContent>
+
+          {/* Notifications Tab */}
+          <TabsContent value="notifications" className="mt-6">
+            <NotificationPreferences />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
