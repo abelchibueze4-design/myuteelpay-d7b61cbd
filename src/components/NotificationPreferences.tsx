@@ -150,9 +150,9 @@ export const NotificationPreferences = () => {
               <Switch
                 id={service.id}
                 checked={
-                  localPreferences[
+                  Boolean(localPreferences[
                     service.id as keyof typeof localPreferences
-                  ] ?? true
+                  ] ?? true)
                 }
                 onCheckedChange={() => handleToggle(service.id)}
               />
@@ -192,8 +192,8 @@ export const NotificationPreferences = () => {
               <Switch
                 id={channel.id}
                 checked={
-                  localPreferences[channel.id as keyof typeof localPreferences] ??
-                  true
+                  Boolean(localPreferences[channel.id as keyof typeof localPreferences] ??
+                  true)
                 }
                 onCheckedChange={() => handleToggle(channel.id)}
               />
@@ -237,9 +237,9 @@ export const NotificationPreferences = () => {
               <Switch
                 id={type.id}
                 checked={
-                  localPreferences[
+                  Boolean(localPreferences[
                     type.id as keyof typeof localPreferences
-                  ] ?? true
+                  ] ?? true)
                 }
                 onCheckedChange={() => handleToggle(type.id)}
               />

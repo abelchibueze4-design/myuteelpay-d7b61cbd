@@ -14,31 +14,97 @@ export type Database = {
   }
   public: {
     Tables: {
+      notification_preferences: {
+        Row: {
+          airtime_enabled: boolean
+          bulk_sms_enabled: boolean
+          cable_tv_enabled: boolean
+          created_at: string
+          data_enabled: boolean
+          edu_pins_enabled: boolean
+          electricity_enabled: boolean
+          email_enabled: boolean
+          id: string
+          in_app_enabled: boolean
+          promotions: boolean
+          service_reminders: boolean
+          sms_enabled: boolean
+          transaction_updates: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          airtime_enabled?: boolean
+          bulk_sms_enabled?: boolean
+          cable_tv_enabled?: boolean
+          created_at?: string
+          data_enabled?: boolean
+          edu_pins_enabled?: boolean
+          electricity_enabled?: boolean
+          email_enabled?: boolean
+          id?: string
+          in_app_enabled?: boolean
+          promotions?: boolean
+          service_reminders?: boolean
+          sms_enabled?: boolean
+          transaction_updates?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          airtime_enabled?: boolean
+          bulk_sms_enabled?: boolean
+          cable_tv_enabled?: boolean
+          created_at?: string
+          data_enabled?: boolean
+          edu_pins_enabled?: boolean
+          electricity_enabled?: boolean
+          email_enabled?: boolean
+          id?: string
+          in_app_enabled?: boolean
+          promotions?: boolean
+          service_reminders?: boolean
+          sms_enabled?: boolean
+          transaction_updates?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
           created_at: string
+          deactivated_at: string | null
           full_name: string
           id: string
           phone_number: string | null
+          transaction_pin_enabled: boolean
+          transaction_pin_hash: string | null
           updated_at: string
           username: string | null
         }
         Insert: {
           address?: string | null
           created_at?: string
+          deactivated_at?: string | null
           full_name?: string
           id: string
           phone_number?: string | null
+          transaction_pin_enabled?: boolean
+          transaction_pin_hash?: string | null
           updated_at?: string
           username?: string | null
         }
         Update: {
           address?: string | null
           created_at?: string
+          deactivated_at?: string | null
           full_name?: string
           id?: string
           phone_number?: string | null
+          transaction_pin_enabled?: boolean
+          transaction_pin_hash?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -184,6 +250,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_user_account: { Args: { auth_uid: string }; Returns: undefined }
       get_email_by_username: { Args: { p_username: string }; Returns: string }
     }
     Enums: {

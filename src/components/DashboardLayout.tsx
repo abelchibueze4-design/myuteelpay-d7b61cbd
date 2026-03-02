@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Smartphone, Tv, Zap, MessageSquare, GraduationCap,
-  Gift, LayoutDashboard, LogOut, User, History,
+  Gift, LayoutDashboard, LogOut, History, Wallet, Menu,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +14,8 @@ import {
 
 const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Wallet Summary", url: "/dashboard?tab=wallet", icon: Wallet },
+  { title: "History", url: "/dashboard?tab=history", icon: History },
   { title: "Referral", url: "/referral", icon: Gift },
 ];
 
@@ -112,7 +114,9 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-14 flex items-center border-b px-4 bg-background">
-            <SidebarTrigger className="mr-4" />
+            <SidebarTrigger className="mr-4">
+              <Menu className="h-5 w-5" />
+            </SidebarTrigger>
             <span className="text-lg font-bold text-gradient">Uteelpay</span>
           </header>
           <main className="flex-1 overflow-auto">
