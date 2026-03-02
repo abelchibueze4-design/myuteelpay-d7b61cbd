@@ -1,0 +1,80 @@
+import React from "react";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import DashboardLayout from "@/components/DashboardLayout";
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import Dashboard from "./pages/Dashboard";
+import Airtime from "./pages/Airtime";
+import Data from "./pages/Data";
+import CableTV from "./pages/CableTV";
+import Electricity from "./pages/Electricity";
+import BulkSMS from "./pages/BulkSMS";
+import EduPins from "./pages/EduPins";
+import Referral from "./pages/Referral";
+import NotFound from "./pages/NotFound";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import TransactionMonitoring from "./pages/admin/TransactionMonitoring";
+import ServiceManagement from "./pages/admin/ServiceManagement";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AuditLogs from "./pages/admin/AuditLogs";
+import AdminSettings from "./pages/admin/AdminSettings";
+
+const queryClient = new QueryClient();
+
+const ProtectedWithLayout = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute>
+    <DashboardLayout>{children}</DashboardLayout>
+  </ProtectedRoute>
+);
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/dashboard" element={<ProtectedWithLayout><Dashboard /></ProtectedWithLayout>} />
+              <Route path="/services/airtime" element={<ProtectedWithLayout><Airtime /></ProtectedWithLayout>} />
+              <Route path="/services/data" element={<ProtectedWithLayout><Data /></ProtectedWithLayout>} />
+              <Route path="/services/cable" element={<ProtectedWithLayout><CableTV /></ProtectedWithLayout>} />
+              <Route path="/services/electricity" element={<ProtectedWithLayout><Electricity /></ProtectedWithLayout>} />
+              <Route path="/services/sms" element={<ProtectedWithLayout><BulkSMS /></ProtectedWithLayout>} />
+              <Route path="/services/edu" element={<ProtectedWithLayout><EduPins /></ProtectedWithLayout>} />
+              <Route path="/referral" element={<ProtectedWithLayout><Referral /></ProtectedWithLayout>} />
+              <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+              <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+              <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
+              <Route path="/admin/transactions" element={<AdminLayout><TransactionMonitoring /></AdminLayout>} />
+              <Route path="/admin/services" element={<AdminLayout><ServiceManagement /></AdminLayout>} />
+              <Route path="/admin/analytics" element={<AdminLayout><AdminAnalytics /></AdminLayout>} />
+              <Route path="/admin/logs" element={<AdminLayout><AuditLogs /></AdminLayout>} />
+              <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
