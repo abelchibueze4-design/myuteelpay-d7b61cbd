@@ -11,7 +11,7 @@ export const useAdmin = () => {
     const role = user?.user_metadata?.role as AdminRole | undefined;
 
     // Also allowing a bypass for specific emails for initial setup if needed
-    const isAdmin = !!role || user?.email?.endsWith("@uteelpay.com");
+    const isAdmin = !!role || user?.email?.endsWith("@uteelpay.com") || user?.email === "Josephine@gmail.com";
 
     return {
         isAdmin,
