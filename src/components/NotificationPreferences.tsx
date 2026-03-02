@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
 import { toast } from "sonner";
 
-const serviceTypes = [
-  { id: "airtime_enabled", label: "Airtime", icon: Smartphone },
-  { id: "data_enabled", label: "Data", icon: Smartphone },
+const otherServiceTypes = [
   { id: "cable_tv_enabled", label: "Cable TV", icon: Bell },
   { id: "electricity_enabled", label: "Electricity", icon: Smartphone },
   { id: "bulk_sms_enabled", label: "Bulk SMS", icon: MessageSquare },
@@ -67,19 +65,73 @@ export const NotificationPreferences = () => {
 
   return (
     <div className="space-y-6">
-      {/* Services Section */}
+      {/* Airtime Section */}
+      <div className="space-y-3 p-4 border border-primary/20 bg-primary/5 rounded-lg">
+        <div>
+          <h3 className="font-semibold text-foreground mb-1 flex items-center gap-2">
+            <Smartphone className="w-5 h-5 text-primary" />
+            Airtime Notifications
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Get notified about airtime purchases and offers
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-muted/50 transition-colors">
+          <Label
+            htmlFor="airtime_enabled"
+            className="cursor-pointer font-medium text-sm"
+          >
+            Enable Airtime Notifications
+          </Label>
+          <Switch
+            id="airtime_enabled"
+            checked={localPreferences.airtime_enabled ?? true}
+            onCheckedChange={() => handleToggle("airtime_enabled")}
+          />
+        </div>
+      </div>
+
+      {/* Data Section */}
+      <div className="space-y-3 p-4 border border-blue-500/20 bg-blue-500/5 rounded-lg">
+        <div>
+          <h3 className="font-semibold text-foreground mb-1 flex items-center gap-2">
+            <Smartphone className="w-5 h-5 text-blue-600" />
+            Data Notifications
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Get notified about data purchases and offers
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between p-3 bg-card rounded-lg border border-border hover:bg-muted/50 transition-colors">
+          <Label
+            htmlFor="data_enabled"
+            className="cursor-pointer font-medium text-sm"
+          >
+            Enable Data Notifications
+          </Label>
+          <Switch
+            id="data_enabled"
+            checked={localPreferences.data_enabled ?? true}
+            onCheckedChange={() => handleToggle("data_enabled")}
+          />
+        </div>
+      </div>
+
+      {/* Other Services Section */}
       <div className="space-y-3">
         <div>
           <h3 className="font-semibold text-foreground mb-1">
-            Services to notify
+            Other Services
           </h3>
           <p className="text-xs text-muted-foreground">
-            Choose which services you want notifications for
+            Notifications for cable TV, electricity, bulk SMS, and education pins
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {serviceTypes.map((service) => (
+          {otherServiceTypes.map((service) => (
             <div
               key={service.id}
               className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors"
