@@ -20,8 +20,12 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 
 const quickActions = [
+<<<<<<< HEAD
   { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "bg-primary/10 text-primary" },
   { icon: Smartphone, label: "Data", path: "/services/data", color: "bg-accent/20 text-accent-foreground" },
+=======
+  { icon: Smartphone, label: "Airtime & Data", path: "/services/airtime", color: "bg-primary/10 text-primary" },
+>>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
   { icon: Tv, label: "Cable TV", path: "/services/cable", color: "bg-accent/20 text-accent-foreground" },
   { icon: Zap, label: "Electricity", path: "/services/electricity", color: "bg-primary-glow/10 text-primary" },
   { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "bg-accent/20 text-accent-foreground" },
@@ -74,7 +78,11 @@ const Dashboard = () => {
   return (
     <div className="bg-secondary min-h-full flex flex-col">
       <DashboardTopBar />
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
       <div className="gradient-hero px-4 pt-6 pb-16">
         <div className="container mx-auto">
           <p className="text-primary-foreground/70 text-sm">Welcome back,</p>
@@ -193,7 +201,11 @@ const Dashboard = () => {
             </div>
             <p className="text-sm text-muted-foreground mb-4">Get help or reach out to us</p>
             <div className="space-y-3">
+<<<<<<< HEAD
               <a
+=======
+              <a 
+>>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
                 href="mailto:support@uteelpay.com"
                 className="flex items-center gap-3 p-3 bg-secondary rounded-lg hover:bg-secondary/80 transition-colors"
               >
@@ -203,7 +215,11 @@ const Dashboard = () => {
                   <p className="text-xs text-muted-foreground">support@uteelpay.com</p>
                 </div>
               </a>
+<<<<<<< HEAD
               <a
+=======
+              <a 
+>>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
                 href="https://wa.me/2347036006762"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -227,7 +243,11 @@ const Dashboard = () => {
               <h3 className="font-bold text-lg">Join Our Community</h3>
             </div>
             <p className="text-sm text-muted-foreground mb-4">Stay updated with exclusive offers</p>
+<<<<<<< HEAD
             <a
+=======
+            <a 
+>>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
               href="https://whatsapp.com/channel/uteelpay"
               target="_blank"
               rel="noopener noreferrer"

@@ -20,8 +20,12 @@ const mainItems = [
 ];
 
 const serviceItems = [
+<<<<<<< HEAD
   { title: "Airtime", url: "/services/airtime", icon: Smartphone },
   { title: "Data", url: "/services/data", icon: Smartphone },
+=======
+  { title: "Airtime & Data", url: "/services/airtime", icon: Smartphone },
+>>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
   { title: "Cable TV", url: "/services/cable", icon: Tv },
   { title: "Electricity", url: "/services/electricity", icon: Zap },
   { title: "Bulk SMS", url: "/services/sms", icon: MessageSquare },

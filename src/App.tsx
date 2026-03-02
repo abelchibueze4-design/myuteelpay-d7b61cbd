@@ -13,14 +13,19 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
+<<<<<<< HEAD
 import Airtime from "./pages/Airtime";
 import Data from "./pages/Data";
+=======
+import AirtimeData from "./pages/AirtimeData";
+>>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
 import CableTV from "./pages/CableTV";
 import Electricity from "./pages/Electricity";
 import BulkSMS from "./pages/BulkSMS";
 import EduPins from "./pages/EduPins";
 import Referral from "./pages/Referral";
 import NotFound from "./pages/NotFound";
+<<<<<<< HEAD
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
@@ -29,6 +34,8 @@ import ServiceManagement from "./pages/admin/ServiceManagement";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AuditLogs from "./pages/admin/AuditLogs";
 import AdminSettings from "./pages/admin/AdminSettings";
+=======
+>>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
 
 const queryClient = new QueryClient();
 
@@ -53,13 +60,18 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/dashboard" element={<ProtectedWithLayout><Dashboard /></ProtectedWithLayout>} />
+<<<<<<< HEAD
               <Route path="/services/airtime" element={<ProtectedWithLayout><Airtime /></ProtectedWithLayout>} />
               <Route path="/services/data" element={<ProtectedWithLayout><Data /></ProtectedWithLayout>} />
+=======
+              <Route path="/services/airtime" element={<ProtectedWithLayout><AirtimeData /></ProtectedWithLayout>} />
+>>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
               <Route path="/services/cable" element={<ProtectedWithLayout><CableTV /></ProtectedWithLayout>} />
               <Route path="/services/electricity" element={<ProtectedWithLayout><Electricity /></ProtectedWithLayout>} />
               <Route path="/services/sms" element={<ProtectedWithLayout><BulkSMS /></ProtectedWithLayout>} />
               <Route path="/services/edu" element={<ProtectedWithLayout><EduPins /></ProtectedWithLayout>} />
               <Route path="/referral" element={<ProtectedWithLayout><Referral /></ProtectedWithLayout>} />
+<<<<<<< HEAD
               <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
@@ -68,6 +80,8 @@ function App() {
               <Route path="/admin/analytics" element={<AdminLayout><AdminAnalytics /></AdminLayout>} />
               <Route path="/admin/logs" element={<AdminLayout><AuditLogs /></AdminLayout>} />
               <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
+=======
+>>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
