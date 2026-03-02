@@ -5,15 +5,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+/* ---------------- Navbar ---------------- */
 const Navbar = () => (
   <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
     <div className="container mx-auto flex items-center justify-between h-16 px-4">
       <Link to="/" className="text-xl font-bold text-gradient">Uteelpay</Link>
       <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-<<<<<<< HEAD
-=======
         <a href="#about" className="hover:text-foreground transition-colors">About Us</a>
->>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
         <a href="#services" className="hover:text-foreground transition-colors">Services</a>
         <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
         <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
@@ -25,6 +23,17 @@ const Navbar = () => (
     </div>
   </nav>
 );
+
+/* ---------------- Hero Section ---------------- */
+const quickActions = [
+  { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "bg-primary/10 text-primary" },
+  { icon: Smartphone, label: "Data", path: "/services/data", color: "bg-accent/20 text-accent-foreground" },
+  { icon: Tv, label: "Cable TV", path: "/services/cable", color: "bg-accent/20 text-accent-foreground" },
+  { icon: Zap, label: "Electricity", path: "/services/electricity", color: "bg-primary-glow/10 text-primary" },
+  { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "bg-accent/20 text-accent-foreground" },
+  { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "bg-primary/10 text-primary" },
+  { icon: Gift, label: "Refer & Earn", path: "/referral", color: "bg-accent/20 text-accent-foreground" },
+];
 
 const HeroSection = () => (
   <section className="relative pt-28 pb-20 overflow-hidden">
@@ -45,6 +54,16 @@ const HeroSection = () => (
           <div className="flex flex-col sm:flex-row gap-4">
             <Link to="/signup"><Button variant="hero" size="lg">Get Started <ArrowRight className="w-4 h-4 ml-1" /></Button></Link>
             <a href="#pricing"><Button variant="outline" size="lg" className="rounded-xl border-accent text-accent hover:bg-accent/10">View Rates</Button></a>
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-7 gap-3 mt-6">
+            {quickActions.map((a) => (
+              <Link key={a.path} to={a.path} className="flex flex-col items-center text-xs">
+                <div className={`w-10 h-10 rounded-lg ${a.color} flex items-center justify-center mb-1`}>
+                  <a.icon className="w-5 h-5" />
+                </div>
+                <span>{a.label}</span>
+              </Link>
+            ))}
           </div>
         </div>
         <div className="hidden md:flex justify-center">
@@ -68,30 +87,22 @@ const HeroSection = () => (
   </section>
 );
 
-<<<<<<< HEAD
-const services = [
-  { icon: Smartphone, name: "Airtime", desc: "MTN, Airtel, Glo, 9mobile" },
-  { icon: Smartphone, name: "Data", desc: "Cheap data bundles for all networks" },
-=======
+/* ---------------- About Us ---------------- */
 const AboutUs = () => (
   <section id="about" className="py-24 relative overflow-hidden bg-background">
-    {/* Background embellishments */}
     <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
       <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
     </div>
-    
     <div className="container mx-auto px-4 relative z-10">
       <div className="max-w-4xl mx-auto">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-8 shadow-sm">
           <Star className="w-4 h-4" />
           <span>The Uteelpay Story</span>
         </div>
-        
         <h2 className="text-4xl md:text-5xl lg:text-5xl font-extrabold leading-tight mb-8">
           We don't just process payments.<br/>We power <span className="text-gradient">possibilities.</span>
         </h2>
-        
         <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
           <p>
             In a world that never stops moving, dealing with slow, complicated, or hidden-fee utility platforms shouldn't be your reality. That's exactly why we built <strong>Uteelpay</strong>.
@@ -113,9 +124,10 @@ const AboutUs = () => (
   </section>
 );
 
+/* ---------------- Services ---------------- */
 const services = [
-  { icon: Smartphone, name: "Airtime & Data", desc: "MTN, Airtel, Glo, 9mobile" },
->>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
+  { icon: Smartphone, name: "Airtime", desc: "MTN, Airtel, Glo, 9mobile" },
+  { icon: Smartphone, name: "Data", desc: "Affordable data bundles for all networks" },
   { icon: Zap, name: "Electricity Bills", desc: "Prepaid & Postpaid for all DISCOs" },
   { icon: Tv, name: "Cable TV", desc: "DSTV, GOtv, StarTimes" },
   { icon: GraduationCap, name: "Edu Pins", desc: "WAEC, NECO, JAMB" },
@@ -127,11 +139,20 @@ const ServicesSection = () => (
   <section id="services" className="py-20 bg-secondary">
     <div className="container mx-auto px-4">
       <h2 className="text-3xl font-bold text-center mb-4">Our Services</h2>
-      <p className="text-center text-muted-foreground mb-12 max-w-md mx-auto">Everything you need to stay connected and powered up</p>
+      <p className="text-center text-muted-foreground mb-12 max-w-md mx-auto">
+        Everything you need to stay connected and powered up
+      </p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
         {services.map((s, i) => (
-          <div key={i} className={`bg-card rounded-2xl p-6 shadow-card hover:shadow-primary/10 transition-shadow relative ${s.coming ? "opacity-60" : ""}`}>
-            {s.coming && <span className="absolute top-4 right-4 text-xs font-bold text-accent bg-accent/10 px-2 py-1 rounded-full">Soon</span>}
+          <div
+            key={i}
+            className={`bg-card rounded-2xl p-6 shadow-card hover:shadow-primary/10 transition-shadow relative ${s.coming ? "opacity-60" : ""}`}
+          >
+            {s.coming && (
+              <span className="absolute top-4 right-4 text-xs font-bold text-accent bg-accent/10 px-2 py-1 rounded-full">
+                Soon
+              </span>
+            )}
             <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center mb-4">
               <s.icon className="w-6 h-6 text-primary-foreground" />
             </div>
@@ -144,6 +165,7 @@ const ServicesSection = () => (
   </section>
 );
 
+/* ---------------- How It Works ---------------- */
 const steps = [
   { icon: Shield, num: "1", title: "Sign Up", desc: "Create your account in seconds with your email." },
   { icon: Zap, num: "2", title: "Fund Wallet", desc: "Add money via Bank Transfer or Card payment." },
@@ -170,6 +192,7 @@ const HowItWorks = () => (
   </section>
 );
 
+/* ---------------- Referral ---------------- */
 const ReferralBanner = () => (
   <section className="py-16">
     <div className="container mx-auto px-4">
@@ -185,6 +208,7 @@ const ReferralBanner = () => (
   </section>
 );
 
+/* ---------------- Pricing ---------------- */
 const pricingData = [
   { name: "Airtime", price: "From ₦50", desc: "MTN, Glo, Airtel, 9mobile — up to 4% discount" },
   { name: "Data Bundles", price: "From ₦200", desc: "All networks, 30-day plans with best rates" },
@@ -213,6 +237,7 @@ const PricingSection = () => (
   </section>
 );
 
+/* ---------------- Trust Bar ---------------- */
 const TrustBar = () => (
   <section className="py-12 border-t">
     <div className="container mx-auto px-4 text-center">
@@ -227,6 +252,7 @@ const TrustBar = () => (
   </section>
 );
 
+/* ---------------- Footer ---------------- */
 const Footer = () => (
   <footer className="border-t py-10 bg-card">
     <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
@@ -236,7 +262,7 @@ const Footer = () => (
   </footer>
 );
 
-/* Floating WhatsApp button */
+/* ---------------- WhatsApp Button ---------------- */
 const WhatsAppButton = () => (
   <a
     href="https://wa.me/2348000000000"
@@ -249,14 +275,12 @@ const WhatsAppButton = () => (
   </a>
 );
 
+/* ---------------- Landing Page ---------------- */
 const Landing = () => (
   <div className="min-h-screen">
     <Navbar />
     <HeroSection />
-<<<<<<< HEAD
-=======
     <AboutUs />
->>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
     <ServicesSection />
     <HowItWorks />
     <ReferralBanner />
