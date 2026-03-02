@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Smartphone, Tv, Zap, MessageSquare, GraduationCap,
   Gift, LayoutDashboard, LogOut, History, Wallet, Menu,
@@ -7,8 +7,16 @@ import {
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 
@@ -20,12 +28,8 @@ const mainItems = [
 ];
 
 const serviceItems = [
-<<<<<<< HEAD
   { title: "Airtime", url: "/services/airtime", icon: Smartphone },
   { title: "Data", url: "/services/data", icon: Smartphone },
-=======
-  { title: "Airtime & Data", url: "/services/airtime", icon: Smartphone },
->>>>>>> f561cdfe2bca5ae2034463cbf57565d8a5e24ad4
   { title: "Cable TV", url: "/services/cable", icon: Tv },
   { title: "Electricity", url: "/services/electricity", icon: Zap },
   { title: "Bulk SMS", url: "/services/sms", icon: MessageSquare },
@@ -61,7 +65,12 @@ function AppSidebar() {
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                    <NavLink
+                      to={item.url}
+                      end
+                      className="hover:bg-sidebar-accent/50"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                    >
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
@@ -79,7 +88,12 @@ function AppSidebar() {
               {serviceItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                    <NavLink
+                      to={item.url}
+                      end
+                      className="hover:bg-sidebar-accent/50"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                    >
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
@@ -102,7 +116,10 @@ function AppSidebar() {
               </div>
             </div>
           )}
-          <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground w-full px-2 py-1.5 rounded-md hover:bg-sidebar-accent/50">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground w-full px-2 py-1.5 rounded-md hover:bg-sidebar-accent/50"
+          >
             <LogOut className="w-4 h-4" />
             {!collapsed && <span>Logout</span>}
           </button>
@@ -124,9 +141,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             </SidebarTrigger>
             <span className="text-lg font-bold text-gradient">Uteelpay</span>
           </header>
-          <main className="flex-1 overflow-auto">
-            {children}
-          </main>
+          <main className="flex-1 overflow-auto">{children}</main>
         </div>
       </div>
     </SidebarProvider>
