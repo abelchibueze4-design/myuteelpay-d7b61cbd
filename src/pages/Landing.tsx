@@ -10,6 +10,7 @@ const Navbar = () => (
     <div className="container mx-auto flex items-center justify-between h-16 px-4">
       <Link to="/" className="text-xl font-bold text-gradient">Uteelpay</Link>
       <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
+        <a href="#about" className="hover:text-foreground transition-colors">About Us</a>
         <a href="#services" className="hover:text-foreground transition-colors">Services</a>
         <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
         <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
@@ -57,6 +58,46 @@ const HeroSection = () => (
               ))}
             </div>
             <div className="text-center text-xs opacity-60">Uteelpay • Secure</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+const AboutUs = () => (
+  <section id="about" className="py-24 relative overflow-hidden bg-background">
+    {/* Background embellishments */}
+    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
+    </div>
+    
+    <div className="container mx-auto px-4 relative z-10">
+      <div className="max-w-4xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-semibold mb-8 shadow-sm">
+          <Star className="w-4 h-4" />
+          <span>The Uteelpay Story</span>
+        </div>
+        
+        <h2 className="text-4xl md:text-5xl lg:text-5xl font-extrabold leading-tight mb-8">
+          We don't just process payments.<br/>We power <span className="text-gradient">possibilities.</span>
+        </h2>
+        
+        <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
+          <p>
+            In a world that never stops moving, dealing with slow, complicated, or hidden-fee utility platforms shouldn't be your reality. That's exactly why we built <strong>Uteelpay</strong>.
+          </p>
+          <p>
+            We started with a radically simple idea: what if paying your everyday bills felt as effortless as sending a text message? What if you never had to worry about service down-times when you needed electricity the most, or running out of data right before an important meeting?
+          </p>
+          <p>
+            Today, Uteelpay is the silent powerhouse behind thousands of Nigerians' daily routines. From ensuring a student gets their WAEC pin at 2 AM, to keeping households illuminated across the nation, we deliver absolute speed, rock-solid security, and zero hidden charges. 
+          </p>
+          <div className="pt-6 mt-6 border-t border-border/50">
+            <p className="font-semibold text-foreground text-xl">
+              Because your time is the most valuable currency, and we refuse to let you waste a single second of it.
+            </p>
           </div>
         </div>
       </div>
@@ -203,6 +244,7 @@ const Landing = () => (
   <div className="min-h-screen">
     <Navbar />
     <HeroSection />
+    <AboutUs />
     <ServicesSection />
     <HowItWorks />
     <ReferralBanner />
