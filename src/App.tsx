@@ -25,6 +25,7 @@ import EduPins from "./pages/EduPins";
 import Referral from "./pages/Referral";
 
 // Admin
+import AdminLogin from "./pages/admin/AdminLogin"; // ✅ admin login page
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
@@ -53,12 +54,17 @@ function App() {
         <BrowserRouter>
           <AuthProvider>
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
 
+              {/* Admin Login */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+
+              {/* User Dashboard */}
               <Route
                 path="/dashboard"
                 element={
@@ -68,6 +74,7 @@ function App() {
                 }
               />
 
+              {/* Services */}
               <Route
                 path="/services/airtime"
                 element={
@@ -125,7 +132,7 @@ function App() {
                 }
               />
 
-              {/* Admin Routes */}
+              {/* Admin Protected Routes */}
               <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
@@ -135,6 +142,7 @@ function App() {
               <Route path="/admin/logs" element={<AdminLayout><AuditLogs /></AdminLayout>} />
               <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
 
+              {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>

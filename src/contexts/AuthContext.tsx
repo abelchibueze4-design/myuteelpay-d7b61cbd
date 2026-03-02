@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, fullName: string, phone: string, username: string, address: string, referralCode?: string) => Promise<{ error: Error | null }>;
   signIn: (username: string, password: string) => Promise<{ error: Error | null }>;
+  adminSignIn: (email: string, password: string) => Promise<{ error: Error | null; user?: User | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
   checkPinRequired: () => Promise<boolean>;
@@ -57,13 +58,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (username: string, password: string) => {
     // Look up email by username using the database function
     const { data: emailData, error: lookupError } = await supabase.rpc("get_email_by_username", { p_username: username });
-    
+
     if (lookupError || !emailData) {
       return { error: new Error("Invalid username or password") };
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email: emailData as string, password });
     return { error: error as Error | null };
+  };
+
+  // Separate admin login by email
+  const adminSignIn = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    return { error: error as Error | null, user: data?.user ?? null };
   };
 
   const resetPassword = async (email: string) => {
@@ -96,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, resetPassword, checkPinRequired }}>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, adminSignIn, signOut, resetPassword, checkPinRequired }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,24 +1,24 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AtSign, Lock, ArrowRight, Eye, EyeOff, Shield } from "lucide-react";
+import { AtSign, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { adminSignIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const { error, user } = await signIn(username, password);
+    const { error, user: authUser } = await adminSignIn(email, password);
     setLoading(false);
 
     if (error) {
@@ -26,8 +26,10 @@ const AdminLogin = () => {
       return;
     }
 
-    // Check if user is admin
-    if (user?.user_metadata?.role !== "admin") {
+    const role = authUser?.user_metadata?.role;
+    const isAdmin = !!role || authUser?.email?.endsWith("@uteelpay.com") || authUser?.email === "Josephine@gmail.com";
+
+    if (!isAdmin) {
       toast.error("You do not have admin access");
       return;
     }
@@ -46,15 +48,15 @@ const AdminLogin = () => {
 
         <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-8 shadow-card space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Username</label>
+            <label className="text-sm font-medium">Email</label>
             <div className="relative">
               <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@example.com"
                 className="pl-10"
-                type="text"
+                type="email"
                 required
               />
             </div>

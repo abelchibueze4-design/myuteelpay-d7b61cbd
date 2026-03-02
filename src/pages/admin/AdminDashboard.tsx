@@ -18,6 +18,7 @@ import {
     ArrowDownRight,
     Activity,
     AlertCircle,
+    ArrowRight,
 } from "lucide-react";
 import { format, subDays, isSameDay } from "date-fns";
 
@@ -28,6 +29,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 const AdminDashboard = () => {
     const { data: users, isLoading: loadingUsers } = useUsers();
@@ -97,45 +99,45 @@ const AdminDashboard = () => {
     ];
 
     if (loadingUsers || loadingTransactions) {
-        return <div className="p-8 text-center text-slate-400 animate-pulse">Calculating platform metrics...</div>;
+        return <div className="p-8 text-center text-muted-foreground animate-pulse">Calculating platform metrics...</div>;
     }
 
     return (
         <div className="space-y-8 pb-12">
             <div>
-                <h1 className="text-2xl font-bold text-white">Platform Overview</h1>
-                <p className="text-sm text-slate-400">Real-time performance and system health metrics</p>
+                <h1 className="text-2xl font-bold">Platform Overview</h1>
+                <p className="text-sm text-muted-foreground mt-1">Real-time performance and system health metrics</p>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat) => (
-                    <div key={stat.label} className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl hover:border-slate-700 transition-all group">
+                    <div key={stat.label} className="bg-card p-6 rounded-2xl shadow-card hover:shadow-primary/10 transition-shadow group">
                         <div className="flex items-center justify-between mb-4">
                             <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
                                 <stat.icon className="w-6 h-6" />
                             </div>
-                            <div className={`flex items-center gap-1 text-xs font-bold ${stat.trendUp ? "text-green-500" : "text-red-500"}`}>
+                            <div className={`flex items-center gap-1 text-xs font-bold ${stat.trendUp ? "text-green-500" : "text-destructive"}`}>
                                 {stat.trendUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                                 {stat.trend}
                             </div>
                         </div>
-                        <p className="text-slate-400 text-sm font-medium">{stat.label}</p>
-                        <p className="text-2xl font-bold mt-1 text-white">{stat.value}</p>
+                        <p className="text-muted-foreground text-sm font-medium">{stat.label}</p>
+                        <p className="text-2xl font-bold mt-1">{stat.value}</p>
                     </div>
                 ))}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Chart */}
-                <div className="lg:col-span-2 bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <div className="lg:col-span-2 bg-card p-6 rounded-2xl shadow-card">
                     <div className="flex items-center justify-between mb-8">
-                        <h3 className="font-bold text-lg text-white">Revenue Analysis (7D)</h3>
+                        <h3 className="font-bold text-lg">Revenue Analysis (7D)</h3>
                         <Select defaultValue="revenue">
-                            <SelectTrigger className="w-32 bg-slate-800 border-slate-700 h-8 text-xs">
+                            <SelectTrigger className="w-32 bg-secondary border-transparent h-8 text-xs">
                                 <SelectValue placeholder="Metric" />
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-900 border-slate-800 text-slate-200">
+                            <SelectContent>
                                 <SelectItem value="revenue">Revenue</SelectItem>
                                 <SelectItem value="transactions">Transactions</SelectItem>
                             </SelectContent>
@@ -150,24 +152,26 @@ const AdminDashboard = () => {
                                         <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                <CartesianGrid strokeDasharray="3 3" opacity={0.1} vertical={false} />
                                 <XAxis
                                     dataKey="name"
-                                    stroke="#475569"
+                                    stroke="currentColor"
+                                    opacity={0.5}
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
                                     dy={10}
                                 />
                                 <YAxis
-                                    stroke="#475569"
+                                    stroke="currentColor"
+                                    opacity={0.5}
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
                                     tickFormatter={(value) => `₦${(value / 1000).toFixed(0)}k`}
                                 />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: "#0f172a", borderColor: "#1e293b", color: "#f1f5f9" }}
+                                    contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))", borderRadius: "8px" }}
                                     formatter={(value: any) => [`₦${value.toLocaleString()}`, "Revenue"]}
                                 />
                                 <Area
@@ -184,17 +188,17 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Recent Activity List (Mini) */}
-                <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-                    <h3 className="font-bold text-lg text-white mb-6">Recent Activity</h3>
+                <div className="bg-card p-6 rounded-2xl shadow-card">
+                    <h3 className="font-bold text-lg mb-6">Recent Activity</h3>
                     <div className="space-y-6">
                         {successfulTransactions.slice(0, 5).map((t, i) => (
                             <div key={t.id} className="flex items-start gap-3">
-                                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
                                     <Activity className="w-4 h-4 text-primary" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-sm font-medium text-white truncate">{t.user_name} purchased {t.type.replace("_", " ")}</p>
-                                    <p className="text-[10px] text-slate-500">{format(new Date(t.created_at), "h:mm aa, MMM d")}</p>
+                                    <p className="text-sm font-medium truncate">{t.user_name} purchased {t.type.replace("_", " ")}</p>
+                                    <p className="text-[10px] text-muted-foreground">{format(new Date(t.created_at), "h:mm aa, MMM d")}</p>
                                 </div>
                             </div>
                         ))}
