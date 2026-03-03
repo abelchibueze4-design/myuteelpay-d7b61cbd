@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useCreateTransaction } from "@/hooks/useTransactions";
+import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
+import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { toast } from "sonner";
 
 const BulkSMS = () => {
@@ -14,14 +16,24 @@ const BulkSMS = () => {
   const [recipients, setRecipients] = useState("");
   const [message, setMessage] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [pinOpen, setPinOpen] = useState(false);
   const createTransaction = useCreateTransaction();
+  const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
   const recipientCount = recipients.split(",").filter((r) => r.trim()).length;
   const charCount = message.length;
   const totalCost = recipientCount * 2.5;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!sender || !recipients || !message) return;
+    setPinOpen(true);
+  };
+
+  const handleConfirmSend = async (pin: string) => {
+    const isValid = await verifyPin(pin);
+    if (!isValid) return false;
+
     try {
       await createTransaction.mutateAsync({
         type: "bulk_sms",
@@ -30,8 +42,10 @@ const BulkSMS = () => {
         metadata: { sender, recipientCount },
       });
       setShowSuccess(true);
+      return true;
     } catch {
       toast.error("Transaction failed. Please try again.");
+      return false;
     }
   };
 
@@ -69,6 +83,13 @@ const BulkSMS = () => {
           </Button>
         </form>
       </div>
+
+      <PinVerificationDialog
+        open={pinOpen}
+        onOpenChange={setPinOpen}
+        onVerify={handleConfirmSend}
+        isLoading={isVerifying || createTransaction.isPending}
+      />
 
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="max-w-sm text-center">

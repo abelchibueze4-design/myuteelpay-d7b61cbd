@@ -1,187 +1,263 @@
 import { useState } from "react";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-    Search,
-    Filter,
-    CheckCircle2,
-    XCircle,
-    Clock,
-    ArrowRight,
-    Download,
-} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+    DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+    Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+    Receipt, Search, Download, MoreVertical, RefreshCw,
+    CheckCircle2, XCircle, Clock, AlertTriangle, Eye,
+    ArrowLeftRight, Flag,
+} from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+
+const StatusBadge = ({ status }: { status: string }) => {
+    if (status === "success") return <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] gap-1"><CheckCircle2 className="w-3 h-3" /> Success</Badge>;
+    if (status === "failed") return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-[10px] gap-1"><XCircle className="w-3 h-3" /> Failed</Badge>;
+    return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] gap-1"><Clock className="w-3 h-3" /> Pending</Badge>;
+};
 
 const TransactionMonitoring = () => {
-    const { data: transactions, isLoading, error } = useAdminTransactions();
-    const [searchTerm, setSearchTerm] = useState("");
+    const { data: transactions, isLoading, error, refetch } = useAdminTransactions();
+    const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [typeFilter, setTypeFilter] = useState("all");
+    const [selectedTx, setSelectedTx] = useState<any>(null);
+    const [flagged, setFlagged] = useState<Set<string>>(new Set());
 
-    const filteredTransactions = transactions?.filter((t) => {
-        const matchesSearch =
-            t.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            t.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            t.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const types = [...new Set((transactions ?? []).map((t) => t.type))];
 
-        const matchesStatus = statusFilter === "all" || t.status === statusFilter;
-
-        return matchesSearch && matchesStatus;
+    const filtered = (transactions ?? []).filter((t) => {
+        const s = search.toLowerCase();
+        const matchSearch = !search
+            || t.reference?.toLowerCase().includes(s)
+            || t.user_name?.toLowerCase().includes(s)
+            || t.description?.toLowerCase().includes(s);
+        const matchStatus = statusFilter === "all" || t.status === statusFilter;
+        const matchType = typeFilter === "all" || t.type === typeFilter;
+        return matchSearch && matchStatus && matchType;
     });
 
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "success":
-                return <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20"><CheckCircle2 className="w-3 h-3 mr-1" /> Success</Badge>;
-            case "failed":
-                return <Badge className="bg-red-500/10 text-red-500 hover:bg-red-500/20"><XCircle className="w-3 h-3 mr-1" /> Failed</Badge>;
-            default:
-                return <Badge className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"><Clock className="w-3 h-3 mr-1" /> Pending</Badge>;
-        }
+    const exportCSV = () => {
+        const rows = [
+            ["Reference", "User", "Type", "Amount", "Status", "Date"],
+            ...filtered.map((t) => [t.reference, t.user_name, t.type, t.amount, t.status, format(new Date(t.created_at), "yyyy-MM-dd HH:mm")]),
+        ];
+        const csv = rows.map((r) => r.join(",")).join("\n");
+        const blob = new Blob([csv], { type: "text/csv" });
+        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "transactions.csv"; a.click();
+        toast.success("Exported transactions.csv");
     };
 
-    const formatType = (type: string) => {
-        return type.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+    const toggleFlag = (id: string) => {
+        const next = new Set(flagged);
+        if (next.has(id)) next.delete(id); else next.add(id);
+        setFlagged(next);
+        toast.success(next.has(id) ? "Transaction flagged as fraudulent" : "Flag removed");
     };
-
-    if (error) {
-        return (
-            <div className="p-8 text-center text-red-500">
-                <p className="font-bold">Error loading transactions</p>
-                <p className="text-sm mt-2">{(error as Error).message}</p>
-            </div>
-        );
-    }
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold">Transaction Monitoring</h1>
-                    <p className="text-sm text-slate-400">Monitor and manage all system transactions real-time</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                        <Input
-                            placeholder="Ref ID, user, or desc..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 bg-slate-900 border-slate-800 w-full md:w-64"
-                        />
+        <div className="max-w-screen-2xl space-y-6">
+            <PageHeader
+                title="Transaction Monitoring"
+                description="Real-time transaction oversight with filter, retry, and fraud controls"
+                icon={Receipt}
+                badge={`${(transactions ?? []).length}`}
+                actions={
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => refetch()}>
+                            <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
+                        </Button>
+                        <Button size="sm" onClick={exportCSV}>
+                            <Download className="w-3.5 h-3.5 mr-1.5" /> Export CSV
+                        </Button>
                     </div>
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-[130px] bg-slate-900 border-slate-800">
-                            <SelectValue placeholder="Status" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-900 border-slate-800 text-slate-200">
-                            <SelectItem value="all">All Status</SelectItem>
-                            <SelectItem value="success">Success</SelectItem>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="failed">Failed</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <Button variant="outline" className="border-slate-800 bg-slate-900" onClick={() => toast.info("Exporting logs...")}>
-                        <Download className="w-4 h-4 mr-2" />
-                        Export
-                    </Button>
+                }
+            />
+
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3">
+                <div className="relative flex-1 min-w-[200px] max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input className="pl-9" placeholder="Reference, user, description..." value={search} onChange={(e) => setSearch(e.target.value)} />
                 </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-36">
+                        <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="success">Success</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Service type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Services</SelectItem>
+                        {types.map((t) => (
+                            <SelectItem key={t} value={t} className="capitalize">{t?.replace(/_/g, " ")}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader className="bg-slate-800/50">
-                            <TableRow className="border-slate-800 hover:bg-transparent">
-                                <TableHead className="text-slate-300 font-bold w-[180px]">Reference</TableHead>
-                                <TableHead className="text-slate-300 font-bold">User</TableHead>
-                                <TableHead className="text-slate-300 font-bold">Service Info</TableHead>
-                                <TableHead className="text-slate-300 font-bold text-right">Amount</TableHead>
-                                <TableHead className="text-slate-300 font-bold">Status</TableHead>
-                                <TableHead className="text-slate-300 font-bold">Timestamp</TableHead>
-                                <TableHead className="text-right text-slate-300 font-bold">Detail</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {isLoading ? (
-                                Array.from({ length: 5 }).map((_, i) => (
-                                    <TableRow key={i} className="border-slate-800 animate-pulse">
-                                        <TableCell><div className="h-4 bg-slate-800 rounded w-full" /></TableCell>
-                                        <TableCell><div className="h-4 bg-slate-800 rounded w-full" /></TableCell>
-                                        <TableCell><div className="h-4 bg-slate-800 rounded w-full" /></TableCell>
-                                        <TableCell><div className="h-4 bg-slate-800 rounded w-full ml-auto" /></TableCell>
-                                        <TableCell><div className="h-4 bg-slate-800 rounded w-full" /></TableCell>
-                                        <TableCell><div className="h-4 bg-slate-800 rounded w-full" /></TableCell>
-                                        <TableCell><div className="h-8 bg-slate-800 rounded w-8 ml-auto" /></TableCell>
-                                    </TableRow>
-                                ))
-                            ) : filteredTransactions && filteredTransactions.length > 0 ? (
-                                filteredTransactions.map((t) => (
-                                    <TableRow key={t.id} className="border-slate-800 hover:bg-slate-800/30 transition-colors">
-                                        <TableCell className="font-mono text-[10px] text-slate-400">
-                                            {t.reference || t.id.split("-")[0]}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div>
-                                                <p className="text-sm font-medium text-white">{t.user_name}</p>
-                                                <p className="text-[10px] text-slate-500">@{t.user_handle}</p>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div>
-                                                <p className="text-sm text-slate-200">{formatType(t.type)}</p>
-                                                <p className="text-[10px] text-slate-500 line-clamp-1">{t.description || "N/A"}</p>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <p className={`text-sm font-bold ${t.amount < 0 ? "text-red-400" : "text-green-400"}`}>
-                                                {t.amount < 0 ? "-" : "+"}₦{Math.abs(t.amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })}
-                                            </p>
-                                        </TableCell>
-                                        <TableCell>
-                                            {getStatusBadge(t.status)}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="text-xs text-slate-300">
-                                                <p>{format(new Date(t.created_at), "MMM d, yyyy")}</p>
-                                                <p className="text-slate-500">{format(new Date(t.created_at), "h:mm aa")}</p>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" className="hover:bg-slate-700 text-slate-400" onClick={() => toast.info(`Viewing details for ${t.reference}`)}>
-                                                <ArrowRight className="w-4 h-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="h-32 text-center text-slate-500 italic border-slate-800">
-                                        No transactions found.
-                                    </TableCell>
+            {/* Table */}
+            <div className="bg-card border border-border rounded-2xl overflow-hidden">
+                <Table>
+                    <TableHeader>
+                        <TableRow className="border-border hover:bg-transparent">
+                            <TableHead className="font-semibold text-xs uppercase tracking-wide">Reference</TableHead>
+                            <TableHead className="font-semibold text-xs uppercase tracking-wide">User</TableHead>
+                            <TableHead className="font-semibold text-xs uppercase tracking-wide">Service</TableHead>
+                            <TableHead className="font-semibold text-xs uppercase tracking-wide text-right">Amount</TableHead>
+                            <TableHead className="font-semibold text-xs uppercase tracking-wide">Status</TableHead>
+                            <TableHead className="font-semibold text-xs uppercase tracking-wide">Date</TableHead>
+                            <TableHead className="text-right font-semibold text-xs uppercase tracking-wide">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {isLoading ? (
+                            Array.from({ length: 6 }).map((_, i) => (
+                                <TableRow key={i} className="animate-pulse border-border">
+                                    {Array.from({ length: 7 }).map((_, j) => (
+                                        <TableCell key={j}><div className="h-6 bg-accent rounded" /></TableCell>
+                                    ))}
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
+                            ))
+                        ) : error ? (
+                            <TableRow>
+                                <TableCell colSpan={7} className="text-center text-destructive py-8">
+                                    {(error as Error).message}
+                                </TableCell>
+                            </TableRow>
+                        ) : filtered.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={7} className="text-center text-muted-foreground py-12 italic">
+                                    No transactions match your filters.
+                                </TableCell>
+                            </TableRow>
+                        ) : filtered.map((t) => (
+                            <TableRow
+                                key={t.id}
+                                className={`border-border hover:bg-accent/20 transition-colors ${flagged.has(t.id) ? "bg-red-50" : ""}`}
+                            >
+                                <TableCell>
+                                    <div className="flex items-center gap-1.5">
+                                        {flagged.has(t.id) && <AlertTriangle className="w-3 h-3 text-red-500 shrink-0" />}
+                                        <code className="text-[10px] font-mono text-muted-foreground">
+                                            {t.reference || t.id.split("-")[0].toUpperCase()}
+                                        </code>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+                                            {t.user_name?.[0]?.toUpperCase() ?? "?"}
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-medium">{t.user_name}</p>
+                                            <p className="text-[10px] text-muted-foreground">@{t.user_handle}</p>
+                                        </div>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <p className="text-xs capitalize text-muted-foreground">{t.type?.replace(/_/g, " ")}</p>
+                                    {t.description && <p className="text-[10px] text-muted-foreground/60 line-clamp-1">{t.description}</p>}
+                                </TableCell>
+                                <TableCell className={`text-right text-sm font-bold ${t.amount < 0 ? "text-destructive" : "text-emerald-600"}`}>
+                                    {t.amount < 0 ? "−" : "+"}₦{Math.abs(t.amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })}
+                                </TableCell>
+                                <TableCell><StatusBadge status={t.status} /></TableCell>
+                                <TableCell>
+                                    <div className="text-[10px] text-muted-foreground">
+                                        <p>{format(new Date(t.created_at), "MMM d, yyyy")}</p>
+                                        <p>{format(new Date(t.created_at), "h:mm a")}</p>
+                                    </div>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                                                <MoreVertical className="w-4 h-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-44">
+                                            <DropdownMenuItem onClick={() => setSelectedTx(t)}>
+                                                <Eye className="w-4 h-4 mr-2" /> View Details
+                                            </DropdownMenuItem>
+                                            {t.status === "failed" && (
+                                                <DropdownMenuItem onClick={() => toast.info("Retrying transaction...")}>
+                                                    <RefreshCw className="w-4 h-4 mr-2" /> Retry
+                                                </DropdownMenuItem>
+                                            )}
+                                            {t.status === "success" && (
+                                                <DropdownMenuItem onClick={() => toast.info("Reversal request submitted")}>
+                                                    <ArrowLeftRight className="w-4 h-4 mr-2" /> Reverse
+                                                </DropdownMenuItem>
+                                            )}
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem
+                                                className={flagged.has(t.id) ? "text-muted-foreground" : "text-red-600 focus:text-red-600"}
+                                                onClick={() => toggleFlag(t.id)}
+                                            >
+                                                <Flag className="w-4 h-4 mr-2" />
+                                                {flagged.has(t.id) ? "Unflag" : "Flag Fraud"}
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </div>
+
+            {/* Transaction Detail Dialog */}
+            <Dialog open={!!selectedTx} onOpenChange={(o) => !o && setSelectedTx(null)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Receipt className="w-5 h-5 text-primary" /> Transaction Detail
+                        </DialogTitle>
+                    </DialogHeader>
+                    {selectedTx && (
+                        <div className="space-y-3 pt-2 text-sm">
+                            {[
+                                ["Reference", selectedTx.reference || selectedTx.id],
+                                ["User", `${selectedTx.user_name} (@${selectedTx.user_handle})`],
+                                ["Service", selectedTx.type?.replace(/_/g, " ")],
+                                ["Description", selectedTx.description || "N/A"],
+                                ["Amount", `₦${Math.abs(selectedTx.amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`],
+                                ["Status", selectedTx.status],
+                                ["Date", format(new Date(selectedTx.created_at), "PPpp")],
+                            ].map(([k, v]) => (
+                                <div key={k} className="flex justify-between border-b border-border/50 pb-2">
+                                    <p className="text-muted-foreground text-xs">{k}</p>
+                                    <p className="font-medium text-xs text-right max-w-[55%] capitalize">{v}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

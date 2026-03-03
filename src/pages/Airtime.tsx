@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
+import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
+import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 
 const networks = ["MTN", "Glo", "Airtel", "9mobile"];
 
@@ -15,11 +17,19 @@ const Airtime = () => {
     const [phone, setPhone] = useState("");
     const [amount, setAmount] = useState("");
     const [showSuccess, setShowSuccess] = useState(false);
+    const [pinOpen, setPinOpen] = useState(false);
     const kvdata = useKvdata();
+    const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!network || !phone || !amount) return;
+        setPinOpen(true);
+    };
+
+    const handleConfirmPurchase = async (pin: string) => {
+        const isValid = await verifyPin(pin);
+        if (!isValid) return false;
 
         try {
             await kvdata.mutateAsync({
@@ -29,8 +39,9 @@ const Airtime = () => {
                 amount: Number(amount),
             });
             setShowSuccess(true);
+            return true;
         } catch {
-            // error handled by hook
+            return false;
         }
     };
 
@@ -67,6 +78,13 @@ const Airtime = () => {
                     </Button>
                 </form>
             </div>
+
+            <PinVerificationDialog
+                open={pinOpen}
+                onOpenChange={setPinOpen}
+                onVerify={handleConfirmPurchase}
+                isLoading={isVerifying || kvdata.isPending}
+            />
 
             <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
                 <DialogContent className="max-w-sm text-center">

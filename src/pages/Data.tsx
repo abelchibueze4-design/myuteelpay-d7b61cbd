@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
+import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
+import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 
 const networks = ["MTN", "Glo", "Airtel", "9mobile"];
 const dataPlans = [
@@ -21,14 +23,22 @@ const Data = () => {
     const [phone, setPhone] = useState("");
     const [plan, setPlan] = useState("");
     const [showSuccess, setShowSuccess] = useState(false);
+    const [pinOpen, setPinOpen] = useState(false);
     const kvdata = useKvdata();
+    const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!network || !phone || !plan) return;
+        setPinOpen(true);
+    };
+
+    const handleConfirmPurchase = async (pin: string) => {
+        const isValid = await verifyPin(pin);
+        if (!isValid) return false;
 
         const selectedPlan = dataPlans.find((p) => String(p.plan_id) === plan);
-        if (!selectedPlan) return;
+        if (!selectedPlan) return false;
 
         try {
             await kvdata.mutateAsync({
@@ -40,8 +50,9 @@ const Data = () => {
                 amount: selectedPlan.price,
             });
             setShowSuccess(true);
+            return true;
         } catch {
-            // error handled by hook
+            return false;
         }
     };
 
@@ -81,6 +92,13 @@ const Data = () => {
                     </Button>
                 </form>
             </div>
+
+            <PinVerificationDialog
+                open={pinOpen}
+                onOpenChange={setPinOpen}
+                onVerify={handleConfirmPurchase}
+                isLoading={isVerifying || kvdata.isPending}
+            />
 
             <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
                 <DialogContent className="max-w-sm text-center">

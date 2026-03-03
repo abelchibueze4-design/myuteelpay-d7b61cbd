@@ -23,7 +23,7 @@ import {
 
 const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Wallet Summary", url: "/dashboard?tab=wallet", icon: Wallet },
+  { title: "Wallet History", url: "/dashboard?tab=wallet", icon: Wallet },
   { title: "History", url: "/dashboard?tab=history", icon: History },
   { title: "Referral", url: "/referral", icon: Gift },
 ];

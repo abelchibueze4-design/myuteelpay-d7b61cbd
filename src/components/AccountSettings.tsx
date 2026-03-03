@@ -114,7 +114,7 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
             <TabsTrigger value="profile" className="text-xs sm:text-sm">Profile</TabsTrigger>
             <TabsTrigger value="security" className="text-xs sm:text-sm">Security</TabsTrigger>
             <TabsTrigger value="notifications" className="text-xs sm:text-sm">Notifications</TabsTrigger>
-            <TabsTrigger value="danger" className="text-xs sm:text-sm text-destructive">Danger</TabsTrigger>
+            <TabsTrigger value="danger" className="text-xs sm:text-sm text-destructive font-bold">Deactivate/Delete Account</TabsTrigger>
           </TabsList>
 
           {/* Profile Tab */}

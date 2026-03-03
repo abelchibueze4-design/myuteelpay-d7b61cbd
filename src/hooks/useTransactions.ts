@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useEffect } from "react";
 import type { Database } from "@/integrations/supabase/types";
 
 type TransactionType = Database["public"]["Enums"]["transaction_type"];
@@ -14,6 +15,33 @@ interface CreateTransactionParams {
 
 export const useTransactions = (limit = 10) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Real-time synchronization for transaction history
+    const channel = supabase
+      .channel(`transactions-realtime-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Listen for all events (INSERT, UPDATE, DELETE)
+          schema: "public",
+          table: "transactions",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["transactions"] });
+          queryClient.invalidateQueries({ queryKey: ["wallet"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
 
   return useQuery({
     queryKey: ["transactions", user?.id, limit],

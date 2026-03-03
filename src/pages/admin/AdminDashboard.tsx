@@ -1,211 +1,255 @@
-import { useUsers } from "@/hooks/useUsers";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
+import { useUsers } from "@/hooks/useUsers";
+import { StatCard } from "@/components/admin/StatCard";
+import { PageHeader } from "@/components/admin/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    AreaChart,
-    Area,
+    AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+    Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 import {
-    Users,
-    Wallet,
-    ArrowUpRight,
-    ArrowDownRight,
-    Activity,
-    AlertCircle,
-    ArrowRight,
+    Users, Wallet, TrendingUp, Activity, AlertTriangle,
+    CheckCircle, XCircle, Clock, LayoutDashboard, ArrowRight,
+    Download, RefreshCw,
 } from "lucide-react";
-import { format, subDays, isSameDay } from "date-fns";
+import { format, subDays, isSameDay, startOfDay } from "date-fns";
+import { Link } from "react-router-dom";
 
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+const CHART_COLORS = ["#7C3AED", "#D4AF37", "#10b981", "#3b82f6", "#ef4444"];
 
 const AdminDashboard = () => {
     const { data: users, isLoading: loadingUsers } = useUsers();
-    const { data: transactions, isLoading: loadingTransactions } = useAdminTransactions();
+    const { data: transactions, isLoading: loadingTx } = useAdminTransactions();
 
-    // Calculate Metrics
     const totalUsers = users?.length ?? 0;
     const activeUsers = users?.filter((u) => u.status === "active").length ?? 0;
-    const totalBalance = users?.reduce((acc, u) => acc + (u.wallet_balance ?? 0), 0) ?? 0;
+    const totalWalletBalance = users?.reduce((acc, u) => acc + (u.wallet_balance ?? 0), 0) ?? 0;
 
-    const successfulTransactions = transactions?.filter((t) => t.status === "success") ?? [];
-    const totalRevenue = successfulTransactions.reduce((acc, t) => acc + Math.abs(t.amount), 0);
-    const failedCount = transactions?.filter((t) => t.status === "failed").length ?? 0;
+    const successful = transactions?.filter((t) => t.status === "success") ?? [];
+    const failed = transactions?.filter((t) => t.status === "failed") ?? [];
+    const pending = transactions?.filter((t) => t.status === "pending") ?? [];
+    const totalRevenue = successful.reduce((acc, t) => acc + Math.abs(t.amount), 0);
+    const successRate = transactions?.length ? ((successful.length / transactions.length) * 100).toFixed(1) : "0";
 
-    // Prepare Chart Data (Last 7 Days)
-    const chartData = Array.from({ length: 7 }).map((_, i) => {
-        const date = subDays(new Date(), 6 - i);
-        const dayTransactions = successfulTransactions.filter((t) =>
-            isSameDay(new Date(t.created_at), date)
-        );
+    // Today's revenue
+    const todayRevenue = successful
+        .filter((t) => isSameDay(new Date(t.created_at), new Date()))
+        .reduce((acc, t) => acc + Math.abs(t.amount), 0);
+
+    // Weekly chart data (14 days for richer chart)
+    const chartData = Array.from({ length: 14 }).map((_, i) => {
+        const date = subDays(new Date(), 13 - i);
+        const dayTx = successful.filter((t) => isSameDay(new Date(t.created_at), date));
         return {
             name: format(date, "MMM d"),
-            amount: dayTransactions.reduce((acc, t) => acc + Math.abs(t.amount), 0),
-            count: dayTransactions.length,
+            revenue: dayTx.reduce((acc, t) => acc + Math.abs(t.amount), 0),
+            count: dayTx.length,
         };
     });
 
-    const stats = [
-        {
-            label: "Total Users",
-            value: totalUsers.toString(),
-            trend: "+12%",
-            trendUp: true,
-            icon: Users,
-            color: "text-blue-500",
-            bg: "bg-blue-500/10",
-        },
-        {
-            label: "Platform Revenue",
-            value: `₦${totalRevenue.toLocaleString("en-NG", { minimumFractionDigits: 0 })}`,
-            trend: "+5.4%",
-            trendUp: true,
-            icon: Wallet,
-            color: "text-green-500",
-            bg: "bg-green-500/10",
-        },
-        {
-            label: "Success Rate",
-            value: transactions?.length
-                ? `${((successfulTransactions.length / transactions.length) * 100).toFixed(1)}%`
-                : "0%",
-            trend: "-0.5%",
-            trendUp: false,
-            icon: Activity,
-            color: "text-purple-500",
-            bg: "bg-purple-500/10",
-        },
-        {
-            label: "System Alerts",
-            value: failedCount.toString(),
-            trend: "Recent failures",
-            trendUp: false,
-            icon: AlertCircle,
-            color: "text-red-500",
-            bg: "bg-red-500/10",
-        },
-    ];
+    // Service breakdown
+    const serviceBreakdown = transactions?.reduce((acc: any[], t) => {
+        const key = t.type?.replace(/_/g, " ") || "Other";
+        const found = acc.find((a) => a.name === key);
+        if (found) { found.value++; found.revenue += Math.abs(t.amount); }
+        else acc.push({ name: key, value: 1, revenue: Math.abs(t.amount) });
+        return acc;
+    }, []) ?? [];
 
-    if (loadingUsers || loadingTransactions) {
-        return <div className="p-8 text-center text-muted-foreground animate-pulse">Calculating platform metrics...</div>;
+    const topServices = [...serviceBreakdown].sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+
+    // Recent transactions
+    const recentTx = (transactions ?? []).slice(0, 8);
+
+    if (loadingUsers || loadingTx) {
+        return (
+            <div className="min-h-[50vh] flex items-center justify-center">
+                <div className="text-center space-y-3">
+                    <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto" />
+                    <p className="text-sm text-muted-foreground">Loading dashboard data...</p>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div className="space-y-8 pb-12">
-            <div>
-                <h1 className="text-2xl font-bold">Platform Overview</h1>
-                <p className="text-sm text-muted-foreground mt-1">Real-time performance and system health metrics</p>
+        <div className="space-y-8 max-w-screen-2xl">
+            <PageHeader
+                title="Executive Dashboard"
+                description="Real-time platform overview and financial metrics"
+                icon={LayoutDashboard}
+                badge="Live"
+                badgeVariant="default"
+                actions={
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                            <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
+                        </Button>
+                        <Button size="sm">
+                            <Download className="w-3.5 h-3.5 mr-1.5" /> Export
+                        </Button>
+                    </div>
+                }
+            />
+
+            {/* Risk Alert Banner */}
+            {failed.length > 5 && (
+                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+                    <AlertTriangle className="w-5 h-5 shrink-0" />
+                    <p className="text-sm font-medium">
+                        {failed.length} failed transactions detected. <Link to="/admin/transactions" className="underline font-bold">Review now.</Link>
+                    </p>
+                </div>
+            )}
+
+            {/* Primary KPI Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+                <StatCard
+                    label="Total Revenue"
+                    value={`₦${totalRevenue.toLocaleString("en-NG", { minimumFractionDigits: 0 })}`}
+                    sub={`₦${todayRevenue.toLocaleString("en-NG", { minimumFractionDigits: 0 })} today`}
+                    icon={Wallet}
+                    highlight
+                />
+                <StatCard
+                    label="Total Users"
+                    value={totalUsers.toLocaleString()}
+                    sub={`${activeUsers} active now`}
+                    icon={Users}
+                    iconColor="text-blue-500"
+                    iconBg="bg-blue-500/10"
+                />
+                <StatCard
+                    label="Success Rate"
+                    value={`${successRate}%`}
+                    sub={`${successful.length} successful operations`}
+                    icon={Activity}
+                    iconColor="text-emerald-500"
+                    iconBg="bg-emerald-500/10"
+                />
+                <StatCard
+                    label="Floating Balance"
+                    value={`₦${totalWalletBalance.toLocaleString("en-NG", { minimumFractionDigits: 0 })}`}
+                    sub="Sum of all user wallets"
+                    icon={TrendingUp}
+                    iconColor="text-amber-500"
+                    iconBg="bg-amber-500/10"
+                />
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat) => (
-                    <div key={stat.label} className="bg-card p-6 rounded-2xl shadow-card hover:shadow-primary/10 transition-shadow group">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} group-hover:scale-110 transition-transform`}>
-                                <stat.icon className="w-6 h-6" />
-                            </div>
-                            <div className={`flex items-center gap-1 text-xs font-bold ${stat.trendUp ? "text-green-500" : "text-destructive"}`}>
-                                {stat.trendUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                                {stat.trend}
-                            </div>
+            {/* Secondary Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                    { label: "Successful", value: successful.length, color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200", icon: CheckCircle },
+                    { label: "Failed", value: failed.length, color: "text-red-600", bg: "bg-red-50 border-red-200", icon: XCircle },
+                    { label: "Pending", value: pending.length, color: "text-amber-600", bg: "bg-amber-50 border-amber-200", icon: Clock },
+                    { label: "Alerts", value: failed.length, color: "text-red-600", bg: "bg-red-50 border-red-200", icon: AlertTriangle },
+                ].map((s) => (
+                    <div key={s.label} className={`rounded-xl border p-4 ${s.bg}`}>
+                        <div className="flex items-center gap-2 mb-1">
+                            <s.icon className={`w-4 h-4 ${s.color}`} />
+                            <p className={`text-xs font-semibold uppercase tracking-wide ${s.color}`}>{s.label}</p>
                         </div>
-                        <p className="text-muted-foreground text-sm font-medium">{stat.label}</p>
-                        <p className="text-2xl font-bold mt-1">{stat.value}</p>
+                        <p className={`text-2xl font-extrabold ${s.color}`}>{s.value}</p>
                     </div>
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Chart */}
-                <div className="lg:col-span-2 bg-card p-6 rounded-2xl shadow-card">
-                    <div className="flex items-center justify-between mb-8">
-                        <h3 className="font-bold text-lg">Revenue Analysis (7D)</h3>
-                        <Select defaultValue="revenue">
-                            <SelectTrigger className="w-32 bg-secondary border-transparent h-8 text-xs">
-                                <SelectValue placeholder="Metric" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="revenue">Revenue</SelectItem>
-                                <SelectItem value="transactions">Transactions</SelectItem>
-                            </SelectContent>
-                        </Select>
+            {/* Insights Row */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="xl:col-span-2 bg-card border border-border rounded-2xl p-12 flex flex-col items-center justify-center text-center space-y-4">
+                    <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center text-primary/30">
+                        <Activity className="w-8 h-8" />
                     </div>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={chartData}>
-                                <defs>
-                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" opacity={0.1} vertical={false} />
-                                <XAxis
-                                    dataKey="name"
-                                    stroke="currentColor"
-                                    opacity={0.5}
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    dy={10}
-                                />
-                                <YAxis
-                                    stroke="currentColor"
-                                    opacity={0.5}
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tickFormatter={(value) => `₦${(value / 1000).toFixed(0)}k`}
-                                />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))", borderRadius: "8px" }}
-                                    formatter={(value: any) => [`₦${value.toLocaleString()}`, "Revenue"]}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="amount"
-                                    stroke="#8b5cf6"
-                                    strokeWidth={3}
-                                    fillOpacity={1}
-                                    fill="url(#colorRevenue)"
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
+                    <div>
+                        <h3 className="font-bold text-lg">Activity Analytics</h3>
+                        <p className="text-sm text-muted-foreground max-w-sm">Detailed visual insights will become available as your transaction volume grows. Current platform data is shown in the overview cards above.</p>
                     </div>
                 </div>
 
-                {/* Recent Activity List (Mini) */}
-                <div className="bg-card p-6 rounded-2xl shadow-card">
-                    <h3 className="font-bold text-lg mb-6">Recent Activity</h3>
-                    <div className="space-y-6">
-                        {successfulTransactions.slice(0, 5).map((t, i) => (
-                            <div key={t.id} className="flex items-start gap-3">
-                                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
-                                    <Activity className="w-4 h-4 text-primary" />
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="text-sm font-medium truncate">{t.user_name} purchased {t.type.replace("_", " ")}</p>
-                                    <p className="text-[10px] text-muted-foreground">{format(new Date(t.created_at), "h:mm aa, MMM d")}</p>
-                                </div>
-                            </div>
-                        ))}
+                <div className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4">
+                    <div className="w-12 h-12 rounded-full bg-amber-500/5 flex items-center justify-center text-amber-500/30">
+                        <TrendingUp className="w-6 h-6" />
                     </div>
-                    <Button variant="ghost" className="w-full mt-6 text-primary hover:text-primary hover:bg-primary/10 text-xs font-bold uppercase tracking-widest gap-2">
-                        View All Transactions <ArrowRight className="w-4 h-4" />
+                    <div>
+                        <h3 className="font-bold text-base">Service Trends</h3>
+                        <p className="text-xs text-muted-foreground">Monitoring service performance and distribution across all active users.</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Recent Transactions */}
+            <div className="bg-card border border-border rounded-2xl">
+                <div className="flex items-center justify-between p-6 border-b border-border">
+                    <div>
+                        <h3 className="font-bold text-base">Recent Transactions</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">Latest activity across all users</p>
+                    </div>
+                    <Button variant="outline" size="sm" asChild>
+                        <Link to="/admin/transactions">
+                            View All <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                        </Link>
                     </Button>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-border text-left">
+                                <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">User</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Service</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right">Amount</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Status</th>
+                                <th className="px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {recentTx.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground text-sm italic">
+                                        No transactions found.
+                                    </td>
+                                </tr>
+                            ) : recentTx.map((t) => (
+                                <tr key={t.id} className="border-b border-border/50 hover:bg-accent/30 transition-colors">
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
+                                                {t.user_name?.[0]?.toUpperCase() ?? "?"}
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-xs">{t.user_name}</p>
+                                                <p className="text-[10px] text-muted-foreground">@{t.user_handle}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-xs capitalize text-muted-foreground">
+                                        {t.type?.replace(/_/g, " ") ?? "—"}
+                                    </td>
+                                    <td className={`px-6 py-4 text-right text-xs font-bold ${t.amount < 0 ? "text-destructive" : "text-emerald-600"}`}>
+                                        {t.amount < 0 ? "−" : "+"}₦{Math.abs(t.amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <Badge
+                                            className={
+                                                t.status === "success"
+                                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+                                                    : t.status === "failed"
+                                                        ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-50"
+                                                        : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50"
+                                            }
+                                            variant="outline"
+                                        >
+                                            {t.status}
+                                        </Badge>
+                                    </td>
+                                    <td className="px-6 py-4 text-[10px] text-muted-foreground">
+                                        {format(new Date(t.created_at), "MMM d, h:mm a")}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -213,5 +257,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
-

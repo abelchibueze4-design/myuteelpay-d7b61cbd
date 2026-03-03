@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
+import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
+import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 
 const providers = [
   { name: "DSTV", plans: [{ label: "Padi", plan_id: 1, price: 2500 }, { label: "Yanga", plan_id: 2, price: 3500 }, { label: "Confam", plan_id: 3, price: 6200 }, { label: "Compact", plan_id: 4, price: 10500 }, { label: "Premium", plan_id: 5, price: 24500 }] },
@@ -20,7 +22,9 @@ const CableTV = () => {
   const [smartcard, setSmartcard] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [customerName, setCustomerName] = useState("");
+  const [pinOpen, setPinOpen] = useState(false);
   const kvdata = useKvdata();
+  const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
   const selectedProvider = providers.find((p) => p.name === provider);
   const selectedPlan = selectedProvider?.plans.find(p => p.label === plan);
@@ -39,9 +43,18 @@ const CableTV = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlan) return;
+    setPinOpen(true);
+  };
+
+  const handleConfirmPurchase = async (pin: string) => {
+    const isValid = await verifyPin(pin);
+    if (!isValid) return false;
+
+    if (!selectedPlan) return false;
+
     try {
       await kvdata.mutateAsync({
         action: "buy_cable",
@@ -52,8 +65,9 @@ const CableTV = () => {
         amount: selectedPlan.price,
       });
       setShowSuccess(true);
+      return true;
     } catch {
-      // error handled by hook
+      return false;
     }
   };
 
@@ -96,6 +110,13 @@ const CableTV = () => {
           </Button>
         </form>
       </div>
+
+      <PinVerificationDialog
+        open={pinOpen}
+        onOpenChange={setPinOpen}
+        onVerify={handleConfirmPurchase}
+        isLoading={isVerifying || kvdata.isPending}
+      />
 
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="max-w-sm text-center">

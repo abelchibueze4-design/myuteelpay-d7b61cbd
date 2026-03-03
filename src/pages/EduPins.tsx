@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
+import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
+import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 
 const exams = [
   { name: "WAEC", price: 3500 },
@@ -17,14 +19,25 @@ const EduPins = () => {
   const [quantity, setQuantity] = useState("1");
   const [showSuccess, setShowSuccess] = useState(false);
   const [pinData, setPinData] = useState<any>(null);
+  const [pinOpen, setPinOpen] = useState(false);
   const kvdata = useKvdata();
+  const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
   const selected = exams.find((e) => e.name === exam);
   const total = selected ? selected.price * parseInt(quantity) : 0;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selected) return;
+    setPinOpen(true);
+  };
+
+  const handleConfirmPurchase = async (pin: string) => {
+    const isValid = await verifyPin(pin);
+    if (!isValid) return false;
+
+    if (!selected) return false;
+
     try {
       const res = await kvdata.mutateAsync({
         action: "buy_edu_pin",
@@ -34,8 +47,9 @@ const EduPins = () => {
       });
       setPinData(res?.kvdata);
       setShowSuccess(true);
+      return true;
     } catch {
-      // error handled by hook
+      return false;
     }
   };
 
@@ -73,6 +87,13 @@ const EduPins = () => {
           </Button>
         </form>
       </div>
+
+      <PinVerificationDialog
+        open={pinOpen}
+        onOpenChange={setPinOpen}
+        onVerify={handleConfirmPurchase}
+        isLoading={isVerifying || kvdata.isPending}
+      />
 
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="max-w-sm text-center">

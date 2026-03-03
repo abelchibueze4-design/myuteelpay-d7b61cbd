@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
+import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
+import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 
 const discos = ["IKEDC", "EKEDC", "AEDC", "KEDCO", "PHEDC", "BEDC", "IBEDC", "JEDC", "KAEDCO"];
 
@@ -18,7 +20,9 @@ const Electricity = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [token, setToken] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [pinOpen, setPinOpen] = useState(false);
   const kvdata = useKvdata();
+  const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
   const handleValidateMeter = async () => {
     if (!meter || !disco) return;
@@ -35,8 +39,16 @@ const Electricity = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!disco || !meter || !amount) return;
+    setPinOpen(true);
+  };
+
+  const handleConfirmPurchase = async (pin: string) => {
+    const isValid = await verifyPin(pin);
+    if (!isValid) return false;
+
     try {
       const res = await kvdata.mutateAsync({
         action: "buy_electricity",
@@ -47,8 +59,9 @@ const Electricity = () => {
       });
       setToken(res?.kvdata?.token || res?.kvdata?.Token || "");
       setShowSuccess(true);
+      return true;
     } catch {
-      // error handled by hook
+      return false;
     }
   };
 
@@ -64,9 +77,8 @@ const Electricity = () => {
         <div className="flex gap-2 mb-6">
           {(["prepaid", "postpaid"] as const).map((t) => (
             <button key={t} onClick={() => setType(t)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all ${
-                type === t ? "gradient-primary text-primary-foreground shadow-primary" : "bg-card text-muted-foreground"
-              }`}>{t}</button>
+              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all ${type === t ? "gradient-primary text-primary-foreground shadow-primary" : "bg-card text-muted-foreground"
+                }`}>{t}</button>
           ))}
         </div>
 
@@ -95,6 +107,13 @@ const Electricity = () => {
           </Button>
         </form>
       </div>
+
+      <PinVerificationDialog
+        open={pinOpen}
+        onOpenChange={setPinOpen}
+        onVerify={handleConfirmPurchase}
+        isLoading={isVerifying || kvdata.isPending}
+      />
 
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="max-w-sm text-center">

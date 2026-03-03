@@ -2,8 +2,11 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { format } from "date-fns";
-import { Search, Filter, ArrowDownCircle, ArrowUpCircle, X } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import {
+  Search, Filter, ArrowDownLeft, ArrowUpRight, X,
+  Calendar, RotateCcw, FileText, Download, ChevronRight
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardTopBar } from "@/components/DashboardTopBar";
+import { cn } from "@/lib/utils";
 
 const TYPE_LABELS: Record<string, string> = {
   wallet_fund: "Wallet Fund",
@@ -29,15 +33,19 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  success: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  pending: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-  failed: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+  success: "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30",
+  pending: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30",
+  failed: "bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/30",
 };
 
-const TransactionHistory = () => {
+interface TransactionHistoryProps {
+  defaultType?: string;
+}
+
+const TransactionHistory = ({ defaultType = "all" }: TransactionHistoryProps) => {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState(defaultType);
   const [statusFilter, setStatusFilter] = useState("all");
 
   const { data: transactions, isLoading } = useQuery({
@@ -84,118 +92,187 @@ const TransactionHistory = () => {
   };
 
   return (
-    <div className="bg-secondary min-h-full flex flex-col">
+    <div className="bg-[#F8FAFC] dark:bg-[#0F172A] min-h-screen flex flex-col font-sans">
       <DashboardTopBar />
 
-      <div className="gradient-hero px-4 pt-6 pb-12">
-        <div className="container mx-auto">
-          <h1 className="text-xl font-bold text-primary-foreground">Transaction History</h1>
-          <p className="text-primary-foreground/70 text-sm">
-            {transactions?.length ?? 0} total transactions
-          </p>
+      {/* Header Section */}
+      <div className="relative overflow-hidden bg-primary px-4 pt-10 pb-20 sm:pt-12 lg:px-8">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
+
+        <div className="container mx-auto relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-black text-white tracking-tight">Financial Records</h1>
+              <p className="text-white/60 text-sm mt-1 font-medium italic">
+                {transactions?.length ?? 0} total entries documented
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl gap-2 h-10 px-4 font-bold">
+                <Download className="w-4 h-4" /> Export Data
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 -mt-6">
-        {/* Filters */}
-        <div className="bg-card rounded-2xl p-4 shadow-card mb-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by description or reference..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
+      <div className="container mx-auto px-4 -mt-10 relative z-20 pb-12">
+        {/* Modern Filters Card */}
+        <div className="bg-card rounded-3xl p-6 shadow-xl shadow-primary/5 border border-border/50 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4 items-end">
+            <div className="relative flex-1 w-full">
+              <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Search Records</label>
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Reference, service, or description..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-11 h-12 rounded-2xl border-border/60 focus-visible:ring-primary/20 bg-secondary/30 font-medium"
+                />
+              </div>
             </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-full sm:w-[160px]">
-                <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                {Object.entries(TYPE_LABELS).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[140px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="success">Success</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {hasActiveFilters && (
-            <div className="mt-3 flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">
-                {filtered.length} result{filtered.length !== 1 ? "s" : ""}
-              </span>
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 text-xs">
-                <X className="w-3 h-3 mr-1" /> Clear filters
+
+            <div className="w-full lg:w-48">
+              <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Service Type</label>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-3.5 h-3.5 text-primary" />
+                    <SelectValue placeholder="All types" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-none shadow-2xl">
+                  <SelectItem value="all" className="font-bold">All Services</SelectItem>
+                  {Object.entries(TYPE_LABELS).map(([key, label]) => (
+                    <SelectItem key={key} value={key} className="font-medium">{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-full lg:w-40">
+              <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Status</label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-none shadow-2xl">
+                  <SelectItem value="all" className="font-bold">Every Status</SelectItem>
+                  <SelectItem value="success" className="font-medium text-emerald-600">Success Only</SelectItem>
+                  <SelectItem value="pending" className="font-medium text-amber-500">Pending</SelectItem>
+                  <SelectItem value="failed" className="font-medium text-red-500">Failed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                onClick={clearFilters}
+                className="h-12 px-4 rounded-2xl text-red-500 font-bold hover:bg-red-50 transition-all gap-2"
+              >
+                <RotateCcw className="w-4 h-4" /> Reset
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Transaction List */}
-        <div className="bg-card rounded-2xl shadow-card divide-y mb-8">
-          {isLoading ? (
-            Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-between p-4">
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-24" />
+        {/* Transaction Feed */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" /> Transaction Stream
+            </h2>
+            {hasActiveFilters && (
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-secondary px-3 py-1 rounded-full">
+                {filtered.length} Fount
+              </p>
+            )}
+          </div>
+
+          <div className="bg-card rounded-3xl border border-border/50 overflow-hidden shadow-sm divide-y divide-border/30">
+            {isLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-6">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="w-12 h-12 rounded-2xl" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                  <div className="text-right space-y-2">
+                    <Skeleton className="h-4 w-20 ml-auto" />
+                    <Skeleton className="h-3 w-16 ml-auto" />
+                  </div>
                 </div>
-                <div className="space-y-2 text-right">
-                  <Skeleton className="h-4 w-20 ml-auto" />
-                  <Skeleton className="h-3 w-16 ml-auto" />
+              ))
+            ) : filtered.length > 0 ? (
+              filtered.map((t) => {
+                const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus";
+                const isSuccess = t.status === "success";
+
+                return (
+                  <div key={t.id} className="group p-5 sm:p-6 flex items-center justify-between hover:bg-accent/5 transition-all cursor-pointer">
+                    <div className="flex items-center gap-5 min-w-0">
+                      <div className={cn(
+                        "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 shadow-sm",
+                        isCredit
+                          ? "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/30"
+                          : "bg-primary/5 text-primary border-primary/10"
+                      )}>
+                        {isCredit ? <ArrowDownLeft className="w-6 h-6" /> : <ArrowUpRight className="w-6 h-6" />}
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="font-bold text-foreground text-sm sm:text-base tracking-tight truncate group-hover:text-primary transition-colors">
+                          {t.description || TYPE_LABELS[t.type] || t.type}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-[10px] font-bold text-muted-foreground/70 uppercase">Reference: {t.reference?.slice(0, 10)}...</p>
+                          <span className="w-1 h-1 rounded-full bg-border" />
+                          <div className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+                            <Calendar className="w-2.5 h-2.5" />
+                            {format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-6 shrink-0 ml-4">
+                      <div className="text-right hidden sm:block">
+                        <p className={cn("text-lg font-black tracking-tighter", isCredit ? "text-emerald-600" : "text-foreground")}>
+                          {formatAmount(t.amount, t.type)}
+                        </p>
+                        <Badge variant="outline" className={cn("text-[8px] font-black uppercase tracking-[0.2em] h-5 decoration-none border-none", STATUS_COLORS[t.status])}>
+                          {t.status}
+                        </Badge>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-24 text-center space-y-4">
+                <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 border border-border/50">
+                  <RotateCcw className="w-8 h-8 text-muted-foreground/30" />
                 </div>
+                <div>
+                  <h3 className="text-lg font-bold text-foreground tracking-tight">Empty feed detected</h3>
+                  <p className="text-sm text-muted-foreground max-w-xs mx-auto italic mt-1">
+                    {hasActiveFilters ? "We couldn't find any transactions matching your specific filters." : "You haven't made any transactions yet. Your financial journey begins with your first payment!"}
+                  </p>
+                </div>
+                {hasActiveFilters && (
+                  <Button variant="outline" onClick={clearFilters} className="rounded-xl font-bold border-2">
+                    Clear all filters
+                  </Button>
+                )}
               </div>
-            ))
-          ) : filtered.length > 0 ? (
-            filtered.map((t) => {
-              const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus";
-              return (
-                <div key={t.id} className="flex items-center gap-3 p-4">
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${isCredit ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"}`}>
-                    {isCredit ? (
-                      <ArrowDownCircle className="w-5 h-5 text-green-600" />
-                    ) : (
-                      <ArrowUpCircle className="w-5 h-5 text-red-500" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate">
-                      {t.description || TYPE_LABELS[t.type] || t.type}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(t.created_at), "MMM d, yyyy · h:mm a")}
-                    </p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className={`font-bold text-sm ${isCredit ? "text-green-600" : "text-foreground"}`}>
-                      {formatAmount(t.amount, t.type)}
-                    </p>
-                    <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 ${STATUS_COLORS[t.status] || ""}`}>
-                      {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
-                    </Badge>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="p-12 text-center text-sm text-muted-foreground">
-              {hasActiveFilters ? "No transactions match your filters" : "No transactions yet"}
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -118,9 +118,9 @@ export const DangerZone = () => {
           <AlertTriangle className="w-5 h-5 text-destructive" />
         </div>
         <div>
-          <h3 className="font-semibold text-foreground text-lg">Danger Zone</h3>
+          <h3 className="font-semibold text-foreground text-lg">Deactivate/Delete Account</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Irreversible actions - proceed with caution
+            Account management - proceed with caution
           </p>
         </div>
       </div>

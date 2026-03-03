@@ -24,8 +24,7 @@ import BulkSMS from "./pages/BulkSMS";
 import EduPins from "./pages/EduPins";
 import Referral from "./pages/Referral";
 
-// Admin
-import AdminLogin from "./pages/admin/AdminLogin"; // ✅ admin login page
+import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
@@ -34,6 +33,12 @@ import ServiceManagement from "./pages/admin/ServiceManagement";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AuditLogs from "./pages/admin/AuditLogs";
 import AdminSettings from "./pages/admin/AdminSettings";
+import WalletFinance from "./pages/admin/WalletFinance";
+import ReferralCommission from "./pages/admin/ReferralCommission";
+import SecurityMonitoring from "./pages/admin/SecurityMonitoring";
+import Reports from "./pages/admin/Reports";
+import Reconciliation from "./pages/admin/Reconciliation";
+import NotificationCenter from "./pages/admin/NotificationCenter";
 
 import NotFound from "./pages/NotFound";
 
@@ -136,10 +141,18 @@ function App() {
               <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
+              <Route path="/admin/users/kyc" element={<AdminLayout><UserManagement /></AdminLayout>} />
               <Route path="/admin/transactions" element={<AdminLayout><TransactionMonitoring /></AdminLayout>} />
+              <Route path="/admin/finance" element={<AdminLayout><WalletFinance /></AdminLayout>} />
+              <Route path="/admin/finance/refunds" element={<AdminLayout><WalletFinance /></AdminLayout>} />
               <Route path="/admin/services" element={<AdminLayout><ServiceManagement /></AdminLayout>} />
+              <Route path="/admin/referrals" element={<AdminLayout><ReferralCommission /></AdminLayout>} />
               <Route path="/admin/analytics" element={<AdminLayout><AdminAnalytics /></AdminLayout>} />
               <Route path="/admin/logs" element={<AdminLayout><AuditLogs /></AdminLayout>} />
+              <Route path="/admin/security" element={<AdminLayout><SecurityMonitoring /></AdminLayout>} />
+              <Route path="/admin/reports" element={<AdminLayout><Reports /></AdminLayout>} />
+              <Route path="/admin/reconciliation" element={<AdminLayout><Reconciliation /></AdminLayout>} />
+              <Route path="/admin/notifications" element={<AdminLayout><NotificationCenter /></AdminLayout>} />
               <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
 
               {/* 404 */}
