@@ -12,27 +12,63 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const mockReferrals = [
-    { id: "1", referrer: "John Doe", handle: "johndoe", referees: 12, earnings: 3600, paid: 2400, pending: 1200, status: "active" },
-    { id: "2", referrer: "Mary Ade", handle: "marya", referees: 8, earnings: 2400, paid: 2400, pending: 0, status: "paid" },
-    { id: "3", referrer: "Emeka Obi", handle: "emeka", referees: 5, earnings: 1500, paid: 0, pending: 1500, status: "pending" },
-    { id: "4", referrer: "Fatima B.", handle: "fatimab", referees: 20, earnings: 6000, paid: 4000, pending: 2000, status: "active" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const ReferralCommission = () => {
-    const [commissionRate, setCommissionRate] = useState("300");
-    const [editRate, setEditRate] = useState(false);
-    const [newRate, setNewRate] = useState("300");
+    const { data: referrals, isLoading } = useQuery({
+        queryKey: ["adminReferrals"],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from("referred_users")
+                .select(`
+                    id,
+                    reward_amount,
+                    is_claimed,
+                    created_at,
+                    referrer:profiles!referred_users_referrer_id_fkey(full_name, username)
+                `);
+            if (error) throw error;
 
-    const totalEarnings = mockReferrals.reduce((a, r) => a + r.earnings, 0);
-    const totalPaid = mockReferrals.reduce((a, r) => a + r.paid, 0);
-    const totalPending = mockReferrals.reduce((a, r) => a + r.pending, 0);
-    const totalReferees = mockReferrals.reduce((a, r) => a + r.referees, 0);
+            // Group by referrer
+            const grouped = (data || []).reduce((acc: any, curr: any) => {
+                const ref = curr.referrer;
+                const name = ref?.full_name || "Unknown";
+                if (!acc[name]) {
+                    acc[name] = {
+                        name,
+                        handle: ref?.username || "---",
+                        referees: 0,
+                        earnings: 0,
+                        paid: 0,
+                        pending: 0
+                    };
+                }
+                acc[name].referees++;
+                acc[name].earnings += curr.reward_amount || 10;
+                if (curr.is_claimed) acc[name].paid += curr.reward_amount || 10;
+                else acc[name].pending += curr.reward_amount || 10;
+                return acc;
+            }, {});
+
+            return Object.values(grouped);
+        }
+    });
+
+    const [commissionRate, setCommissionRate] = useState("10"); // Match actual default
+    const [editRate, setEditRate] = useState(false);
+    const [newRate, setNewRate] = useState("10");
+
+    const typedReferrals = (referrals as any[]) || [];
+    const totalEarnings = typedReferrals.reduce((a, r) => a + r.earnings, 0);
+    const totalPaid = typedReferrals.reduce((a, r) => a + r.paid, 0);
+    const totalPending = typedReferrals.reduce((a, r) => a + r.pending, 0);
+    const totalReferees = typedReferrals.reduce((a, r) => a + r.referees, 0);
 
     const exportCSV = () => {
         const rows = [
             ["Referrer", "Handle", "Referees", "Total Earnings", "Paid", "Pending", "Status"],
-            ...mockReferrals.map((r) => [r.referrer, r.handle, r.referees, r.earnings, r.paid, r.pending, r.status]),
+            ...typedReferrals.map((r) => [r.name, r.handle, r.referees, r.earnings, r.paid, r.pending, r.pending === 0 ? "PAID" : "PENDING"]),
         ];
         const csv = rows.map((r) => r.join(",")).join("\n");
         const blob = new Blob([csv], { type: "text/csv" });
@@ -103,15 +139,15 @@ const ReferralCommission = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {mockReferrals.map((r) => (
-                            <TableRow key={r.id} className="border-border hover:bg-accent/20 transition-colors">
+                        {typedReferrals.map((r, i) => (
+                            <TableRow key={i} className="border-border hover:bg-accent/20 transition-colors">
                                 <TableCell>
                                     <div className="flex items-center gap-2.5">
                                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                                            {r.referrer[0]}
+                                            {r.name[0]}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold">{r.referrer}</p>
+                                            <p className="text-sm font-semibold">{r.name}</p>
                                             <p className="text-[10px] text-muted-foreground">@{r.handle}</p>
                                         </div>
                                     </div>
@@ -126,11 +162,10 @@ const ReferralCommission = () => {
                                 <TableCell className="text-right text-sm text-amber-600 font-medium">₦{r.pending.toLocaleString()}</TableCell>
                                 <TableCell>
                                     <Badge variant="outline" className={
-                                        r.status === "paid" ? "bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]"
-                                            : r.status === "pending" ? "bg-amber-50 text-amber-700 border-amber-200 text-[10px]"
-                                                : "bg-blue-50 text-blue-700 border-blue-200 text-[10px]"
+                                        r.pending === 0 ? "bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]"
+                                            : "bg-amber-50 text-amber-700 border-amber-200 text-[10px]"
                                     }>
-                                        {r.status}
+                                        {r.pending === 0 ? "PAID" : "PENDING"}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
@@ -138,9 +173,9 @@ const ReferralCommission = () => {
                                         <Button
                                             size="sm"
                                             className="text-xs h-7"
-                                            onClick={() => toast.success(`Approved ₦${r.pending.toLocaleString()} payout for @${r.handle}`)}
+                                            onClick={() => toast.info("User must claim this from their dashboard.")}
                                         >
-                                            Approve ₦{r.pending.toLocaleString()}
+                                            View Details
                                         </Button>
                                     )}
                                 </TableCell>

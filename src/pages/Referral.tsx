@@ -73,8 +73,9 @@ const Referral = () => {
     toast.success("Referral link copied!");
   };
 
-  const totalReferrals = referredUsers?.length ?? 0;
-  const totalEarnings = totalReferrals * 10;
+  const unclaimedUsers = (referredUsers as any[])?.filter(r => !r.is_claimed) || [];
+  const totalReferrals = unclaimedUsers.length;
+  const totalEarnings = unclaimedUsers.reduce((sum, r) => sum + (r.reward_amount || 10), 0);
 
   const handleTransfer = () => {
     if (totalReferrals < 10) {
@@ -201,7 +202,17 @@ const Referral = () => {
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{format(new Date(r.created_at), "MMM d, yyyy")}</p>
                         </div>
                       </div>
-                      <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 font-black text-[10px] uppercase">+ ₦10.00</Badge>
+                      <div className="flex flex-col items-end gap-1">
+                        <Badge className={cn(
+                          "border-none px-3 py-1 font-black text-[10px] uppercase",
+                          r.is_claimed ? "bg-slate-100 text-slate-500" : "bg-emerald-50 text-emerald-600"
+                        )}>
+                          {r.is_claimed ? "Claimed" : "Available"}
+                        </Badge>
+                        <p className="text-xs font-black text-foreground">
+                          + ₦{(r.reward_amount || 10).toLocaleString()}
+                        </p>
+                      </div>
                     </div>
                   ))
                 ) : (
