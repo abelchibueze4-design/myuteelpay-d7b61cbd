@@ -20,6 +20,8 @@ import { useTransactions } from "@/hooks/useTransactions";
 import { useFundWallet } from "@/hooks/useFundWallet";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 const quickActions = [
@@ -41,6 +43,43 @@ const Dashboard = () => {
   const [fundOpen, setFundOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [showBalance, setShowBalance] = useState(true);
+
+  const { data: referredUsers } = useQuery({
+    queryKey: ["referredUsers", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("referred_users")
+        .select("*")
+        .eq("referrer_id", user!.id);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const { data: mySignupReferral } = useQuery({
+    queryKey: ["mySignupReferral", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("referred_users")
+        .select("*")
+        .eq("referred_user_id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const referrerBonus = (referredUsers as any[])
+    ?.filter(r => !r.is_claimed)
+    .reduce((sum, r) => sum + (r.reward_amount || 10), 0) || 0;
+
+  const signupBonus = (mySignupReferral && !(mySignupReferral as any).referee_is_claimed)
+    ? (mySignupReferral as any).referee_reward_amount || 10
+    : 0;
+
+  const bonusBalance = referrerBonus + signupBonus;
 
   const activeTab = searchParams.get("tab");
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
@@ -208,9 +247,16 @@ const Dashboard = () => {
                   </DialogContent>
                 </Dialog>
 
-                <Button variant="outline" className="h-12 px-8 rounded-2xl border-2 border-primary/20 hover:border-primary hover:bg-primary/5 text-primary font-bold text-base transition-all">
-                  Withdrawal
-                </Button>
+                <Link
+                  to="/referral?tab=bonus"
+                  className="h-12 px-6 sm:px-8 rounded-2xl border-2 border-accent/20 hover:border-accent hover:bg-accent/5 text-accent font-bold text-sm sm:text-base flex items-center gap-2 transition-all"
+                >
+                  <Gift className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <div className="flex flex-col items-start leading-tight">
+                    <span className="text-[10px] uppercase opacity-60">Referral Bonus</span>
+                    <span className="font-black">₦{(bonusBalance || 0).toLocaleString()}</span>
+                  </div>
+                </Link>
               </div>
             </div>
           </div>

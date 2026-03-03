@@ -55,16 +55,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error as Error | null };
   };
 
-  const signIn = async (username: string, password: string) => {
-    // Look up email by username using the database function
-    const { data: emailData, error: lookupError } = await supabase.rpc("get_email_by_username", { p_username: username });
+  const signIn = async (identifier: string, password: string) => {
+    let email: string;
 
-    if (lookupError || !emailData) {
-      return { error: new Error("Invalid username or password") };
+    // Check if the identifier is an email
+    const isEmail = identifier.includes("@");
+
+    if (isEmail) {
+      email = identifier;
+    } else {
+      // Look up email by username using the database function
+      const { data: emailData, error: lookupError } = await supabase.rpc("get_email_by_username", {
+        p_username: identifier
+      });
+
+      if (lookupError || !emailData) {
+        return { error: new Error("User not found or invalid username.") };
+      }
+      email = emailData as string;
     }
 
-    const { error } = await supabase.auth.signInWithPassword({ email: emailData as string, password });
-    return { error: error as Error | null };
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      // Check for specific error messages like unconfirmed email
+      if (error.message.toLowerCase().includes("email not confirmed")) {
+        return { error: new Error("Account exists, but your email is not yet verified. Please check your inbox.") };
+      }
+      return { error: new Error("Invalid credentials. Please check your details and try again.") };
+    }
+
+    return { error: null };
   };
 
   // Separate admin login by email

@@ -32,6 +32,7 @@ const Referral = () => {
     enabled: !!user,
   });
 
+  // Fetch people the user referred
   const { data: referredUsers } = useQuery({
     queryKey: ["referredUsers", user?.id],
     queryFn: async () => {
@@ -40,6 +41,21 @@ const Referral = () => {
         .select("*, profiles!referred_users_referred_user_id_fkey(full_name)")
         .eq("referrer_id", user!.id)
         .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  // Fetch the user's own signup referral record (to check referee bonus)
+  const { data: mySignupReferral } = useQuery({
+    queryKey: ["mySignupReferral", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("referred_users")
+        .select("*")
+        .eq("referred_user_id", user!.id)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -75,7 +91,14 @@ const Referral = () => {
 
   const unclaimedUsers = (referredUsers as any[])?.filter(r => !r.is_claimed) || [];
   const totalReferrals = unclaimedUsers.length;
-  const totalEarnings = unclaimedUsers.reduce((sum, r) => sum + (r.reward_amount || 10), 0);
+
+  // Sum of: Unclaimed Referral rewards + Unclaimed Referee (Signup) reward
+  const referrerBonus = unclaimedUsers.reduce((sum, r) => sum + (r.reward_amount || 10), 0);
+  const signupBonus = (mySignupReferral && !(mySignupReferral as any).referee_is_claimed)
+    ? (mySignupReferral as any).referee_reward_amount || 10
+    : 0;
+
+  const totalEarnings = referrerBonus + signupBonus;
 
   const handleTransfer = () => {
     if (totalReferrals < 10) {
@@ -190,31 +213,61 @@ const Referral = () => {
             <div className="space-y-4">
               <h3 className="text-lg font-black text-foreground tracking-tight px-2">Recent Referrals</h3>
               <div className="bg-white dark:bg-slate-800 rounded-3xl border border-border/50 divide-y divide-border/30 shadow-sm overflow-hidden">
-                {referredUsers && referredUsers.length > 0 ? (
-                  referredUsers.map((r) => (
-                    <div key={r.id} className="flex items-center justify-between p-6 group hover:bg-slate-50 dark:hover:bg-slate-700/5 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-sm font-black transition-transform group-hover:scale-110">
-                          {(r.profiles as any)?.full_name?.[0]?.toUpperCase() || "?"}
+                {(mySignupReferral || (referredUsers && referredUsers.length > 0)) ? (
+                  <>
+                    {/* Display user's own signup bonus if they were referred */}
+                    {mySignupReferral && (
+                      <div className="flex items-center justify-between p-6 bg-accent/5 group hover:bg-accent/10 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center text-accent text-sm font-black transition-transform group-hover:scale-110">
+                            ME
+                          </div>
+                          <div>
+                            <p className="font-black text-sm text-foreground">My Signup Bonus</p>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                              {format(new Date((mySignupReferral as any).created_at), "MMM d, yyyy")}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-black text-sm text-foreground">{(r.profiles as any)?.full_name || "New Uteel User"}</p>
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{format(new Date(r.created_at), "MMM d, yyyy")}</p>
+                        <div className="flex flex-col items-end gap-1">
+                          <Badge className={cn(
+                            "border-none px-3 py-1 font-black text-[10px] uppercase",
+                            (mySignupReferral as any).referee_is_claimed ? "bg-slate-100 text-slate-500" : "bg-emerald-50 text-emerald-600"
+                          )}>
+                            {(mySignupReferral as any).referee_is_claimed ? "Claimed" : "Available"}
+                          </Badge>
+                          <p className="text-xs font-black text-foreground">
+                            + ₦{((mySignupReferral as any).referee_reward_amount || 10).toLocaleString()}
+                          </p>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <Badge className={cn(
-                          "border-none px-3 py-1 font-black text-[10px] uppercase",
-                          r.is_claimed ? "bg-slate-100 text-slate-500" : "bg-emerald-50 text-emerald-600"
-                        )}>
-                          {r.is_claimed ? "Claimed" : "Available"}
-                        </Badge>
-                        <p className="text-xs font-black text-foreground">
-                          + ₦{(r.reward_amount || 10).toLocaleString()}
-                        </p>
+                    )}
+
+                    {referredUsers?.map((r: any) => (
+                      <div key={r.id} className="flex items-center justify-between p-6 group hover:bg-slate-50 dark:hover:bg-slate-700/5 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-sm font-black transition-transform group-hover:scale-110">
+                            {(r.profiles as any)?.full_name?.[0]?.toUpperCase() || "?"}
+                          </div>
+                          <div>
+                            <p className="font-black text-sm text-foreground">{(r.profiles as any)?.full_name || "New Uteel User"}</p>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{format(new Date(r.created_at), "MMM d, yyyy")}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <Badge className={cn(
+                            "border-none px-3 py-1 font-black text-[10px] uppercase",
+                            r.is_claimed ? "bg-slate-100 text-slate-500" : "bg-emerald-50 text-emerald-600"
+                          )}>
+                            {r.is_claimed ? "Claimed" : "Available"}
+                          </Badge>
+                          <p className="text-xs font-black text-foreground">
+                            + ₦{(r.reward_amount || 10).toLocaleString()}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </>
                 ) : (
                   <div className="p-20 text-center opacity-40 grayscale flex flex-col items-center gap-4">
                     <Users className="w-12 h-12" />
