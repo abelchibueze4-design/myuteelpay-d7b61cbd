@@ -2,9 +2,12 @@ import { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Smartphone, Tv, Zap, MessageSquare, GraduationCap,
-  Gift, LayoutDashboard, LogOut, History, Wallet, Menu, ShieldCheck
+  Gift, LayoutDashboard, LogOut, History, Wallet, Menu, ShieldCheck,
+  HelpCircle, Settings, CreditCard, Coins, Plus
 } from "lucide-react";
+import { useState } from "react";
 import { NavLink } from "@/components/NavLink";
+import { AccountSettings } from "@/components/AccountSettings";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import {
@@ -23,30 +26,51 @@ import {
 
 const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Fund Wallet", url: "/dashboard?fund=true", icon: Plus },
   { title: "Wallet History", url: "/dashboard?tab=wallet", icon: Wallet },
   { title: "History", url: "/dashboard?tab=history", icon: History },
   { title: "Referral", url: "/referral", icon: Gift },
+  { title: "Bonus to Wallet", url: "/referral?tab=bonus", icon: Coins },
 ];
 
 const serviceItems = [
   { title: "Airtime", url: "/services/airtime", icon: Smartphone },
   { title: "Data", url: "/services/data", icon: Smartphone },
+  { title: "Data Card", url: "/services/data-card", icon: CreditCard },
   { title: "Cable TV", url: "/services/cable", icon: Tv },
   { title: "Electricity", url: "/services/electricity", icon: Zap },
   { title: "Bulk SMS", url: "/services/sms", icon: MessageSquare },
   { title: "Edu Pins", url: "/services/edu", icon: GraduationCap },
 ];
 
+const otherItems = [
+  { title: "Settings", url: "#", icon: Settings, isSettings: true },
+  { title: "FAQs", url: "/faqs", icon: HelpCircle },
+];
+
 function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, setOpenMobile, isMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const { signOut, user } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const handleLogout = async () => {
+    if (isMobile) setOpenMobile(false);
     await signOut();
     navigate("/");
+  };
+
+  const handleItemClick = (item?: any) => {
+    if (item?.isSettings) {
+      setSettingsOpen(true);
+      if (isMobile) setOpenMobile(false);
+      return;
+    }
+    if (isMobile) {
+      setOpenMobile(false);
+    }
   };
 
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
@@ -66,7 +90,7 @@ function AppSidebar() {
             <SidebarMenu>
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild onClick={() => handleItemClick(item)}>
                     <NavLink
                       to={item.url}
                       end
@@ -81,7 +105,7 @@ function AppSidebar() {
               ))}
               {isAdmin && (
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild onClick={() => handleItemClick()}>
                     <NavLink
                       to="/admin"
                       className="hover:bg-sidebar-accent/50 text-primary font-semibold"
@@ -103,7 +127,7 @@ function AppSidebar() {
             <SidebarMenu>
               {serviceItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild onClick={() => handleItemClick()}>
                     <NavLink
                       to={item.url}
                       end
@@ -119,6 +143,31 @@ function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Support & More</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {otherItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild onClick={() => handleItemClick(item)}>
+                    <NavLink
+                      to={item.url}
+                      className="hover:bg-sidebar-accent/50"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                    >
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Account Settings Dialog (Hidden Trigger) */}
+        <AccountSettings open={settingsOpen} onOpenChange={setSettingsOpen} />
 
         {/* Bottom section */}
         <div className="mt-auto p-4 border-t border-sidebar-border">

@@ -20,6 +20,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardTopBar } from "@/components/DashboardTopBar";
 import { cn } from "@/lib/utils";
+import { exportToCSV, printPDF } from "@/utils/exportUtils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 const TYPE_LABELS: Record<string, string> = {
   wallet_fund: "Wallet Fund",
@@ -40,9 +48,10 @@ const STATUS_COLORS: Record<string, string> = {
 
 interface TransactionHistoryProps {
   defaultType?: string;
+  filter?: "all" | "services" | "wallet";
 }
 
-const TransactionHistory = ({ defaultType = "all" }: TransactionHistoryProps) => {
+const TransactionHistory = ({ defaultType = "all", filter = "all" }: TransactionHistoryProps) => {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState(defaultType);
@@ -66,16 +75,27 @@ const TransactionHistory = ({ defaultType = "all" }: TransactionHistoryProps) =>
   const filtered = useMemo(() => {
     if (!transactions) return [];
     return transactions.filter((t) => {
+      // Apply the high-level filter (Services vs Wallet)
+      if (filter === "services") {
+        const isService = t.type !== "wallet_fund" && t.type !== "referral_bonus";
+        if (!isService) return false;
+      } else if (filter === "wallet") {
+        const isWalletAction = t.type === "wallet_fund" || t.type === "referral_bonus";
+        if (!isWalletAction) return false;
+      }
+
       const matchesSearch =
         !search ||
         (t.description?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
         t.reference?.toLowerCase().includes(search.toLowerCase()) ||
         TYPE_LABELS[t.type]?.toLowerCase().includes(search.toLowerCase());
+
       const matchesType = typeFilter === "all" || t.type === typeFilter;
       const matchesStatus = statusFilter === "all" || t.status === statusFilter;
+
       return matchesSearch && matchesType && matchesStatus;
     });
-  }, [transactions, search, typeFilter, statusFilter]);
+  }, [transactions, search, typeFilter, statusFilter, filter]);
 
   const hasActiveFilters = search || typeFilter !== "all" || statusFilter !== "all";
 
@@ -91,6 +111,33 @@ const TransactionHistory = ({ defaultType = "all" }: TransactionHistoryProps) =>
     return `${prefix}₦${Math.abs(amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
   };
 
+  const handleExport = (type: "csv" | "pdf") => {
+    if (!filtered.length) {
+      toast.error("No data available to export");
+      return;
+    }
+
+    const headers = ["Date", "Description", "Reference", "Service", "Amount", "Status"];
+    const data = filtered.map((t) => [
+      format(parseISO(t.created_at), "yyyy-MM-dd HH:mm"),
+      t.description || "N/A",
+      t.reference || "N/A",
+      TYPE_LABELS[t.type] || t.type,
+      formatAmount(t.amount, t.type),
+      t.status
+    ]);
+
+    const reportTitle = filter === "wallet" ? "Wallet Summary" : filter === "services" ? "Service History" : "Transaction History";
+
+    if (type === "csv") {
+      exportToCSV(headers, data, reportTitle.toLowerCase().replace(/ /g, "_"));
+      toast.success(`${reportTitle} exported to CSV`);
+    } else {
+      printPDF(reportTitle, headers, data);
+      toast.success("Print dialog opened for PDF report");
+    }
+  };
+
   return (
     <div className="bg-[#F8FAFC] dark:bg-[#0F172A] min-h-screen flex flex-col font-sans">
       <DashboardTopBar />
@@ -102,15 +149,29 @@ const TransactionHistory = ({ defaultType = "all" }: TransactionHistoryProps) =>
         <div className="container mx-auto relative z-10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-black text-white tracking-tight">Financial Records</h1>
+              <h1 className="text-3xl font-black text-white tracking-tight">
+                {filter === "wallet" ? "Wallet Summary" : filter === "services" ? "Service History" : "Financial Records"}
+              </h1>
               <p className="text-white/60 text-sm mt-1 font-medium italic">
-                {transactions?.length ?? 0} total entries documented
+                {filter === "wallet" ? "All credits, debits, and bonuses" : filter === "services" ? "Track your utility and service payments" : `${transactions?.length ?? 0} total entries documented`}
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl gap-2 h-10 px-4 font-bold">
-                <Download className="w-4 h-4" /> Export Data
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl gap-2 h-10 px-4 font-bold">
+                    <Download className="w-4 h-4" /> Export Data
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="rounded-2xl border-none shadow-2xl min-w-[180px]">
+                  <DropdownMenuItem onClick={() => handleExport("csv")} className="font-bold py-3 cursor-pointer">
+                    Export as CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport("pdf")} className="font-bold py-3 cursor-pointer">
+                    Export as PDF/Print
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

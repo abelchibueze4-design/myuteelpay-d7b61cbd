@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { exportToCSV, printPDF } from "@/utils/exportUtils";
 
 const StatusBadge = ({ status }: { status: string }) => {
     if (status === "success") return <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] gap-1"><CheckCircle2 className="w-3 h-3" /> Success</Badge>;
@@ -52,15 +53,24 @@ const TransactionMonitoring = () => {
         return matchSearch && matchStatus && matchType;
     });
 
-    const exportCSV = () => {
-        const rows = [
-            ["Reference", "User", "Type", "Amount", "Status", "Date"],
-            ...filtered.map((t) => [t.reference, t.user_name, t.type, t.amount, t.status, format(new Date(t.created_at), "yyyy-MM-dd HH:mm")]),
-        ];
-        const csv = rows.map((r) => r.join(",")).join("\n");
-        const blob = new Blob([csv], { type: "text/csv" });
-        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "transactions.csv"; a.click();
-        toast.success("Exported transactions.csv");
+    const handleExport = (type: "csv" | "pdf") => {
+        const headers = ["Reference", "User", "Type", "Amount", "Status", "Date"];
+        const data = filtered.map((t) => [
+            t.reference || t.id.split("-")[0].toUpperCase(),
+            t.user_name,
+            t.type?.replace(/_/g, " "),
+            `N${Math.abs(t.amount).toLocaleString()}`,
+            t.status,
+            format(new Date(t.created_at), "yyyy-MM-dd HH:mm")
+        ]);
+
+        if (type === "csv") {
+            exportToCSV(headers, data, "transactions_report");
+            toast.success("Transactions exported to CSV");
+        } else {
+            printPDF("Transaction Audit Report", headers, data);
+            toast.success("Print dialog opened for PDF report");
+        }
     };
 
     const toggleFlag = (id: string) => {
@@ -82,9 +92,21 @@ const TransactionMonitoring = () => {
                         <Button variant="outline" size="sm" onClick={() => refetch()}>
                             <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
                         </Button>
-                        <Button size="sm" onClick={exportCSV}>
-                            <Download className="w-3.5 h-3.5 mr-1.5" /> Export CSV
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button size="sm">
+                                    <Download className="w-3.5 h-3.5 mr-1.5" /> Export Data
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => handleExport("csv")}>
+                                    Export as CSV
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleExport("pdf")}>
+                                    Export as PDF/Print
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 }
             />

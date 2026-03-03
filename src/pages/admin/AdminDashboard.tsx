@@ -4,6 +4,13 @@ import { StatCard } from "@/components/admin/StatCard";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import {
     AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
@@ -15,6 +22,7 @@ import {
 } from "lucide-react";
 import { format, subDays, isSameDay, startOfDay } from "date-fns";
 import { Link } from "react-router-dom";
+import { exportToCSV, printPDF } from "@/utils/exportUtils";
 
 const CHART_COLORS = ["#7C3AED", "#D4AF37", "#10b981", "#3b82f6", "#ef4444"];
 
@@ -62,6 +70,28 @@ const AdminDashboard = () => {
     // Recent transactions
     const recentTx = (transactions ?? []).slice(0, 8);
 
+    const handleExport = (type: "csv" | "pdf") => {
+        const headers = ["Metric", "Value"];
+        const data = [
+            ["Total Revenue", `N${totalRevenue.toLocaleString()}`],
+            ["Today's Revenue", `N${todayRevenue.toLocaleString()}`],
+            ["Total Users", totalUsers.toLocaleString()],
+            ["Active Users", activeUsers.toLocaleString()],
+            ["Success Rate", `${successRate}%`],
+            ["Successful Txns", successful.length.toString()],
+            ["Failed Txns", failed.length.toString()],
+            ["Floating Balance", `N${totalWalletBalance.toLocaleString()}`]
+        ];
+
+        if (type === "csv") {
+            exportToCSV(headers, data, "admin_dashboard_summary");
+            toast.success("Summary exported to CSV");
+        } else {
+            printPDF("Platform Executive Summary", headers, data);
+            toast.success("PDF summary generated");
+        }
+    };
+
     if (loadingUsers || loadingTx) {
         return (
             <div className="min-h-[50vh] flex items-center justify-center">
@@ -86,9 +116,21 @@ const AdminDashboard = () => {
                         <Button variant="outline" size="sm">
                             <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
                         </Button>
-                        <Button size="sm">
-                            <Download className="w-3.5 h-3.5 mr-1.5" /> Export
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button size="sm">
+                                    <Download className="w-3.5 h-3.5 mr-1.5" /> Export
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => handleExport("csv")}>
+                                    Export Summary (CSV)
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleExport("pdf")}>
+                                    Export Summary (PDF)
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 }
             />

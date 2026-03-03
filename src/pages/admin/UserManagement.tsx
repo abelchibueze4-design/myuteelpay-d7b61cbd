@@ -24,6 +24,7 @@ import {
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { exportToCSV, printPDF } from "@/utils/exportUtils";
 
 const UserManagement = () => {
     const { data: users, isLoading, error, refetch } = useUsers();
@@ -80,16 +81,24 @@ const UserManagement = () => {
         }
     };
 
-    const exportCSV = () => {
-        const rows = [
-            ["Name", "Username", "Phone", "Wallet Balance", "Status", "Joined"],
-            ...(filtered.map((u) => [u.full_name, u.username, u.phone_number, u.wallet_balance, u.status, format(new Date(u.created_at), "yyyy-MM-dd")])),
-        ];
-        const csv = rows.map((r) => r.join(",")).join("\n");
-        const blob = new Blob([csv], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a"); a.href = url; a.download = "users.csv"; a.click();
-        toast.success("Exported users.csv");
+    const handleExport = (type: "csv" | "pdf") => {
+        const headers = ["Name", "Username", "Phone", "Wallet Balance", "Status", "Joined"];
+        const data = filtered.map((u) => [
+            u.full_name,
+            u.username,
+            u.phone_number,
+            `N${(u.wallet_balance ?? 0).toLocaleString()}`,
+            u.status,
+            format(new Date(u.created_at), "yyyy-MM-dd")
+        ]);
+
+        if (type === "csv") {
+            exportToCSV(headers, data, "users_report");
+            toast.success("Users exported to CSV");
+        } else {
+            printPDF("User Management Report", headers, data);
+            toast.success("Print dialog opened for PDF report");
+        }
     };
 
     return (
@@ -101,9 +110,21 @@ const UserManagement = () => {
                 badge={`${(users ?? []).length} total`}
                 actions={
                     <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={exportCSV}>
-                            <Download className="w-3.5 h-3.5 mr-1.5" /> Export CSV
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                    <Download className="w-3.5 h-3.5 mr-1.5" /> Export Data
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => handleExport("csv")}>
+                                    Export as CSV
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleExport("pdf")}>
+                                    Export as PDF/Print
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 }
             />

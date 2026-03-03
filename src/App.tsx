@@ -23,6 +23,8 @@ import Electricity from "./pages/Electricity";
 import BulkSMS from "./pages/BulkSMS";
 import EduPins from "./pages/EduPins";
 import Referral from "./pages/Referral";
+import DataCard from "./pages/DataCard";
+import FAQs from "./pages/FAQs";
 
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -133,6 +135,22 @@ function App() {
                 element={
                   <ProtectedWithLayout>
                     <Referral />
+                  </ProtectedWithLayout>
+                }
+              />
+              <Route
+                path="/services/data-card"
+                element={
+                  <ProtectedWithLayout>
+                    <DataCard />
+                  </ProtectedWithLayout>
+                }
+              />
+              <Route
+                path="/faqs"
+                element={
+                  <ProtectedWithLayout>
+                    <FAQs />
                   </ProtectedWithLayout>
                 }
               />

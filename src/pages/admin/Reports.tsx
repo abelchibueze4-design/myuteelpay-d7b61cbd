@@ -9,6 +9,7 @@ import { useAdminTransactions } from "@/hooks/useAdminTransactions";
 import { useUsers } from "@/hooks/useUsers";
 import { format, startOfMonth, isAfter, startOfWeek } from "date-fns";
 import { toast } from "sonner";
+import { exportToCSV, printPDF } from "@/utils/exportUtils";
 
 const Reports = () => {
     const { data: transactions } = useAdminTransactions();
@@ -69,13 +70,53 @@ const Reports = () => {
         },
     ];
 
-    const handleDownload = (title: string) => {
-        toast.success(`"${title}" download started`);
+    const handleDownload = (report: any) => {
+        if (report.title === "Financial Summary") {
+            const headers = ["ID", "Reference", "User", "Type", "Amount", "Status", "Date"];
+            const data = (transactions ?? []).map(t => [
+                t.id, t.reference || 'N/A', t.user_name, t.type, t.amount, t.status, t.created_at
+            ]);
+            exportToCSV(headers, data, "financial_summary");
+            toast.success("Financial Summary exported");
+        }
+        else if (report.title === "User Activity Report") {
+            const headers = ["ID", "Name", "Username", "Email", "Balance", "Status", "Joined"];
+            const data = (users ?? []).map(u => [
+                u.id, u.full_name, u.username, u.email, u.wallet_balance, u.status, u.created_at
+            ]);
+            exportToCSV(headers, data, "user_activity_report");
+            toast.success("User Activity Report exported");
+        }
+        else if (report.type === "PDF") {
+            toast.info(`Generating ${report.title} PDF...`);
+            // Custom simplified data for other PDF reports
+            const headers = ["Metric", "Value"];
+            const data = [
+                ["Report Type", report.title],
+                ["Generated On", format(new Date(), "PPpp")],
+                ["Success Rate", `${successRate}%`],
+                ["Total Users", (users?.length ?? 0).toString()],
+                ["Total Revenue", `N${totalRevenue.toLocaleString()}`]
+            ];
+            printPDF(report.title, headers, data);
+        }
+        else {
+            toast.info(`Preparing "${report.title}" export...`);
+            setTimeout(() => toast.success(`"${report.title}" download started`), 1000);
+        }
     };
 
     const generatePDF = () => {
-        toast.info("Generating monthly PDF report...");
-        setTimeout(() => toast.success("Monthly PDF report ready for download!"), 2000);
+        toast.info("Generating platform snapshot...");
+        const headers = ["Section", "Stat", "Value"];
+        const data = [
+            ["Financials", "Total Revenue", `N${totalRevenue.toLocaleString()}`],
+            ["Financials", "Monthly Revenue", `N${monthlyRevenue.toLocaleString()}`],
+            ["Platfrom", "Total Users", (users?.length ?? 0).toString()],
+            ["Platfrom", "Success Rate", `${successRate}%`],
+            ["Operations", "Successful Txns", successful.length.toString()],
+        ];
+        printPDF("Monthly Platform Operations Report", headers, data);
     };
 
     return (
@@ -190,7 +231,7 @@ const Reports = () => {
                                 variant="ghost"
                                 size="icon"
                                 className="shrink-0 h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors"
-                                onClick={() => handleDownload(report.title)}
+                                onClick={() => handleDownload(report)}
                             >
                                 <Download className="w-4 h-4" />
                             </Button>

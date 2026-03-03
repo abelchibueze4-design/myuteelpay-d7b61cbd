@@ -59,12 +59,21 @@ const Dashboard = () => {
     }
   }, [searchParams, setSearchParams, verifyPayment]);
 
+  useEffect(() => {
+    if (searchParams.get("fund") === "true") {
+      setFundOpen(true);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("fund");
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   if (activeTab === "history") {
-    return <TransactionHistory />;
+    return <TransactionHistory filter="services" />;
   }
 
   if (activeTab === "wallet") {
-    return <TransactionHistory defaultType="wallet_fund" />;
+    return <TransactionHistory filter="wallet" />;
   }
 
   const handleFund = () => {
@@ -114,8 +123,8 @@ const Dashboard = () => {
       <div className="container mx-auto px-4 -mt-16 sm:-mt-20 relative z-20 space-y-8 pb-12">
         {/* Main Stats Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Wallet Card */}
-          <div className="lg:col-span-2 relative overflow-hidden glass-card rounded-3xl p-8 transition-all hover:shadow-primary/10">
+          {/* Wallet Card - Full Width */}
+          <div className="lg:col-span-3 relative overflow-hidden glass-card rounded-3xl p-8 transition-all hover:shadow-primary/10">
             {/* Background Gradient Detail */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-20 -mt-20 blur-3xl" />
 
@@ -203,60 +212,6 @@ const Dashboard = () => {
                   Withdrawal
                 </Button>
               </div>
-            </div>
-          </div>
-
-          {/* Quick Stats Sidebar */}
-          <div className="bg-card rounded-3xl p-6 border border-border/50 shadow-sm flex flex-col justify-between">
-            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4">Account Health</h3>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-2xl border border-accent/20 bg-accent/5 dark:bg-accent/10">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-accent text-accent-foreground flex items-center justify-center">
-                    <ArrowDownLeft className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-accent tracking-wide">Recent Credit</p>
-                    <p className="font-bold text-sm">
-                      {transactions?.find(t => t.type === 'wallet_fund' && t.status === 'success')
-                        ? formatAmount(transactions.find(t => t.type === 'wallet_fund' && t.status === 'success')!.amount)
-                        : "₦0.00"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-2xl border border-purple-100 bg-purple-50/50 dark:bg-purple-900/10 dark:border-purple-800/30">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500 text-white flex items-center justify-center">
-                    <ArrowUpRight className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-purple-600/70 tracking-wide">Recent Spend</p>
-                    <p className="font-bold text-sm">
-                      {transactions?.find(t => t.type !== 'wallet_fund' && t.status === 'success')
-                        ? formatAmount(transactions.find(t => t.type !== 'wallet_fund' && t.status === 'success')!.amount)
-                        : "₦0.00"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-6 border-t border-border/50">
-              <Link to="/referral" className="flex items-center justify-between group">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-accent/20 text-accent-foreground flex items-center justify-center group-hover:bg-accent/30 transition-colors">
-                    <Gift className="w-5 h-5 text-accent" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold">Refer & Earn Bonus</p>
-                    <p className="text-[10px] text-muted-foreground">Earn ₦10 per invite</p>
-                  </div>
-                </div>
-                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-              </Link>
             </div>
           </div>
         </div>
@@ -405,10 +360,10 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Dynamic Nav spacing for mobile */}
-      <div className="h-20 lg:hidden" />
+        {/* Dynamic Nav spacing for mobile */}
+        <div className="h-20 lg:hidden" />
+      </div>
     </div>
   );
 };

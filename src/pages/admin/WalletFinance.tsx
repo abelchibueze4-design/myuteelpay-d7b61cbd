@@ -15,6 +15,13 @@ import { toast } from "sonner";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
 import { useUsers } from "@/hooks/useUsers";
 import { format } from "date-fns";
+import { exportToCSV, printPDF } from "@/utils/exportUtils";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const WalletFinance = () => {
     const { data: transactions } = useAdminTransactions();
@@ -36,6 +43,25 @@ const WalletFinance = () => {
     const netProfit = totalRevenue - totalDebits;
 
     const recentLedger = (transactions ?? []).slice(0, 10);
+
+    const handleExport = (type: "csv" | "pdf") => {
+        const headers = ["Service", "Margin", "Volume", "Profit"];
+        const data = [
+            ["Airtime", "2.5%", "N1.2M", "N30K"],
+            ["Data Bundles", "5%", "N980K", "N49K"],
+            ["Electricity", "3%", "N2.1M", "N63K"],
+            ["Cable TV", "4%", "N560K", "N22.4K"],
+            ["Education Pins", "6%", "N120K", "N7.2K"],
+        ];
+
+        if (type === "csv") {
+            exportToCSV(headers, data, "service_profit_margins");
+            toast.success("Margins exported to CSV");
+        } else {
+            printPDF("Service Profitability Report", headers, data);
+            toast.success("PDF report generated");
+        }
+    };
 
     return (
         <div className="max-w-screen-2xl space-y-8">
@@ -80,9 +106,21 @@ const WalletFinance = () => {
                         <h3 className="font-bold text-base">Service Profit Margins</h3>
                         <p className="text-xs text-muted-foreground">Estimated margin per service (editable)</p>
                     </div>
-                    <Button variant="outline" size="sm">
-                        <Download className="w-3.5 h-3.5 mr-1.5" /> Export
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                                <Download className="w-3.5 h-3.5 mr-1.5" /> Export
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => handleExport("csv")}>
+                                Export as CSV
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleExport("pdf")}>
+                                Export as PDF/Print
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
                 <div className="space-y-3">
                     {[
