@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { HelpCircle, ChevronRight, ChevronDown, MessageSquare, Mail, Smartphone } from "lucide-react";
+import { HelpCircle, ChevronRight, ChevronDown, MessageSquare, Mail, Smartphone, Gift, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 const faqCategories = [
     { id: "general", label: "General", icon: HelpCircle },
     { id: "wallet", label: "Wallet & Funding", icon: Smartphone },
     { id: "services", label: "Services & Bills", icon: MessageSquare },
-    { id: "referrals", label: "Referrals & Bonuses", icon: smartphone => smartphone }, // placeholder icon fix
+    { id: "referrals", label: "Referrals & Bonuses", icon: Gift },
 ];
 
 const faqs = [
@@ -139,5 +140,4 @@ const FAQs = () => {
     );
 };
 
-import { Badge } from "@/components/ui/badge";
 export default FAQs;

@@ -4,7 +4,7 @@ import {
   Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap,
   Gift, ArrowRight, Mail, MessageCircle, Users, Eye, EyeOff,
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
-  ArrowUpRight, Activity,
+  ArrowUpRight, Activity, HelpCircle,
 } from "lucide-react";
 import TransactionHistory from "@/components/TransactionHistory";
 import { Button } from "@/components/ui/button";
@@ -331,6 +331,13 @@ const Dashboard = () => {
                     </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground group-hover/btn:text-emerald-500 transition-colors" />
                   </a>
+                  <Link to="/faqs" className="flex items-center justify-between p-4 rounded-2xl bg-secondary/50 hover:bg-orange-500/10 group/btn transition-all">
+                    <div className="flex items-center gap-3">
+                      <HelpCircle className="w-4 h-4 text-orange-500" />
+                      <span className="text-xs font-bold text-foreground">Help Guide (FAQs)</span>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover/btn:text-orange-500 transition-colors" />
+                  </Link>
                 </div>
               </div>
             </div>

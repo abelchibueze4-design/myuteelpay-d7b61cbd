@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   Zap, Shield, Clock, Star, Smartphone, Tv, GraduationCap,
-  MessageSquare, CreditCard, Users, ArrowRight, Phone, Gift,
+  MessageSquare, CreditCard, Users, ArrowRight, Phone, Gift, HelpCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -15,6 +15,7 @@ const Navbar = () => (
         <a href="#services" className="hover:text-foreground transition-colors">Services</a>
         <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
         <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
+        <a href="#faqs" className="hover:text-foreground transition-colors">FAQs</a>
       </div>
       <div className="flex items-center gap-3">
         <Link to="/login"><Button variant="ghost" size="sm">Login</Button></Link>
@@ -101,7 +102,7 @@ const AboutUs = () => (
           <span>The Uteelpay Story</span>
         </div>
         <h2 className="text-4xl md:text-5xl lg:text-5xl font-extrabold leading-tight mb-8">
-          We don't just process payments.<br/>We power <span className="text-gradient">possibilities.</span>
+          We don't just process payments.<br />We power <span className="text-gradient">possibilities.</span>
         </h2>
         <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
           <p>
@@ -111,7 +112,7 @@ const AboutUs = () => (
             We started with a radically simple idea: what if paying your everyday bills felt as effortless as sending a text message? What if you never had to worry about service down-times when you needed electricity the most, or running out of data right before an important meeting?
           </p>
           <p>
-            Today, Uteelpay is the silent powerhouse behind thousands of Nigerians' daily routines. From ensuring a student gets their WAEC pin at 2 AM, to keeping households illuminated across the nation, we deliver absolute speed, rock-solid security, and zero hidden charges. 
+            Today, Uteelpay is the silent powerhouse behind thousands of Nigerians' daily routines. From ensuring a student gets their WAEC pin at 2 AM, to keeping households illuminated across the nation, we deliver absolute speed, rock-solid security, and zero hidden charges.
           </p>
           <div className="pt-6 mt-6 border-t border-border/50">
             <p className="font-semibold text-foreground text-xl">
@@ -237,6 +238,42 @@ const PricingSection = () => (
   </section>
 );
 
+/* ---------------- FAQs Section ---------------- */
+const landingFaqs = [
+  { q: "How fast are top-ups?", a: "Most transactions are processed instantly. You'll receive your value in under 5 seconds." },
+  { q: "Is Uteelpay secure?", a: "Yes. We use bank-grade encryption and secure Paystack gateway for all fundings." },
+  { q: "What if I have an issue?", a: "Our support team is available 24/7 via WhatsApp and email to resolve any complaints." },
+];
+
+const FAQSection = () => (
+  <section id="faqs" className="py-20 bg-background relative overflow-hidden">
+    <div className="absolute top-1/2 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -ml-32 -mt-32 invisible md:visible" />
+    <div className="container mx-auto px-4 relative z-10">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+        <p className="text-muted-foreground max-w-md mx-auto italic">Quick answers to common questions about our platform.</p>
+      </div>
+      <div className="max-w-3xl mx-auto space-y-4">
+        {landingFaqs.map((f, i) => (
+          <div key={i} className="bg-card rounded-2xl p-6 border border-border/50 shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="font-black text-foreground mb-2 flex items-center gap-3">
+              <HelpCircle className="w-5 h-5 text-primary shrink-0" /> {f.q}
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed pl-8">{f.a}</p>
+          </div>
+        ))}
+      </div>
+      <div className="text-center mt-12">
+        <Link to="/faqs">
+          <Button variant="ghost" className="rounded-full text-primary font-bold gap-2">
+            View Full Help Center <ArrowRight className="w-4 h-4" />
+          </Button>
+        </Link>
+      </div>
+    </div>
+  </section>
+);
+
 /* ---------------- Trust Bar ---------------- */
 const TrustBar = () => (
   <section className="py-12 border-t">
@@ -254,10 +291,21 @@ const TrustBar = () => (
 
 /* ---------------- Footer ---------------- */
 const Footer = () => (
-  <footer className="border-t py-10 bg-card">
-    <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-      <p className="font-bold text-gradient text-lg mb-2">Uteelpay</p>
-      <p>© 2026 Uteelpay. All rights reserved.</p>
+  <footer className="border-t py-12 bg-card relative overflow-hidden">
+    <div className="container mx-auto px-4 text-center">
+      <p className="font-black text-gradient text-2xl mb-6 tracking-tighter">Uteelpay</p>
+
+      <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm font-bold text-muted-foreground mb-8">
+        <a href="#" className="hover:text-primary transition-colors">Home</a>
+        <a href="#services" className="hover:text-primary transition-colors">Services</a>
+        <a href="#pricing" className="hover:text-primary transition-colors">Pricing</a>
+        <Link to="/faqs" className="hover:text-primary transition-colors">FAQs & Support</Link>
+        <Link to="/signup" className="hover:text-primary transition-colors">Create Account</Link>
+      </div>
+
+      <div className="border-t border-border/30 pt-8">
+        <p className="text-xs text-muted-foreground">© 2026 Uteelpay. Empowering Nigeria's digital lifestyle.</p>
+      </div>
     </div>
   </footer>
 );
@@ -285,6 +333,7 @@ const Landing = () => (
     <HowItWorks />
     <ReferralBanner />
     <PricingSection />
+    <FAQSection />
     <TrustBar />
     <Footer />
     <WhatsAppButton />

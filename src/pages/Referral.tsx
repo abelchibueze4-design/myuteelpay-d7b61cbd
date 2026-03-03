@@ -49,7 +49,7 @@ const Referral = () => {
   const transferMutation = useMutation({
     mutationFn: async (amount: number) => {
       // Note: In production, this should be a managed RPC to handle balance logic securely
-      const { error } = await supabase.rpc('transfer_referral_bonus', {
+      const { error } = await supabase.rpc('transfer_referral_bonus' as any, {
         user_id_param: user!.id,
         amount_to_transfer: amount
       });
@@ -77,12 +77,18 @@ const Referral = () => {
   const totalEarnings = totalReferrals * 10;
 
   const handleTransfer = () => {
-    if (totalEarnings <= 0) {
-      toast.error("You don't have any bonus to transfer");
+    if (totalReferrals < 10) {
+      toast.error("Threshold not reached! You need at least 10 referrals to transfer bonus.");
+      return;
+    }
+    if (totalEarnings < 100) {
+      toast.error("Insufficient bonus balance! Minimum transfer is ₦100.");
       return;
     }
     transferMutation.mutate(totalEarnings);
   };
+
+  const transferThresholdReached = totalReferrals >= 10 && totalEarnings >= 100;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] pb-24">
@@ -125,9 +131,15 @@ const Referral = () => {
               <div className="bg-white dark:bg-slate-800 rounded-[2rem] p-8 border border-border/50 shadow-sm relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform blur-xl" />
                 <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-1">Total Network</p>
-                <p className="text-4xl font-black text-foreground">{totalReferrals}</p>
-                <div className="mt-4 flex items-center gap-2 text-primary font-bold text-[10px] uppercase">
-                  Active Referrals <Check className="w-3 h-3" />
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-black text-foreground">{totalReferrals}</p>
+                  <p className="text-[10px] font-black text-muted-foreground">/ 10 GOAL</p>
+                </div>
+                <div className="mt-4 w-full bg-secondary h-1.5 rounded-full overflow-hidden">
+                  <div
+                    className="bg-primary h-full transition-all duration-1000"
+                    style={{ width: `${Math.min((totalReferrals / 10) * 100, 100)}%` }}
+                  />
                 </div>
               </div>
               <div className="bg-slate-900 rounded-[2rem] p-8 border border-slate-800 shadow-xl relative overflow-hidden group">
@@ -152,6 +164,26 @@ const Referral = () => {
                   <Copy className="w-4 h-4 mr-2" /> Copy
                 </Button>
               </div>
+
+              {referralCode && (
+                <div className="mt-6 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Your Referral Code</p>
+                    <p className="text-2xl font-black text-primary tracking-tighter uppercase">{referralCode}</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(referralCode);
+                      toast.success("Referral code copied!");
+                    }}
+                    className="rounded-xl border-primary/20 text-primary font-bold hover:bg-primary/5"
+                  >
+                    Copy Code
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -183,18 +215,35 @@ const Referral = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-[2.5rem] p-12 text-center text-white relative overflow-hidden shadow-2xl shadow-emerald-200">
+            <div className={cn(
+              "rounded-[2.5rem] p-12 text-center text-white relative overflow-hidden shadow-2xl transition-all duration-500",
+              transferThresholdReached ? "bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-emerald-200" : "bg-gradient-to-br from-slate-600 to-slate-800 shadow-slate-200"
+            )}>
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
               <div className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center mx-auto mb-8 shadow-xl">
                 <Wallet className="w-10 h-10 text-white" />
               </div>
-              <p className="text-emerald-100/70 text-xs font-black uppercase tracking-widest mb-2">Claimable Bonus</p>
-              <h2 className="text-6xl font-black mb-10 tracking-tighter">₦{totalEarnings.toLocaleString()}</h2>
+              <p className="text-white/70 text-xs font-black uppercase tracking-widest mb-2">Claimable Bonus</p>
+              <h2 className="text-6xl font-black mb-4 tracking-tighter">₦{totalEarnings.toLocaleString()}</h2>
+
+              <div className="mb-10 space-y-2">
+                <p className="text-[11px] font-bold opacity-80 decoration-primary text-white/90">
+                  {totalReferrals < 10 ? `Progress: ${totalReferrals}/10 Referrals Required` : "Referral Goal Reached!"}
+                </p>
+                <div className="w-max mx-auto px-4 py-1.5 rounded-full bg-black/20 text-[10px] font-black uppercase tracking-widest">
+                  Threshold: 10 Refs + ₦100 Balance
+                </div>
+              </div>
 
               <Button
                 onClick={handleTransfer}
-                disabled={transferMutation.isPending || totalEarnings <= 0}
-                className="w-full h-16 rounded-2xl bg-white text-emerald-600 hover:bg-white/90 shadow-xl shadow-emerald-800/20 font-black text-lg gap-2"
+                disabled={transferMutation.isPending || !transferThresholdReached}
+                className={cn(
+                  "w-full h-16 rounded-2xl font-black text-lg gap-2 transition-all shadow-xl",
+                  transferThresholdReached
+                    ? "bg-white text-emerald-600 hover:bg-white/90 shadow-emerald-800/20"
+                    : "bg-white/10 text-white/40 cursor-not-allowed shadow-none"
+                )}
               >
                 {transferMutation.isPending ? "Processing..." : "Transfer to Wallet"} <ArrowRight className="w-5 h-5" />
               </Button>

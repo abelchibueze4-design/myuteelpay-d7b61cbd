@@ -146,14 +146,7 @@ function App() {
                   </ProtectedWithLayout>
                 }
               />
-              <Route
-                path="/faqs"
-                element={
-                  <ProtectedWithLayout>
-                    <FAQs />
-                  </ProtectedWithLayout>
-                }
-              />
+              <Route path="/faqs" element={<FAQs />} />
 
               {/* Admin Protected Routes */}
               <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
