@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { StatCard } from "@/components/admin/StatCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -7,183 +8,136 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-    Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog";
-import {
-    Shield, Search, AlertTriangle, Lock, Eye, XCircle,
-    UserX, Activity, Clock, Download,
+    Shield, Search, AlertTriangle, Activity, Clock, Download,
+    Users, CheckCircle2, XCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-
-const mockLogs = [
-    { id: "1", admin: "support@uteelpay.com", action: "Credited wallet ₦5,000", target: "John Doe", timestamp: new Date(), ip: "41.58.100.21", severity: "info" },
-    { id: "2", admin: "admin@uteelpay.com", action: "Deactivated user account", target: "@spamuser", timestamp: new Date(Date.now() - 900000), ip: "41.58.100.22", severity: "warning" },
-    { id: "3", admin: "System", action: "Failed login attempt (×5)", target: "unknown@email.com", timestamp: new Date(Date.now() - 3600000), ip: "197.230.15.4", severity: "critical" },
-    { id: "4", admin: "finance@uteelpay.com", action: "Processed refund ₦12,000", target: "TXN-AB1234", timestamp: new Date(Date.now() - 7200000), ip: "41.58.100.25", severity: "info" },
-    { id: "5", admin: "System", action: "Suspicious bulk transactions", target: "@newuser99", timestamp: new Date(Date.now() - 86400000), ip: "154.120.0.1", severity: "critical" },
-];
-
-const blockedIPs = [
-    { ip: "154.120.0.1", reason: "Brute force attempt", blocked: new Date(Date.now() - 3600000) },
-    { ip: "197.230.15.4", reason: "Suspicious login pattern", blocked: new Date(Date.now() - 7200000) },
-];
+import { useAdminTransactions } from "@/hooks/useAdminTransactions";
+import { useUsers } from "@/hooks/useUsers";
 
 const SecurityMonitoring = () => {
     const [search, setSearch] = useState("");
-    const [blockIPDialog, setBlockIPDialog] = useState(false);
-    const [ipToBlock, setIpToBlock] = useState("");
-    const [blockReason, setBlockReason] = useState("");
-    const [blocked, setBlocked] = useState(blockedIPs);
+    const { data: transactions } = useAdminTransactions();
+    const { data: users } = useUsers();
 
-    const filtered = mockLogs.filter(
-        (l) =>
-            l.admin.toLowerCase().includes(search.toLowerCase()) ||
-            l.action.toLowerCase().includes(search.toLowerCase()) ||
-            l.target.toLowerCase().includes(search.toLowerCase()) ||
-            l.ip.includes(search)
+    const allTx = transactions ?? [];
+    const failedTx = allTx.filter((t) => t.status === "failed");
+    const successfulTx = allTx.filter((t) => t.status === "success");
+    const deactivatedUsers = (users ?? []).filter((u) => u.status === "inactive");
+
+    // Show failed transactions as security events
+    const securityEvents = failedTx.map((t) => ({
+        id: t.id,
+        user: t.user_name || "Unknown",
+        handle: t.user_handle || "unknown",
+        action: `Failed ${t.type?.replace(/_/g, " ")} — ₦${Math.abs(t.amount).toLocaleString()}`,
+        description: t.description || "Transaction failed",
+        timestamp: t.created_at,
+        severity: Math.abs(t.amount) > 5000 ? "high" : "medium",
+    }));
+
+    const filtered = securityEvents.filter(
+        (e) =>
+            e.user.toLowerCase().includes(search.toLowerCase()) ||
+            e.action.toLowerCase().includes(search.toLowerCase())
     );
-
-    const handleBlockIP = () => {
-        if (!ipToBlock) return toast.error("Enter an IP address");
-        setBlocked([...blocked, { ip: ipToBlock, reason: blockReason || "Manual block", blocked: new Date() }]);
-        setBlockIPDialog(false);
-        setIpToBlock("");
-        setBlockReason("");
-        toast.success(`IP ${ipToBlock} blocked`);
-    };
 
     const exportCSV = () => {
         const rows = [
-            ["Admin", "Action", "Target", "IP", "Severity", "Timestamp"],
-            ...filtered.map((l) => [l.admin, l.action, l.target, l.ip, l.severity, format(l.timestamp, "yyyy-MM-dd HH:mm:ss")]),
+            ["User", "Action", "Severity", "Timestamp"],
+            ...filtered.map((e) => [e.user, e.action, e.severity, format(new Date(e.timestamp), "yyyy-MM-dd HH:mm:ss")]),
         ];
         const csv = rows.map((r) => r.join(",")).join("\n");
         const blob = new Blob([csv], { type: "text/csv" });
-        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "audit_logs.csv"; a.click();
-        toast.success("Exported audit_logs.csv");
+        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "security_events.csv"; a.click();
+        toast.success("Exported security_events.csv");
     };
 
     const severityBadge = (sev: string) => {
-        if (sev === "critical") return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-[10px] gap-1"><AlertTriangle className="w-3 h-3" /> Critical</Badge>;
-        if (sev === "warning") return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] gap-1"><AlertTriangle className="w-3 h-3" /> Warning</Badge>;
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] gap-1"><Activity className="w-3 h-3" /> Info</Badge>;
+        if (sev === "high") return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-[10px] gap-1"><AlertTriangle className="w-3 h-3" /> High</Badge>;
+        if (sev === "medium") return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] gap-1"><AlertTriangle className="w-3 h-3" /> Medium</Badge>;
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] gap-1"><Activity className="w-3 h-3" /> Low</Badge>;
     };
 
     return (
         <div className="max-w-screen-2xl space-y-8">
             <PageHeader
                 title="Security & Monitoring"
-                description="Admin audit logs, failed logins, IP blocking, and suspicious activity alerts"
+                description="Failed transactions, deactivated accounts, and platform security overview"
                 icon={Shield}
-                badge="Live"
-                badgeVariant="destructive"
                 actions={
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={exportCSV}>
-                            <Download className="w-3.5 h-3.5 mr-1.5" /> Export Logs
-                        </Button>
-                        <Button size="sm" variant="destructive" onClick={() => setBlockIPDialog(true)}>
-                            <Lock className="w-3.5 h-3.5 mr-1.5" /> Block IP
-                        </Button>
-                    </div>
+                    <Button variant="outline" size="sm" onClick={exportCSV}>
+                        <Download className="w-3.5 h-3.5 mr-1.5" /> Export Events
+                    </Button>
                 }
             />
 
-            {/* Critical Alert Banner */}
-            {filtered.some((l) => l.severity === "critical") && (
-                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
-                    <AlertTriangle className="w-5 h-5 shrink-0 animate-pulse" />
+            {/* Summary Cards */}
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
+                <StatCard label="Total Transactions" value={allTx.length.toLocaleString()} icon={Activity} iconColor="text-blue-500" iconBg="bg-blue-500/10" />
+                <StatCard label="Successful" value={successfulTx.length.toLocaleString()} icon={CheckCircle2} iconColor="text-emerald-500" iconBg="bg-emerald-500/10" />
+                <StatCard label="Failed" value={failedTx.length.toLocaleString()} icon={XCircle} iconColor="text-red-500" iconBg="bg-red-500/10" />
+                <StatCard label="Deactivated Users" value={deactivatedUsers.length.toLocaleString()} icon={Users} iconColor="text-amber-500" iconBg="bg-amber-500/10" />
+            </div>
+
+            {/* Failed Transaction Alert */}
+            {failedTx.length > 0 && (
+                <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-700">
+                    <AlertTriangle className="w-5 h-5 shrink-0" />
                     <p className="text-sm font-medium">
-                        {filtered.filter((l) => l.severity === "critical").length} critical security events detected this session.
+                        {failedTx.length} failed transaction{failedTx.length !== 1 ? "s" : ""} detected. Review below.
                     </p>
                 </div>
             )}
 
-            {/* Blocked IPs */}
-            <div className="bg-card border border-border rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-base flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-destructive" /> Blocked IPs
-                    </h3>
-                    <Badge variant="destructive">{blocked.length} Blocked</Badge>
-                </div>
-                {blocked.length === 0 ? (
-                    <p className="text-sm text-muted-foreground italic">No IPs currently blocked.</p>
-                ) : (
-                    <div className="space-y-2">
-                        {blocked.map((b) => (
-                            <div key={b.ip} className="flex items-center justify-between p-3 rounded-xl border border-red-200 bg-red-50">
-                                <div className="flex items-center gap-3">
-                                    <XCircle className="w-4 h-4 text-red-500" />
-                                    <div>
-                                        <p className="font-mono text-sm font-semibold">{b.ip}</p>
-                                        <p className="text-[10px] text-muted-foreground">{b.reason} · {format(b.blocked, "MMM d, h:mm a")}</p>
-                                    </div>
-                                </div>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-100 text-xs"
-                                    onClick={() => { setBlocked(blocked.filter((x) => x.ip !== b.ip)); toast.success(`${b.ip} unblocked`); }}
-                                >
-                                    Unblock
-                                </Button>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Audit Logs */}
+            {/* Security Events (failed transactions) */}
             <div className="bg-card border border-border rounded-2xl overflow-hidden">
                 <div className="flex items-center justify-between p-6 border-b border-border">
                     <div>
-                        <h3 className="font-bold text-base">Admin Activity Logs</h3>
-                        <p className="text-xs text-muted-foreground mt-0.5">All administrative actions with IP and timestamp</p>
+                        <h3 className="font-bold text-base">Security Events</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">Failed transactions flagged for review</p>
                     </div>
                     <div className="relative w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input className="pl-9 h-8 text-xs" placeholder="Search logs..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                        <Input className="pl-9 h-8 text-xs" placeholder="Search events..." value={search} onChange={(e) => setSearch(e.target.value)} />
                     </div>
                 </div>
                 <Table>
                     <TableHeader>
                         <TableRow className="border-border hover:bg-transparent">
-                            <TableHead className="font-semibold text-xs uppercase">Admin</TableHead>
-                            <TableHead className="font-semibold text-xs uppercase">Action</TableHead>
-                            <TableHead className="font-semibold text-xs uppercase">Target</TableHead>
-                            <TableHead className="font-semibold text-xs uppercase">IP</TableHead>
+                            <TableHead className="font-semibold text-xs uppercase">User</TableHead>
+                            <TableHead className="font-semibold text-xs uppercase">Event</TableHead>
                             <TableHead className="font-semibold text-xs uppercase">Severity</TableHead>
                             <TableHead className="font-semibold text-xs uppercase">Timestamp</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filtered.map((log) => (
-                            <TableRow key={log.id} className={`border-border transition-colors ${log.severity === "critical" ? "bg-red-50/50 hover:bg-red-50" : "hover:bg-accent/20"}`}>
+                        {filtered.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center text-muted-foreground py-12 italic">
+                                    No security events to display.
+                                </TableCell>
+                            </TableRow>
+                        ) : filtered.slice(0, 50).map((event) => (
+                            <TableRow key={event.id} className="border-border hover:bg-accent/20 transition-colors">
                                 <TableCell>
                                     <div className="flex items-center gap-2">
-                                        <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center">
-                                            {log.admin === "System" ? <Activity className="w-3.5 h-3.5 text-muted-foreground" /> : <Eye className="w-3.5 h-3.5 text-muted-foreground" />}
+                                        <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-muted-foreground">
+                                            {event.user[0]?.toUpperCase() ?? "?"}
                                         </div>
-                                        <span className="text-xs font-medium truncate max-w-[100px]">{log.admin}</span>
+                                        <div>
+                                            <span className="text-xs font-medium">{event.user}</span>
+                                            <p className="text-[10px] text-muted-foreground">@{event.handle}</p>
+                                        </div>
                                     </div>
                                 </TableCell>
-                                <TableCell className="text-xs text-muted-foreground max-w-[180px]">{log.action}</TableCell>
-                                <TableCell className="text-xs font-mono text-muted-foreground">{log.target}</TableCell>
-                                <TableCell>
-                                    <div className="flex items-center gap-1.5">
-                                        <p className="font-mono text-[10px] text-muted-foreground">{log.ip}</p>
-                                        {blocked.some((b) => b.ip === log.ip) && (
-                                            <Lock className="w-3 h-3 text-red-500" aria-label="IP is blocked" />
-                                        )}
-                                    </div>
-                                </TableCell>
-                                <TableCell>{severityBadge(log.severity)}</TableCell>
+                                <TableCell className="text-xs text-muted-foreground max-w-[250px]">{event.action}</TableCell>
+                                <TableCell>{severityBadge(event.severity)}</TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                                         <Clock className="w-3 h-3" />
-                                        {format(log.timestamp, "MMM d, h:mm a")}
+                                        {format(new Date(event.timestamp), "MMM d, h:mm a")}
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -191,31 +145,6 @@ const SecurityMonitoring = () => {
                     </TableBody>
                 </Table>
             </div>
-
-            {/* Block IP Dialog */}
-            <Dialog open={blockIPDialog} onOpenChange={setBlockIPDialog}>
-                <DialogContent className="max-w-sm">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Lock className="w-5 h-5 text-destructive" /> Block IP Address
-                        </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 pt-2">
-                        <div>
-                            <label className="text-xs font-semibold text-muted-foreground mb-1 block">IP Address</label>
-                            <Input placeholder="e.g. 192.168.1.100" value={ipToBlock} onChange={(e) => setIpToBlock(e.target.value)} />
-                        </div>
-                        <div>
-                            <label className="text-xs font-semibold text-muted-foreground mb-1 block">Reason</label>
-                            <Input placeholder="Reason for blocking..." value={blockReason} onChange={(e) => setBlockReason(e.target.value)} />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setBlockIPDialog(false)}>Cancel</Button>
-                        <Button variant="destructive" onClick={handleBlockIP}>Block IP</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 };
