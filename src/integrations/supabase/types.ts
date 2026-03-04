@@ -76,9 +76,11 @@ export type Database = {
           address: string | null
           created_at: string
           deactivated_at: string | null
+          email: string | null
           full_name: string
           id: string
           phone_number: string | null
+          role: string | null
           transaction_pin_enabled: boolean
           transaction_pin_hash: string | null
           updated_at: string
@@ -88,9 +90,11 @@ export type Database = {
           address?: string | null
           created_at?: string
           deactivated_at?: string | null
+          email?: string | null
           full_name?: string
           id: string
           phone_number?: string | null
+          role?: string | null
           transaction_pin_enabled?: boolean
           transaction_pin_hash?: string | null
           updated_at?: string
@@ -100,9 +104,11 @@ export type Database = {
           address?: string | null
           created_at?: string
           deactivated_at?: string | null
+          email?: string | null
           full_name?: string
           id?: string
           phone_number?: string | null
+          role?: string | null
           transaction_pin_enabled?: boolean
           transaction_pin_hash?: string | null
           updated_at?: string
@@ -143,20 +149,32 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_claimed: boolean | null
+          referee_is_claimed: boolean | null
+          referee_reward_amount: number | null
           referred_user_id: string
           referrer_id: string
+          reward_amount: number | null
         }
         Insert: {
           created_at?: string
           id?: string
+          is_claimed?: boolean | null
+          referee_is_claimed?: boolean | null
+          referee_reward_amount?: number | null
           referred_user_id: string
           referrer_id: string
+          reward_amount?: number | null
         }
         Update: {
           created_at?: string
           id?: string
+          is_claimed?: boolean | null
+          referee_is_claimed?: boolean | null
+          referee_reward_amount?: number | null
           referred_user_id?: string
           referrer_id?: string
+          reward_amount?: number | null
         }
         Relationships: [
           {
@@ -252,6 +270,11 @@ export type Database = {
     Functions: {
       delete_user_account: { Args: { auth_uid: string }; Returns: undefined }
       get_email_by_username: { Args: { p_username: string }; Returns: string }
+      make_admin: { Args: { user_id: string }; Returns: undefined }
+      transfer_referral_bonus: {
+        Args: { amount_to_transfer: number; user_id_param: string }
+        Returns: undefined
+      }
     }
     Enums: {
       transaction_status: "pending" | "success" | "failed"
