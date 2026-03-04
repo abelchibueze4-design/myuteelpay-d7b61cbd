@@ -148,7 +148,7 @@ const Reconciliation = () => {
     };
 
     const handleRunReconciliation = async () => {
-        await triggerCron.mutateAsync();
+        await triggerCron.mutateAsync(undefined);
     };
 
     return (
