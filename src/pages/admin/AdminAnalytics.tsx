@@ -78,9 +78,9 @@ const AdminAnalytics = () => {
 
             {/* Top Stats */}
             <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
-                <StatCard label="Total Revenue" value={`₦${totalRevenue.toLocaleString("en-NG")}`} icon={Wallet} highlight trend={12} />
-                <StatCard label="Total Users" value={(users?.length ?? 0).toLocaleString()} icon={Users} iconColor="text-blue-500" iconBg="bg-blue-500/10" trend={8} />
-                <StatCard label="Success Rate" value={`${successRate}%`} icon={Activity} iconColor="text-emerald-500" iconBg="bg-emerald-500/10" trend={2} />
+                <StatCard label="Total Revenue" value={`₦${totalRevenue.toLocaleString("en-NG")}`} icon={Wallet} highlight />
+                <StatCard label="Total Users" value={(users?.length ?? 0).toLocaleString()} icon={Users} iconColor="text-blue-500" iconBg="bg-blue-500/10" />
+                <StatCard label="Success Rate" value={`${successRate}%`} icon={Activity} iconColor="text-emerald-500" iconBg="bg-emerald-500/10" />
                 <StatCard label="Avg Revenue/User" value={`₦${users?.length ? Math.round(totalRevenue / users.length).toLocaleString() : 0}`} icon={TrendingUp} iconColor="text-amber-500" iconBg="bg-amber-500/10" />
             </div>
 

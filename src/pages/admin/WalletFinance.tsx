@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import {
     Wallet, ArrowUpCircle, ArrowDownCircle, RefreshCw,
-    AlertTriangle, TrendingUp, Receipt, Edit, Download,
+    AlertTriangle, TrendingUp, Receipt, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
@@ -30,35 +30,44 @@ const WalletFinance = () => {
     const [refundRef, setRefundRef] = useState("");
     const [refundNote, setRefundNote] = useState("");
 
-    const totalRevenue = (transactions ?? [])
-        .filter((t) => t.status === "success" && t.amount > 0)
+    const allTx = transactions ?? [];
+    const successful = allTx.filter((t) => t.status === "success");
+
+    const totalCredits = successful
+        .filter((t) => t.amount > 0)
         .reduce((acc, t) => acc + t.amount, 0);
 
-    const totalDebits = (transactions ?? [])
-        .filter((t) => t.status === "success" && t.amount < 0)
+    const totalDebits = successful
+        .filter((t) => t.amount < 0)
         .reduce((acc, t) => acc + Math.abs(t.amount), 0);
 
     const totalUserBalance = (users ?? []).reduce((acc, u) => acc + (u.wallet_balance ?? 0), 0);
+    const netProfit = totalCredits - totalDebits;
 
-    const netProfit = totalRevenue - totalDebits;
+    // Build service breakdown from real data
+    const serviceBreakdown = successful.reduce((acc: Record<string, { count: number; volume: number }>, t) => {
+        const name = t.type?.replace(/_/g, " ") || "Other";
+        if (!acc[name]) acc[name] = { count: 0, volume: 0 };
+        acc[name].count++;
+        acc[name].volume += Math.abs(t.amount);
+        return acc;
+    }, {});
 
-    const recentLedger = (transactions ?? []).slice(0, 10);
+    const serviceRows = Object.entries(serviceBreakdown).sort(([, a]: [string, any], [, b]: [string, any]) => b.volume - a.volume);
+
+    const recentLedger = allTx.slice(0, 10);
 
     const handleExport = (type: "csv" | "pdf") => {
-        const headers = ["Service", "Margin", "Volume", "Profit"];
-        const data = [
-            ["Airtime", "2.5%", "N1.2M", "N30K"],
-            ["Data Bundles", "5%", "N980K", "N49K"],
-            ["Electricity", "3%", "N2.1M", "N63K"],
-            ["Cable TV", "4%", "N560K", "N22.4K"],
-            ["Education Pins", "6%", "N120K", "N7.2K"],
-        ];
+        const headers = ["Service", "Transactions", "Volume"];
+        const data = serviceRows.map(([name, s]: [string, any]) => [
+            name, s.count.toString(), `N${s.volume.toLocaleString()}`
+        ]);
 
         if (type === "csv") {
-            exportToCSV(headers, data, "service_profit_margins");
-            toast.success("Margins exported to CSV");
+            exportToCSV(headers, data, "service_breakdown");
+            toast.success("Service breakdown exported to CSV");
         } else {
-            printPDF("Service Profitability Report", headers, data);
+            printPDF("Service Volume Report", headers, data);
             toast.success("PDF report generated");
         }
     };
@@ -67,7 +76,7 @@ const WalletFinance = () => {
         <div className="max-w-screen-2xl space-y-8">
             <PageHeader
                 title="Wallet & Finance Control"
-                description="Internal ledger, refunds, profit tracking, and float monitoring"
+                description="Internal ledger, profit tracking, and float monitoring"
                 icon={Wallet}
                 actions={
                     <div className="flex gap-2">
@@ -82,7 +91,7 @@ const WalletFinance = () => {
             />
 
             {/* Float Alert */}
-            {totalUserBalance > totalRevenue * 0.9 && (
+            {totalUserBalance > totalCredits * 0.9 && totalCredits > 0 && (
                 <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-700">
                     <AlertTriangle className="w-5 h-5 shrink-0" />
                     <p className="text-sm font-medium">
@@ -93,18 +102,18 @@ const WalletFinance = () => {
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-                <StatCard label="Total Revenue In" value={`₦${totalRevenue.toLocaleString("en-NG")}`} icon={ArrowUpCircle} iconColor="text-emerald-500" iconBg="bg-emerald-500/10" trend={8} />
+                <StatCard label="Total Credits In" value={`₦${totalCredits.toLocaleString("en-NG")}`} icon={ArrowUpCircle} iconColor="text-emerald-500" iconBg="bg-emerald-500/10" />
                 <StatCard label="Total Debits Out" value={`₦${totalDebits.toLocaleString("en-NG")}`} icon={ArrowDownCircle} iconColor="text-red-500" iconBg="bg-red-500/10" />
-                <StatCard label="Net Profit" value={`₦${netProfit.toLocaleString("en-NG")}`} icon={TrendingUp} highlight trend={5} />
+                <StatCard label="Net Movement" value={`₦${netProfit.toLocaleString("en-NG")}`} icon={TrendingUp} highlight />
                 <StatCard label="Total User Float" value={`₦${totalUserBalance.toLocaleString("en-NG")}`} icon={Wallet} iconColor="text-blue-500" iconBg="bg-blue-500/10" />
             </div>
 
-            {/* Profit Margin per Service */}
+            {/* Service Volume Breakdown */}
             <div className="bg-card border border-border rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h3 className="font-bold text-base">Service Profit Margins</h3>
-                        <p className="text-xs text-muted-foreground">Estimated margin per service (editable)</p>
+                        <h3 className="font-bold text-base">Service Volume Breakdown</h3>
+                        <p className="text-xs text-muted-foreground">Transaction volume per service type</p>
                     </div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -113,33 +122,21 @@ const WalletFinance = () => {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <DropdownMenuItem onClick={() => handleExport("csv")}>
-                                Export as CSV
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleExport("pdf")}>
-                                Export as PDF/Print
-                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleExport("csv")}>Export as CSV</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleExport("pdf")}>Export as PDF/Print</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
                 <div className="space-y-3">
-                    {[
-                        { name: "Airtime", margin: "2.5%", volume: "₦1.2M", profit: "₦30K" },
-                        { name: "Data Bundles", margin: "5%", volume: "₦980K", profit: "₦49K" },
-                        { name: "Electricity", margin: "3%", volume: "₦2.1M", profit: "₦63K" },
-                        { name: "Cable TV", margin: "4%", volume: "₦560K", profit: "₦22.4K" },
-                        { name: "Education Pins", margin: "6%", volume: "₦120K", profit: "₦7.2K" },
-                    ].map((s) => (
-                        <div key={s.name} className="flex items-center gap-4 p-4 rounded-xl border border-border hover:bg-accent/20 transition-colors">
+                    {serviceRows.length === 0 ? (
+                        <p className="text-sm text-muted-foreground italic text-center py-6">No transaction data yet.</p>
+                    ) : serviceRows.map(([name, s]: [string, any]) => (
+                        <div key={name} className="flex items-center gap-4 p-4 rounded-xl border border-border hover:bg-accent/20 transition-colors">
                             <div className="flex-1">
-                                <p className="font-semibold text-sm">{s.name}</p>
-                                <p className="text-xs text-muted-foreground">Volume: {s.volume}</p>
+                                <p className="font-semibold text-sm capitalize">{name}</p>
+                                <p className="text-xs text-muted-foreground">{s.count} transactions</p>
                             </div>
-                            <Badge variant="secondary" className="font-mono">{s.margin}</Badge>
-                            <p className="text-sm font-bold text-emerald-600 w-20 text-right">{s.profit}</p>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                                <Edit className="w-3.5 h-3.5" />
-                            </Button>
+                            <p className="text-sm font-bold text-emerald-600">₦{s.volume.toLocaleString("en-NG")}</p>
                         </div>
                     ))}
                 </div>
@@ -190,7 +187,7 @@ const WalletFinance = () => {
                                         {t.amount >= 0 ? `₦${t.amount.toLocaleString("en-NG")}` : "—"}
                                     </td>
                                     <td className="px-6 py-3">
-                                        <Badge variant="outline" className={t.status === "success" ? "bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]" : "bg-amber-50 text-amber-700 border-amber-200 text-[10px]"}>
+                                        <Badge variant="outline" className={t.status === "success" ? "bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]" : t.status === "failed" ? "bg-red-50 text-red-700 border-red-200 text-[10px]" : "bg-amber-50 text-amber-700 border-amber-200 text-[10px]"}>
                                             {t.status}
                                         </Badge>
                                     </td>

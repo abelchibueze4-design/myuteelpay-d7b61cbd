@@ -7,20 +7,12 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-    ShieldCheck, Search, Filter, User, Clock, FileText,
-    Activity, AlertTriangle, Download,
+    ShieldCheck, Search, User, Clock, FileText, Activity, Download,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-
-const mockLogs = [
-    { id: 1, admin: "Super Admin", action: "Updated wallet balance +₦5,000", target: "John Doe", timestamp: new Date(), ip: "41.58.100.21", type: "financial" },
-    { id: 2, admin: "Support Staff", action: "Deactivated user account", target: "Jane Smith", timestamp: new Date(Date.now() - 900000), ip: "41.58.100.22", type: "user" },
-    { id: 3, admin: "Finance Team", action: "Refunded transaction TXN-T12345 ₦12,000", target: "Bob Wilson", timestamp: new Date(Date.now() - 7200000), ip: "41.58.100.25", type: "financial" },
-    { id: 4, admin: "System", action: "Daily backup completed successfully", target: "Database", timestamp: new Date(Date.now() - 21600000), ip: "Internal", type: "system" },
-    { id: 5, admin: "Service Manager", action: "Added new Data Plan MTN 20GB", target: "Data Service", timestamp: new Date(Date.now() - 86400000), ip: "41.58.100.21", type: "service" },
-    { id: 6, admin: "Super Admin", action: "Blocked IP: 154.120.0.1", target: "Security System", timestamp: new Date(Date.now() - 3600000), ip: "41.58.100.10", type: "security" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const typeBadge: Record<string, JSX.Element> = {
     financial: <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">Financial</Badge>,
@@ -30,23 +22,49 @@ const typeBadge: Record<string, JSX.Element> = {
     security: <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-[10px]">Security</Badge>,
 };
 
+interface AuditLog {
+    id: string;
+    admin_id: string | null;
+    admin_email: string;
+    action: string;
+    target_type: string;
+    target_id: string | null;
+    metadata: Record<string, unknown> | null;
+    created_at: string;
+}
+
 const AuditLogs = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
 
-    const filtered = mockLogs.filter((log) => {
+    const { data: logs, isLoading } = useQuery({
+        queryKey: ["admin_audit_logs"],
+        queryFn: async () => {
+            const { data, error } = await (supabase as any)
+                .from("audit_logs")
+                .select("*")
+                .order("created_at", { ascending: false })
+                .limit(200);
+            if (error) throw error;
+            return (data ?? []) as AuditLog[];
+        },
+    });
+
+    const filtered = (logs ?? []).filter((log) => {
         const matchSearch =
-            log.admin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            log.target.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchType = typeFilter === "all" || log.type === typeFilter;
+            log.admin_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            log.action?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            log.target_type?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchType = typeFilter === "all" || log.target_type === typeFilter;
         return matchSearch && matchType;
     });
 
+    const types = [...new Set((logs ?? []).map((l) => l.target_type).filter(Boolean))];
+
     const exportCSV = () => {
         const rows = [
-            ["Admin", "Action", "Target", "IP", "Type", "Timestamp"],
-            ...filtered.map((l) => [l.admin, l.action, l.target, l.ip, l.type, format(l.timestamp, "yyyy-MM-dd HH:mm:ss")]),
+            ["Admin", "Action", "Target Type", "Target ID", "Timestamp"],
+            ...filtered.map((l) => [l.admin_email, l.action, l.target_type, l.target_id ?? "", format(new Date(l.created_at), "yyyy-MM-dd HH:mm:ss")]),
         ];
         const csv = rows.map((r) => r.join(",")).join("\n");
         const blob = new Blob([csv], { type: "text/csv" });
@@ -74,12 +92,18 @@ const AuditLogs = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input className="pl-9" placeholder="Search admin, action, or target..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </div>
-                <div className="flex gap-2">
-                    {["all", "financial", "user", "security", "service", "system"].map((t) => (
+                <div className="flex gap-2 flex-wrap">
+                    <button
+                        onClick={() => setTypeFilter("all")}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${typeFilter === "all" ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-accent"}`}
+                    >
+                        all
+                    </button>
+                    {types.map((t) => (
                         <button
                             key={t}
                             onClick={() => setTypeFilter(t)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${typeFilter === t ? "bg-primary text-white" : "bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-accent"}`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${typeFilter === t ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground hover:bg-accent"}`}
                         >
                             {t}
                         </button>
@@ -94,45 +118,48 @@ const AuditLogs = () => {
                             <TableHead className="font-semibold text-xs uppercase tracking-wide">Admin</TableHead>
                             <TableHead className="font-semibold text-xs uppercase tracking-wide">Action</TableHead>
                             <TableHead className="font-semibold text-xs uppercase tracking-wide">Target</TableHead>
-                            <TableHead className="font-semibold text-xs uppercase tracking-wide">Type</TableHead>
                             <TableHead className="font-semibold text-xs uppercase tracking-wide">Timestamp</TableHead>
-                            <TableHead className="font-semibold text-xs uppercase tracking-wide">IP</TableHead>
-                            <TableHead className="text-right font-semibold text-xs uppercase tracking-wide">Log</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filtered.length === 0 ? (
+                        {isLoading ? (
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={i} className="animate-pulse border-border">
+                                    {Array.from({ length: 4 }).map((__, j) => (
+                                        <TableCell key={j}><div className="h-6 bg-accent rounded" /></TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : filtered.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center text-muted-foreground py-12 italic">No logs match your search.</TableCell>
+                                <TableCell colSpan={4} className="text-center text-muted-foreground py-12 italic">
+                                    No audit logs recorded yet.
+                                </TableCell>
                             </TableRow>
                         ) : filtered.map((log) => (
                             <TableRow key={log.id} className="border-border hover:bg-accent/20 transition-colors">
                                 <TableCell>
                                     <div className="flex items-center gap-2">
                                         <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                            {log.admin === "System" ? <Activity className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
+                                            <User className="w-3.5 h-3.5" />
                                         </div>
-                                        <span className="text-xs font-medium">{log.admin}</span>
+                                        <span className="text-xs font-medium truncate max-w-[150px]">{log.admin_email}</span>
                                     </div>
                                 </TableCell>
-                                <TableCell className="text-xs text-muted-foreground max-w-[200px]">
+                                <TableCell className="text-xs text-muted-foreground max-w-[250px]">
                                     <p className="line-clamp-2">{log.action}</p>
                                 </TableCell>
-                                <TableCell className="text-xs text-muted-foreground">{log.target}</TableCell>
-                                <TableCell>{typeBadge[log.type] ?? <Badge variant="outline" className="text-[10px]">{log.type}</Badge>}</TableCell>
+                                <TableCell>
+                                    <div className="space-y-0.5">
+                                        {typeBadge[log.target_type] ?? <Badge variant="outline" className="text-[10px]">{log.target_type}</Badge>}
+                                        {log.target_id && <p className="text-[10px] text-muted-foreground font-mono truncate max-w-[120px]">{log.target_id}</p>}
+                                    </div>
+                                </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                                         <Clock className="w-3 h-3" />
-                                        {format(log.timestamp, "MMM d, h:mm a")}
+                                        {format(new Date(log.created_at), "MMM d, h:mm a")}
                                     </div>
-                                </TableCell>
-                                <TableCell>
-                                    <code className="text-[10px] font-mono text-muted-foreground">{log.ip}</code>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => toast.info(`Log ${log.id} details`)}>
-                                        <FileText className="w-4 h-4" />
-                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}

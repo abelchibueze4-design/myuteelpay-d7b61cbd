@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
 import { useUsers } from "@/hooks/useUsers";
-import { format, startOfMonth, isAfter, startOfWeek } from "date-fns";
+import { format, startOfMonth, isAfter } from "date-fns";
 import { toast } from "sonner";
 import { exportToCSV, printPDF } from "@/utils/exportUtils";
 
@@ -15,65 +15,55 @@ const Reports = () => {
     const { data: transactions } = useAdminTransactions();
     const { data: users } = useUsers();
 
-    const successful = (transactions ?? []).filter((t) => t.status === "success");
+    const allTx = transactions ?? [];
+    const successful = allTx.filter((t) => t.status === "success");
     const thisMonthStart = startOfMonth(new Date());
     const monthlySuccessful = successful.filter((t) => isAfter(new Date(t.created_at), thisMonthStart));
 
     const totalRevenue = successful.reduce((a, t) => a + Math.abs(t.amount), 0);
     const monthlyRevenue = monthlySuccessful.reduce((a, t) => a + Math.abs(t.amount), 0);
-    const successRate = (transactions ?? []).length
-        ? ((successful.length / (transactions ?? []).length) * 100).toFixed(1)
+    const successRate = allTx.length
+        ? ((successful.length / allTx.length) * 100).toFixed(1)
         : "0";
+
+    // Build service revenue from real transaction data
+    const serviceRevenue = allTx.reduce((acc: Record<string, { txns: number; volume: number }>, t) => {
+        if (t.status !== "success") return acc;
+        const name = t.type?.replace(/_/g, " ") || "Other";
+        if (!acc[name]) acc[name] = { txns: 0, volume: 0 };
+        acc[name].txns++;
+        acc[name].volume += Math.abs(t.amount);
+        return acc;
+    }, {});
+
+    const serviceRows = Object.entries(serviceRevenue)
+        .sort(([, a]: [string, any], [, b]: [string, any]) => b.volume - a.volume);
 
     const reportItems = [
         {
             title: "Financial Summary",
-            description: "Complete income, expenses, and net profit for all time",
+            description: "Complete income and transaction breakdown for all time",
             type: "CSV",
             date: format(new Date(), "MMM d, yyyy"),
-            size: "~12KB",
         },
         {
             title: "Monthly Revenue Report",
             description: "Detailed breakdown of this month's transactions by service",
             type: "CSV",
             date: format(startOfMonth(new Date()), "MMMM yyyy"),
-            size: "~8KB",
-        },
-        {
-            title: "Profit Breakdown",
-            description: "Profit margins per service with provider costs included",
-            type: "PDF",
-            date: format(new Date(), "MMM d, yyyy"),
-            size: "~3MB",
         },
         {
             title: "User Activity Report",
-            description: "User sign-ups, active sessions, KYC statuses",
+            description: "User sign-ups, active status, and wallet balances",
             type: "CSV",
             date: format(new Date(), "MMM d, yyyy"),
-            size: "~5KB",
-        },
-        {
-            title: "Fraud & Security Report",
-            description: "Flagged transactions, blocked IPs, failed logins",
-            type: "PDF",
-            date: format(new Date(), "MMM d, yyyy"),
-            size: "~2MB",
-        },
-        {
-            title: "Tax-Ready Export",
-            description: "VAT-applicable transactions formatted for tax filing",
-            type: "XLSX",
-            date: format(new Date(), "MMM yyyy"),
-            size: "~15KB",
         },
     ];
 
     const handleDownload = (report: any) => {
         if (report.title === "Financial Summary") {
             const headers = ["ID", "Reference", "User", "Type", "Amount", "Status", "Date"];
-            const data = (transactions ?? []).map(t => [
+            const data = allTx.map(t => [
                 t.id, t.reference || 'N/A', t.user_name, t.type, t.amount, t.status, t.created_at
             ]);
             exportToCSV(headers, data, "financial_summary");
@@ -87,33 +77,23 @@ const Reports = () => {
             exportToCSV(headers, data, "user_activity_report");
             toast.success("User Activity Report exported");
         }
-        else if (report.type === "PDF") {
-            toast.info(`Generating ${report.title} PDF...`);
-            // Custom simplified data for other PDF reports
-            const headers = ["Metric", "Value"];
-            const data = [
-                ["Report Type", report.title],
-                ["Generated On", format(new Date(), "PPpp")],
-                ["Success Rate", `${successRate}%`],
-                ["Total Users", (users?.length ?? 0).toString()],
-                ["Total Revenue", `N${totalRevenue.toLocaleString()}`]
-            ];
-            printPDF(report.title, headers, data);
-        }
-        else {
-            toast.info(`Preparing "${report.title}" export...`);
-            setTimeout(() => toast.success(`"${report.title}" download started`), 1000);
+        else if (report.title === "Monthly Revenue Report") {
+            const headers = ["Service", "Transactions", "Volume"];
+            const data = serviceRows.map(([name, s]: [string, any]) => [
+                name, s.txns.toString(), `N${s.volume.toLocaleString()}`
+            ]);
+            exportToCSV(headers, data, "monthly_revenue_report");
+            toast.success("Monthly Revenue Report exported");
         }
     };
 
     const generatePDF = () => {
-        toast.info("Generating platform snapshot...");
         const headers = ["Section", "Stat", "Value"];
         const data = [
             ["Financials", "Total Revenue", `N${totalRevenue.toLocaleString()}`],
             ["Financials", "Monthly Revenue", `N${monthlyRevenue.toLocaleString()}`],
-            ["Platfrom", "Total Users", (users?.length ?? 0).toString()],
-            ["Platfrom", "Success Rate", `${successRate}%`],
+            ["Platform", "Total Users", (users?.length ?? 0).toString()],
+            ["Platform", "Success Rate", `${successRate}%`],
             ["Operations", "Successful Txns", successful.length.toString()],
         ];
         printPDF("Monthly Platform Operations Report", headers, data);
@@ -123,7 +103,7 @@ const Reports = () => {
         <div className="max-w-screen-2xl space-y-8">
             <PageHeader
                 title="Reports"
-                description="Financial summaries, profit breakdowns, and tax-ready data exports"
+                description="Financial summaries and data exports based on real platform activity"
                 icon={FileText}
                 actions={
                     <Button size="sm" onClick={generatePDF}>
@@ -139,7 +119,6 @@ const Reports = () => {
                     value={`₦${totalRevenue.toLocaleString("en-NG")}`}
                     icon={Wallet}
                     highlight
-                    trend={12}
                 />
                 <StatCard
                     label="This Month Revenue"
@@ -154,7 +133,6 @@ const Reports = () => {
                     icon={CheckCircle2}
                     iconColor="text-emerald-500"
                     iconBg="bg-emerald-500/10"
-                    trend={2}
                 />
                 <StatCard
                     label="Total Users"
@@ -162,38 +140,33 @@ const Reports = () => {
                     icon={TrendingUp}
                     iconColor="text-amber-500"
                     iconBg="bg-amber-500/10"
-                    trend={8}
                 />
             </div>
 
-            {/* Service Revenue Snapshot */}
+            {/* Service Revenue Snapshot — from real data */}
             <div className="bg-card border border-border rounded-2xl p-6">
-                <h3 className="font-bold text-base mb-4">Revenue Snapshot by Service (This Month)</h3>
+                <h3 className="font-bold text-base mb-4">Revenue Snapshot by Service</h3>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b border-border text-left">
                                 <th className="py-2 pr-4 text-xs font-semibold text-muted-foreground uppercase">Service</th>
                                 <th className="py-2 pr-4 text-xs font-semibold text-muted-foreground uppercase text-right">Transactions</th>
-                                <th className="py-2 pr-4 text-xs font-semibold text-muted-foreground uppercase text-right">Volume</th>
-                                <th className="py-2 text-xs font-semibold text-muted-foreground uppercase text-right">Profit (est.)</th>
+                                <th className="py-2 text-xs font-semibold text-muted-foreground uppercase text-right">Volume</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {[
-                                { name: "Airtime", txns: 340, volume: 1200000, margin: 2.5 },
-                                { name: "Data Bundles", txns: 280, volume: 980000, margin: 5 },
-                                { name: "Electricity", txns: 210, volume: 2100000, margin: 3 },
-                                { name: "Cable TV", txns: 95, volume: 560000, margin: 4 },
-                                { name: "Edu Pins", txns: 42, volume: 120000, margin: 6 },
-                            ].map((s) => (
-                                <tr key={s.name} className="border-b border-border/50 hover:bg-accent/20 transition-colors">
-                                    <td className="py-3 pr-4 font-medium text-sm">{s.name}</td>
-                                    <td className="py-3 pr-4 text-right text-muted-foreground text-sm">{s.txns}</td>
-                                    <td className="py-3 pr-4 text-right font-semibold text-sm">₦{s.volume.toLocaleString("en-NG")}</td>
-                                    <td className="py-3 text-right text-emerald-600 font-bold text-sm">
-                                        ₦{((s.volume * s.margin) / 100).toLocaleString("en-NG")}
+                            {serviceRows.length === 0 ? (
+                                <tr>
+                                    <td colSpan={3} className="py-8 text-center text-muted-foreground text-sm italic">
+                                        No transaction data yet.
                                     </td>
+                                </tr>
+                            ) : serviceRows.map(([name, s]: [string, any]) => (
+                                <tr key={name} className="border-b border-border/50 hover:bg-accent/20 transition-colors">
+                                    <td className="py-3 pr-4 font-medium text-sm capitalize">{name}</td>
+                                    <td className="py-3 pr-4 text-right text-muted-foreground text-sm">{s.txns}</td>
+                                    <td className="py-3 text-right font-semibold text-sm">₦{s.volume.toLocaleString("en-NG")}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -205,7 +178,7 @@ const Reports = () => {
             <div className="bg-card border border-border rounded-2xl p-6">
                 <div className="mb-6">
                     <h3 className="font-bold text-base">Available Reports</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">Pre-generated and on-demand report exports</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">On-demand report exports from real data</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {reportItems.map((report) => (
@@ -223,7 +196,6 @@ const Reports = () => {
                                     <div className="flex items-center gap-3 mt-2">
                                         <Badge variant="secondary" className="text-[9px] px-1.5">{report.type}</Badge>
                                         <span className="text-[10px] text-muted-foreground">{report.date}</span>
-                                        <span className="text-[10px] text-muted-foreground">{report.size}</span>
                                     </div>
                                 </div>
                             </div>
