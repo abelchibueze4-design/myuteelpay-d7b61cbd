@@ -151,9 +151,8 @@ const SidebarNavItem = ({
 };
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
-    const { isAdmin, loading } = useAdmin();
+    const { isAdmin, loading, role } = useAdmin();
     const { signOut, user } = useAuth();
-    const { role } = useAdmin();
     const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
