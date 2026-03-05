@@ -370,7 +370,7 @@ const Dashboard = () => {
                     </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground group-hover/btn:text-primary transition-colors" />
                   </a>
-                  <a href="https://wa.me/2347036006762" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 rounded-2xl bg-secondary/50 hover:bg-emerald-500/10 group/btn transition-all">
+                  <a href="https://wa.me/2349022334478" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 rounded-2xl bg-secondary/50 hover:bg-emerald-500/10 group/btn transition-all">
                     <div className="flex items-center gap-3">
                       <MessageCircle className="w-4 h-4 text-emerald-500" />
                       <span className="text-xs font-bold text-foreground">WhatsApp Hub</span>
@@ -402,7 +402,7 @@ const Dashboard = () => {
                 <p className="text-white/80 text-xs font-medium mb-8">Don't miss out! Get daily promo codes and news first.</p>
 
                 <a
-                  href="https://whatsapp.com/channel/uteelpay"
+                  href="https://whatsapp.com/channel/0029Vb77x43It5rpyEOK2N1y"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center w-full h-12 rounded-2xl bg-white text-accent-foreground text-sm font-black hover:bg-white/90 transition-all shadow-md gap-2"
