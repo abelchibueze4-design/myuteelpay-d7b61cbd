@@ -1,35 +1,57 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Smartphone, Check } from "lucide-react";
+import { Smartphone, Check, Loader2, ChevronRight, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useKvdata } from "@/hooks/useKvdata";
+import { useKvdata, useKvdataQuery } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
+import { DataPrices } from "@/components/services/DataPrices";
+import { Badge } from "@/components/ui/badge";
 
-const networks = ["MTN", "Glo", "Airtel", "9mobile"];
-const dataPlans = [
-    { label: "1GB - 30 days", plan_id: 1, price: 500 },
-    { label: "2GB - 30 days", plan_id: 2, price: 1000 },
-    { label: "5GB - 30 days", plan_id: 3, price: 2000 },
-    { label: "10GB - 30 days", plan_id: 4, price: 3500 },
+const networks = [
+    { name: "MTN", id: 1 },
+    { name: "Glo", id: 2 },
+    { name: "Airtel", id: 3 },
+    { name: "9mobile", id: 4 }
 ];
 
 const Data = () => {
     const navigate = useNavigate();
     const [network, setNetwork] = useState("");
+    const [category, setCategory] = useState("");
     const [phone, setPhone] = useState("");
-    const [plan, setPlan] = useState("");
+    const [planId, setPlanId] = useState("");
+    const [selectedPlan, setSelectedPlan] = useState<any>(null);
     const [showSuccess, setShowSuccess] = useState(false);
     const [pinOpen, setPinOpen] = useState(false);
+    
     const kvdata = useKvdata();
+    const { data: apiPlans } = useKvdataQuery({ action: "get_data_plans" });
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+
+    const selectedNetwork = networks.find(n => n.name === network);
+    
+    const plansArray = useMemo(() => {
+        if (!apiPlans) return [];
+        return Array.isArray(apiPlans) ? apiPlans : (apiPlans.plans || []);
+    }, [apiPlans]);
+
+    const categories = useMemo(() => {
+        if (!plansArray || !selectedNetwork) return [];
+        const types = new Set(
+            plansArray
+                .filter((p: any) => p.network === selectedNetwork.id)
+                .map((p: any) => p.plan_type || "Standard")
+        );
+        return Array.from(types);
+    }, [plansArray, selectedNetwork]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!network || !phone || !plan) return;
+        if (!network || !phone || !planId) return;
         setPinOpen(true);
     };
 
@@ -37,7 +59,6 @@ const Data = () => {
         const isValid = await verifyPin(pin);
         if (!isValid) return false;
 
-        const selectedPlan = dataPlans.find((p) => String(p.plan_id) === plan);
         if (!selectedPlan) return false;
 
         try {
@@ -65,30 +86,113 @@ const Data = () => {
             </div>
 
             <div className="container mx-auto px-4 max-w-2xl">
-                <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Network</label>
-                        <Select value={network} onValueChange={setNetwork}>
-                            <SelectTrigger><SelectValue placeholder="Select network" /></SelectTrigger>
-                            <SelectContent>{networks.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Phone Number</label>
-                        <div className="relative">
-                            <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="080X XXX XXXX" className="pl-10" type="tel" required />
+                <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-6">
+                    {/* Network Selection */}
+                    <div className="space-y-3">
+                        <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Select Network</label>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {networks.map((n) => (
+                                <button
+                                    key={n.name}
+                                    type="button"
+                                    onClick={() => { setNetwork(n.name); setCategory(""); setPlanId(""); setSelectedPlan(null); }}
+                                    className={`py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                                        network === n.name 
+                                        ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
+                                        : "border-border/50 hover:border-primary/30"
+                                    }`}
+                                >
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black ${
+                                        n.name === "MTN" ? "bg-yellow-100 text-yellow-700" :
+                                        n.name === "Glo" ? "bg-green-100 text-green-700" :
+                                        n.name === "Airtel" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
+                                    }`}>
+                                        {n.name[0]}
+                                    </div>
+                                    <span className="text-[10px] font-bold uppercase">{n.name}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Data Plan</label>
-                        <Select value={plan} onValueChange={setPlan}>
-                            <SelectTrigger><SelectValue placeholder="Select plan" /></SelectTrigger>
-                            <SelectContent>{dataPlans.map((p) => <SelectItem key={p.plan_id} value={String(p.plan_id)}>{p.label} — ₦{p.price.toLocaleString()}</SelectItem>)}</SelectContent>
-                        </Select>
+
+                    {/* Category Selection */}
+                    {network && categories.length > 0 && (
+                        <div className="space-y-3">
+                            <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Data Category</label>
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => { setCategory(""); setPlanId(""); setSelectedPlan(null); }}
+                                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all border-2 ${
+                                        category === "" 
+                                        ? "bg-primary text-primary-foreground border-primary" 
+                                        : "bg-secondary text-muted-foreground border-transparent hover:border-primary/30"
+                                    }`}
+                                >
+                                    All
+                                </button>
+                                {categories.map((c) => (
+                                    <button
+                                        key={String(c)}
+                                        type="button"
+                                        onClick={() => { setCategory(String(c)); setPlanId(""); setSelectedPlan(null); }}
+                                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all border-2 ${
+                                            category === String(c) 
+                                            ? "bg-primary text-primary-foreground border-primary" 
+                                            : "bg-secondary text-muted-foreground border-transparent hover:border-primary/30"
+                                        }`}
+                                    >
+                                        {String(c)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Phone Number */}
+                    <div className="space-y-3">
+                        <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Phone Number</label>
+                        <div className="relative">
+                            <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input 
+                                value={phone} 
+                                onChange={(e) => setPhone(e.target.value)} 
+                                placeholder="080X XXX XXXX" 
+                                className="h-14 rounded-2xl border-2 border-border/50 pl-12 focus-visible:ring-primary/20 bg-secondary/20 font-bold" 
+                                type="tel" 
+                                required 
+                            />
+                        </div>
                     </div>
-                    <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
-                        {kvdata.isPending ? "Processing..." : "Buy Data"}
+
+                    {/* Plan Selection */}
+                    {network && (
+                        <div className="space-y-3">
+                            <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Select Plan</label>
+                            <DataPrices 
+                                networkId={selectedNetwork!.id} 
+                                category={category} 
+                                selectedPlanId={planId}
+                                onSelect={(plan) => {
+                                    setPlanId(plan.plan_id);
+                                    setSelectedPlan(plan);
+                                }} 
+                            />
+                        </div>
+                    )}
+
+                    <Button 
+                        type="submit" 
+                        variant="hero" 
+                        className="w-full h-14 rounded-2xl text-lg font-black shadow-lg shadow-primary/20" 
+                        disabled={kvdata.isPending || !planId}
+                    >
+                        {kvdata.isPending ? (
+                            <div className="flex items-center gap-2">
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Processing...
+                            </div>
+                        ) : "Buy Data"}
                     </Button>
                 </form>
             </div>

@@ -1,15 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Zap, Check } from "lucide-react";
+import { Zap, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useKvdata } from "@/hooks/useKvdata";
+import { useKvdata, useKvdataQuery } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
-
-const discos = ["IKEDC", "EKEDC", "AEDC", "KEDCO", "PHEDC", "BEDC", "IBEDC", "JEDC", "KAEDCO"];
 
 const Electricity = () => {
   const navigate = useNavigate();
@@ -21,8 +19,19 @@ const Electricity = () => {
   const [token, setToken] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [pinOpen, setPinOpen] = useState(false);
+  
   const kvdata = useKvdata();
+  const { data: apiDiscos, isLoading: isLoadingDiscos } = useKvdataQuery({ action: "get_electricity_discos" });
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+
+  const discos = useMemo(() => {
+    if (!apiDiscos) return [];
+    const discosArray = Array.isArray(apiDiscos) ? apiDiscos : (apiDiscos.discos || []);
+    return discosArray.map((d: any) => ({
+        name: d.disco_name || d.name,
+        id: d.id || d.disco_id
+    }));
+  }, [apiDiscos]);
 
   const handleValidateMeter = async () => {
     if (!meter || !disco) return;
@@ -85,9 +94,21 @@ const Electricity = () => {
         <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Distribution Company</label>
-            <Select value={disco} onValueChange={setDisco}>
-              <SelectTrigger><SelectValue placeholder="Select disco" /></SelectTrigger>
-              <SelectContent>{discos.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+            <Select value={disco} onValueChange={(val) => { setDisco(val); setCustomerName(""); }} disabled={isLoadingDiscos}>
+              <SelectTrigger>
+                <SelectValue placeholder={isLoadingDiscos ? "Loading discos..." : "Select disco"} />
+              </SelectTrigger>
+              <SelectContent>
+                {isLoadingDiscos ? (
+                    <div className="flex items-center justify-center p-4">
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    </div>
+                ) : (
+                    discos.map((d: any) => (
+                        <SelectItem key={d.name} value={d.name}>{d.name}</SelectItem>
+                    ))
+                )}
+              </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">

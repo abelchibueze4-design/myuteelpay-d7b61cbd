@@ -53,33 +53,18 @@ export const useSecuritySettings = () => {
       return false;
     }
 
-    if (!/^\d{4,6}$/.test(pin)) {
-      setError("PIN must be 4-6 digits");
-      return false;
-    }
-
     setIsLoading(true);
     setError(null);
 
     try {
-      // In a real production app, PIN should be hashed on the backend
-      // For now, create a simple hash-like transformation
-      const hashedPin = Array.from(pin)
-        .map((char) => String.fromCharCode(char.charCodeAt(0) ^ 123))
-        .join("");
+      // Use the secure RPC function to set the PIN in Supabase
+      const { error: rpcError } = await supabase.rpc("set_transaction_pin", {
+        p_pin: pin,
+      });
 
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          transaction_pin_enabled: true,
-          transaction_pin_hash: hashedPin,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-
-      if (updateError) {
-        console.error("Update error:", updateError);
-        throw updateError;
+      if (rpcError) {
+        console.error("RPC error:", rpcError);
+        throw rpcError;
       }
 
       setSettings((prev) => ({ ...prev, transactionPinEnabled: true }));

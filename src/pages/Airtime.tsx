@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Smartphone, Check } from "lucide-react";
+import { Smartphone, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +8,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
+import { AirtimePrices } from "@/components/services/AirtimePrices";
 
 const networks = ["MTN", "Glo", "Airtel", "9mobile"];
 
@@ -54,27 +55,81 @@ const Airtime = () => {
             </div>
 
             <div className="container mx-auto px-4 max-w-2xl">
-                <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Network</label>
-                        <Select value={network} onValueChange={setNetwork}>
-                            <SelectTrigger><SelectValue placeholder="Select network" /></SelectTrigger>
-                            <SelectContent>{networks.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Phone Number</label>
-                        <div className="relative">
-                            <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="080X XXX XXXX" className="pl-10" type="tel" required />
+                <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-6">
+                    <div className="space-y-3">
+                        <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Select Network</label>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {networks.map((n) => (
+                                <button
+                                    key={n}
+                                    type="button"
+                                    onClick={() => setNetwork(n)}
+                                    className={`py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                                        network === n 
+                                        ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
+                                        : "border-border/50 hover:border-primary/30"
+                                    }`}
+                                >
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black ${
+                                        n === "MTN" ? "bg-yellow-100 text-yellow-700" :
+                                        n === "Glo" ? "bg-green-100 text-green-700" :
+                                        n === "Airtel" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
+                                    }`}>
+                                        {n[0]}
+                                    </div>
+                                    <span className="text-[10px] font-bold uppercase">{n}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Amount</label>
-                        <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₦100 - ₦50,000" type="number" required />
+
+                    <div className="space-y-3">
+                        <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Phone Number</label>
+                        <div className="relative">
+                            <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input 
+                                value={phone} 
+                                onChange={(e) => setPhone(e.target.value)} 
+                                placeholder="080X XXX XXXX" 
+                                className="h-14 rounded-2xl border-2 border-border/50 pl-12 focus-visible:ring-primary/20 bg-secondary/20 font-bold" 
+                                type="tel" 
+                                required 
+                            />
+                        </div>
                     </div>
-                    <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
-                        {kvdata.isPending ? "Processing..." : "Buy Airtime"}
+
+                    <div className="space-y-3">
+                        <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Quick Select Amount</label>
+                        <AirtimePrices 
+                            onSelect={(val) => setAmount(String(val))} 
+                            selectedAmount={Number(amount)} 
+                        />
+                    </div>
+
+                    <div className="space-y-3">
+                        <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Custom Amount</label>
+                        <Input 
+                            value={amount} 
+                            onChange={(e) => setAmount(e.target.value)} 
+                            placeholder="₦100 - ₦50,000" 
+                            className="h-14 rounded-2xl border-2 border-border/50 px-6 focus-visible:ring-primary/20 bg-secondary/20 text-xl font-black" 
+                            type="number" 
+                            required 
+                        />
+                    </div>
+
+                    <Button 
+                        type="submit" 
+                        variant="hero" 
+                        className="w-full h-14 rounded-2xl text-lg font-black shadow-lg shadow-primary/20" 
+                        disabled={kvdata.isPending || !amount || !network}
+                    >
+                        {kvdata.isPending ? (
+                            <div className="flex items-center gap-2">
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Processing...
+                            </div>
+                        ) : "Buy Airtime"}
                     </Button>
                 </form>
             </div>

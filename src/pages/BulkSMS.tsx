@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useCreateTransaction } from "@/hooks/useTransactions";
+import { useKvdata, useKvdataQuery } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { toast } from "sonner";
@@ -17,12 +17,19 @@ const BulkSMS = () => {
   const [message, setMessage] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
-  const createTransaction = useCreateTransaction();
+
+  const kvdata = useKvdata();
+  const { data: priceData, isLoading: isLoadingPrice } = useKvdataQuery({ action: "get_sms_price" });
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+
+  const smsPrice = useMemo(() => {
+    if (!priceData) return 2.5; // Default fallback
+    return Number(priceData.sms_price || priceData.price || priceData.amount || 2.5);
+  }, [priceData]);
 
   const recipientCount = recipients.split(",").filter((r) => r.trim()).length;
   const charCount = message.length;
-  const totalCost = recipientCount * 2.5;
+  const totalCost = recipientCount * smsPrice;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,11 +42,13 @@ const BulkSMS = () => {
     if (!isValid) return false;
 
     try {
-      await createTransaction.mutateAsync({
-        type: "bulk_sms",
+      await kvdata.mutateAsync({
+        action: "buy_bulk_sms",
         amount: totalCost,
+        sender,
+        recipients,
+        message,
         description: `Bulk SMS to ${recipientCount} recipients`,
-        metadata: { sender, recipientCount },
       });
       setShowSuccess(true);
       return true;
@@ -75,11 +84,16 @@ const BulkSMS = () => {
             <p className="text-xs text-muted-foreground">{charCount}/160 characters</p>
           </div>
           <div className="bg-secondary rounded-lg p-3 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Cost per SMS</span><span className="font-semibold">₦2.50</span></div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Cost per SMS</span>
+              <span className="font-semibold">
+                {isLoadingPrice ? <Loader2 className="w-3 h-3 animate-spin inline" /> : `₦${smsPrice.toFixed(2)}`}
+              </span>
+            </div>
             <div className="flex justify-between mt-1"><span className="text-muted-foreground">Total Cost</span><span className="font-bold text-gradient">₦{totalCost.toFixed(2)}</span></div>
           </div>
-          <Button type="submit" variant="hero" className="w-full" disabled={createTransaction.isPending}>
-            {createTransaction.isPending ? "Sending..." : "Send Messages"}
+          <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending || isLoadingPrice}>
+            {kvdata.isPending ? "Sending..." : "Send Bulk SMS"}
           </Button>
         </form>
       </div>
@@ -88,7 +102,7 @@ const BulkSMS = () => {
         open={pinOpen}
         onOpenChange={setPinOpen}
         onVerify={handleConfirmSend}
-        isLoading={isVerifying || createTransaction.isPending}
+        isLoading={isVerifying || kvdata.isPending}
       />
 
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>

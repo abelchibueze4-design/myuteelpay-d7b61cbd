@@ -17,28 +17,15 @@ export const useTransactionPinVerification = () => {
     setError(null);
 
     try {
-      // Fetch the stored PIN hash
-      const { data, error: fetchError } = await supabase
-        .from("profiles")
-        .select("transaction_pin_hash, transaction_pin_enabled" as any)
-        .eq("id", user.id)
-        .single();
+      // Use the new RPC function for secure server-side verification
+      const { data, error: rpcError } = await supabase.rpc("verify_transaction_pin", {
+        p_pin: pin,
+      });
 
-      if (fetchError) throw fetchError;
+      if (rpcError) throw rpcError;
 
-      if (!(data as any)?.transaction_pin_enabled) {
-        setError("Transaction PIN is not enabled");
-        return false;
-      }
-
-      // Hash the provided PIN the same way
-      const hashedInput = Array.from(pin)
-        .map((char) => String.fromCharCode(char.charCodeAt(0) ^ 123))
-        .join("");
-
-      // Compare hashes
-      if (hashedInput !== (data as any).transaction_pin_hash) {
-        setError("Incorrect PIN");
+      if (data === false) {
+        setError("Incorrect PIN or PIN not enabled");
         return false;
       }
 
@@ -52,6 +39,9 @@ export const useTransactionPinVerification = () => {
       setIsLoading(false);
     }
   };
+
+  return { verifyPin, isLoading, error };
+};
 
   const checkIfPinRequired = async (): Promise<boolean> => {
     if (!user?.id) return false;

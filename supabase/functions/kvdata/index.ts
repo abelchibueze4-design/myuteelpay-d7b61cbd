@@ -1,3 +1,6 @@
+// @ts-nocheck
+// deno-lint-ignore-file
+/// <reference lib="deno.ns" />
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -98,6 +101,42 @@ Deno.serve(async (req) => {
         `/validateiuc?smart_card_number=${smart_card_number}&cablename=${cableId}`,
         "GET"
       );
+      return json(data);
+    }
+
+    // === GET DATA PLANS ===
+    if (action === "get_data_plans") {
+      const data = await kvdataRequest("/data/", "GET");
+      return json(data);
+    }
+
+    // === GET CABLE PLANS ===
+    if (action === "get_cable_plans") {
+      const data = await kvdataRequest("/cable-plans/", "GET");
+      return json(data);
+    }
+
+    // === GET EDU PLANS ===
+    if (action === "get_edu_plans") {
+      const data = await kvdataRequest("/epin-plans/", "GET");
+      return json(data);
+    }
+
+    // === GET DATACARD PLANS ===
+    if (action === "get_datacard_plans") {
+      const data = await kvdataRequest("/datacard-plans/", "GET");
+      return json(data);
+    }
+
+    // === GET SMS PRICE ===
+    if (action === "get_sms_price") {
+      const data = await kvdataRequest("/sms-price/", "GET");
+      return json(data);
+    }
+
+    // === GET ELECTRICITY DISCOS ===
+    if (action === "get_electricity_discos") {
+      const data = await kvdataRequest("/electricity-discos/", "GET");
       return json(data);
     }
 
@@ -210,14 +249,18 @@ Deno.serve(async (req) => {
       .eq("id", user.id);
 
     // Record transaction
+    const initialStatus = (kvResult?.status === "Successful" || kvResult?.Status === "Successful") ? "success" : "pending";
+    const kvReference = kvResult?.request_id || kvResult?.id || kvResult?.reference;
+
     const { data: tx, error: txErr } = await supabaseAdmin
       .from("transactions")
       .insert({
         user_id: user.id,
         type: txType as any,
         amount,
-        status: "success",
+        status: initialStatus,
         description,
+        reference: kvReference ? String(kvReference) : undefined,
         metadata: { kvdata_response: kvResult, ...params },
       })
       .select()

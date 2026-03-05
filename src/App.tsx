@@ -25,6 +25,7 @@ import EduPins from "./pages/EduPins";
 import Referral from "./pages/Referral";
 import DataCard from "./pages/DataCard";
 import FAQs from "./pages/FAQs";
+import DebugKVData from "./pages/DebugKVData";
 
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -131,7 +132,7 @@ function App() {
                 }
               />
               <Route
-                path="/referral"
+                path="/services/referral"
                 element={
                   <ProtectedWithLayout>
                     <Referral />
@@ -165,6 +166,15 @@ function App() {
               <Route path="/admin/reconciliation" element={<AdminLayout><Reconciliation /></AdminLayout>} />
               <Route path="/admin/notifications" element={<AdminLayout><NotificationCenter /></AdminLayout>} />
               <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
+
+              <Route
+                path="/debug/kvdata"
+                element={
+                  <ProtectedWithLayout>
+                    <DebugKVData />
+                  </ProtectedWithLayout>
+                }
+              />
 
               {/* 404 */}
               <Route path="*" element={<NotFound />} />

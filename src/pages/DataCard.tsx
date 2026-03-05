@@ -1,39 +1,41 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Smartphone, Check, CreditCard, Download, Share2, Printer } from "lucide-react";
+import { Smartphone, Check, CreditCard, Download, Share2, Printer, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useKvdata } from "@/hooks/useKvdata";
+import { useKvdata, useKvdataQuery } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
+import { DataCardPrices } from "@/components/services/DataCardPrices";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-const networks = ["MTN", "Glo", "Airtel", "9mobile"];
-const cardPlans = [
-    { label: "MTN 1GB Data Card", plan_id: 101, network: "MTN", price: 350 },
-    { label: "MTN 2GB Data Card", plan_id: 102, network: "MTN", price: 700 },
-    { label: "Airtel 1GB Data Card", plan_id: 201, network: "Airtel", price: 400 },
-    { label: "Glo 2GB Data Card", plan_id: 301, network: "Glo", price: 600 },
+const networks = [
+    { name: "MTN", id: 1 },
+    { name: "Glo", id: 2 },
+    { name: "Airtel", id: 3 },
+    { name: "9mobile", id: 4 }
 ];
 
 const DataCard = () => {
     const navigate = useNavigate();
     const [network, setNetwork] = useState("");
-    const [plan, setPlan] = useState("");
+    const [planId, setPlanId] = useState("");
+    const [selectedPlan, setSelectedPlan] = useState<any>(null);
     const [quantity, setQuantity] = useState("1");
     const [showSuccess, setShowSuccess] = useState(false);
     const [pinOpen, setPinOpen] = useState(false);
+    
     const kvdata = useKvdata();
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
-    const filteredPlans = network ? cardPlans.filter(p => p.network === network) : cardPlans;
+    const selectedNetwork = networks.find(n => n.name === network);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!network || !plan) return;
+        if (!network || !planId) return;
         setPinOpen(true);
     };
 
@@ -41,7 +43,6 @@ const DataCard = () => {
         const isValid = await verifyPin(pin);
         if (!isValid) return false;
 
-        const selectedPlan = cardPlans.find((p) => String(p.plan_id) === plan);
         if (!selectedPlan) return false;
 
         try {
@@ -81,24 +82,24 @@ const DataCard = () => {
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {networks.map((n) => (
                                 <button
-                                    key={n}
+                                    key={n.name}
                                     type="button"
-                                    onClick={() => setNetwork(n)}
+                                    onClick={() => { setNetwork(n.name); setPlanId(""); setSelectedPlan(null); }}
                                     className={cn(
                                         "py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2",
-                                        network === n
+                                        network === n.name
                                             ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
                                             : "border-border/50 hover:border-primary/30"
                                     )}
                                 >
                                     <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black",
-                                        n === "MTN" ? "bg-yellow-100 text-yellow-700" :
-                                            n === "Glo" ? "bg-green-100 text-green-700" :
-                                                n === "Airtel" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
+                                        n.name === "MTN" ? "bg-yellow-100 text-yellow-700" :
+                                            n.name === "Glo" ? "bg-green-100 text-green-700" :
+                                                n.name === "Airtel" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
                                     )}>
-                                        {n[0]}
+                                        {n.name[0]}
                                     </div>
-                                    <span className="text-[10px] font-bold uppercase">{n}</span>
+                                    <span className="text-[10px] font-bold uppercase">{n.name}</span>
                                 </button>
                             ))}
                         </div>
@@ -106,21 +107,21 @@ const DataCard = () => {
 
                     <div className="space-y-3">
                         <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Choose Data Plan</label>
-                        <Select value={plan} onValueChange={setPlan}>
-                            <SelectTrigger className="h-16 rounded-2xl border-2 border-border/50 focus:ring-primary/20 bg-secondary/20">
-                                <SelectValue placeholder="Browse available plans" />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-none shadow-2xl">
-                                {filteredPlans.map((p) => (
-                                    <SelectItem key={p.plan_id} value={String(p.plan_id)} className="py-3 rounded-xl">
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-sm tracking-tight">{p.label}</span>
-                                            <span className="text-[10px] text-primary font-black uppercase">₦{p.price.toLocaleString()}</span>
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        {network && selectedNetwork && (
+                            <DataCardPrices 
+                                networkId={selectedNetwork.id}
+                                selectedPlanId={planId}
+                                onSelect={(plan) => {
+                                    setPlanId(plan.plan_id);
+                                    setSelectedPlan(plan);
+                                }}
+                            />
+                        )}
+                        {!network && (
+                            <div className="p-8 text-center bg-secondary/30 text-muted-foreground rounded-2xl border-2 border-dashed border-border/50">
+                                <p className="font-bold text-sm">Select network first</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-3">
@@ -141,7 +142,7 @@ const DataCard = () => {
                     </div>
 
                     <div className="pt-4">
-                        <Button type="submit" className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 font-black text-lg gap-2" disabled={kvdata.isPending || !network || !plan}>
+                        <Button type="submit" className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 font-black text-lg gap-2" disabled={kvdata.isPending || !network || !planId}>
                             {kvdata.isPending ? "Generating..." : "Generate Pins"}
                         </Button>
                     </div>
