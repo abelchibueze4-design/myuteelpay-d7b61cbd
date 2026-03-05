@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Smartphone, Phone, Info } from "lucide-react";
+import { ArrowLeft, Smartphone, Phone, Info, Zap, Wallet, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -277,6 +277,7 @@ const MobileServicePage = ({
           onChange={(e) => setPhoneNumber(e.target.value)}
           icon={Phone}
           helperText="Enter 11-digit phone number"
+          error=""
         />
         
         <AmountSelector
