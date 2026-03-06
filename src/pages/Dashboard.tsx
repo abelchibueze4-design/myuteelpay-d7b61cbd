@@ -14,6 +14,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { DashboardTopBar } from "@/components/DashboardTopBar";
+import { AccountSettings } from "@/components/AccountSettings";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWallet } from "@/hooks/useWallet";
 import { useTransactions } from "@/hooks/useTransactions";
@@ -40,6 +41,7 @@ const Dashboard = () => {
   const { initializePayment, verifyPayment, isInitializing } = useFundWallet();
   const [searchParams, setSearchParams] = useSearchParams();
   const [fundOpen, setFundOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [showBalance, setShowBalance] = useState(true);
 
@@ -68,6 +70,13 @@ const Dashboard = () => {
   const bonusBalance = referrerBonus + signupBonus;
 
   const activeTab = searchParams.get("tab");
+
+  useEffect(() => {
+    if (activeTab === "settings") {
+      setSettingsOpen(true);
+    }
+  }, [activeTab]);
+
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
 
   const formatAmount = (amount: number) => `₦${Math.abs(amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
@@ -90,7 +99,7 @@ const Dashboard = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  if (activeTab === "history") return <TransactionHistory filter="services" />;
+  if (activeTab === "history") return <TransactionHistory filter="all" />;
   if (activeTab === "wallet") return <TransactionHistory filter="wallet" />;
 
   const handleFund = () => {
@@ -102,6 +111,17 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <AccountSettings 
+        open={settingsOpen} 
+        onOpenChange={(open) => {
+          setSettingsOpen(open);
+          if (!open && activeTab === "settings") {
+            const newParams = new URLSearchParams(searchParams);
+            newParams.delete("tab");
+            setSearchParams(newParams, { replace: true });
+          }
+        }} 
+      />
       {/* Mobile Header */}
       <div className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-border/30">
         <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between">

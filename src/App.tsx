@@ -18,6 +18,7 @@ import Dashboard from "./pages/Dashboard";
 // Services
 import Airtime from "./pages/Airtime";
 import Data from "./pages/Data";
+import Services from "./pages/Services";
 import CableTV from "./pages/CableTV";
 import Electricity from "./pages/Electricity";
 import BulkSMS from "./pages/BulkSMS";
@@ -83,6 +84,14 @@ function App() {
               />
 
               {/* Services */}
+              <Route
+                path="/services"
+                element={
+                  <ProtectedWithLayout>
+                    <Services />
+                  </ProtectedWithLayout>
+                }
+              />
               <Route
                 path="/services/airtime"
                 element={
