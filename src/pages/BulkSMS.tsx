@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useKvdata, useKvdataQuery } from "@/hooks/useKvdata";
+import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { toast } from "sonner";
@@ -19,13 +19,9 @@ const BulkSMS = () => {
   const [pinOpen, setPinOpen] = useState(false);
 
   const kvdata = useKvdata();
-  const { data: priceData, isLoading: isLoadingPrice } = useKvdataQuery({ action: "get_sms_price" });
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
-  const smsPrice = useMemo(() => {
-    if (!priceData) return 2.5; // Default fallback
-    return Number(priceData.sms_price || priceData.price || priceData.amount || 2.5);
-  }, [priceData]);
+  const smsPrice = 2.5; // Fixed price per SMS unit
 
   const recipientCount = recipients.split(",").filter((r) => r.trim()).length;
   const charCount = message.length;
@@ -86,13 +82,11 @@ const BulkSMS = () => {
           <div className="bg-secondary rounded-lg p-3 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Cost per SMS</span>
-              <span className="font-semibold">
-                {isLoadingPrice ? <Loader2 className="w-3 h-3 animate-spin inline" /> : `₦${smsPrice.toFixed(2)}`}
-              </span>
+              <span className="font-semibold">₦{smsPrice.toFixed(2)}</span>
             </div>
             <div className="flex justify-between mt-1"><span className="text-muted-foreground">Total Cost</span><span className="font-bold text-gradient">₦{totalCost.toFixed(2)}</span></div>
           </div>
-          <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending || isLoadingPrice}>
+          <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
             {kvdata.isPending ? "Sending..." : "Send Bulk SMS"}
           </Button>
         </form>

@@ -15,7 +15,7 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-const KVDATA_BASE = "https://www.kvdataapi.net/api";
+const KVDATA_BASE = "https://kvdataapi.net/api";
 
 async function kvdataRequest(path: string, method: "GET" | "POST", body?: unknown) {
   const token = Deno.env.get("KVDATA_API_KEY");
@@ -122,32 +122,26 @@ Deno.serve(async (req) => {
 
     // === GET CABLE PLANS ===
     if (action === "get_cable_plans") {
-      const data = await kvdataRequest("/cable-plans/", "GET");
+      const data = await kvdataRequest("/cablesub/", "GET");
       return json(data);
     }
 
     // === GET EDU PLANS ===
     if (action === "get_edu_plans") {
-      const data = await kvdataRequest("/epin-plans/", "GET");
+      const data = await kvdataRequest("/epin/", "GET");
       return json(data);
     }
 
     // === GET DATACARD PLANS ===
     if (action === "get_datacard_plans") {
-      const data = await kvdataRequest("/datacard-plans/", "GET");
-      return json(data);
-    }
-
-    // === GET SMS PRICE ===
-    if (action === "get_sms_price") {
-      const data = await kvdataRequest("/sms-price/", "GET");
+      const data = await kvdataRequest("/data_pin/", "GET");
       return json(data);
     }
 
     // === GET ELECTRICITY DISCOS ===
     if (action === "get_electricity_discos") {
-      const data = await kvdataRequest("/electricity-discos/", "GET");
-      return json(data);
+      const discoList = Object.keys(DISCO_IDS).map((name) => ({ name, id: DISCO_IDS[name] }));
+      return json(discoList);
     }
 
     // === VALIDATE METER ===
