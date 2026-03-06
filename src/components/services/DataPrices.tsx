@@ -11,27 +11,40 @@ interface DataPricesProps {
   selectedPlanId?: string;
 }
 
+type NetworkRow = {
+  id: string;
+};
+
+type DataPlanRow = {
+  id: string;
+  plan_id: number;
+  name: string;
+  price: number;
+  type: string;
+};
+
 export const DataPrices = ({ networkId, category, onSelect, selectedPlanId }: DataPricesProps) => {
   const { data: dbPlans, isLoading, error } = useQuery({
     queryKey: ["data_plans", networkId],
     queryFn: async () => {
-      // First get the network UUID from the provider_id (integer)
-      const { data: network, error: netError } = await supabase
+      const db = supabase as any;
+      const { data: network, error: netError } = await db
         .from("networks")
         .select("id")
         .eq("provider_id", networkId)
         .single();
       
       if (netError || !network) throw new Error("Network not found");
+      const networkRow = network as NetworkRow;
 
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("data_plans")
         .select("*")
-        .eq("network_id", network.id)
+        .eq("network_id", networkRow.id)
         .eq("is_active", true);
       
       if (error) throw error;
-      return data;
+      return (data || []) as DataPlanRow[];
     },
     enabled: !!networkId
   });
@@ -40,12 +53,12 @@ export const DataPrices = ({ networkId, category, onSelect, selectedPlanId }: Da
     if (!dbPlans) return [];
     
     return dbPlans
-      .filter((p: any) => 
+      .filter((p) => 
         (!category || (p.type || "Standard") === category)
       )
-      .map((p: any) => ({
+      .map((p) => ({
         label: p.name,
-        plan_id: String(p.plan_id), // Use the KVData plan ID for the API
+        plan_id: String(p.plan_id),
         price: Number(p.price),
         raw: p
       }));

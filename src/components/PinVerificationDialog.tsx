@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -75,11 +76,10 @@ export const PinVerificationDialog = ({
             <Lock className="w-5 h-5" />
             {title}
           </DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">{description}</p>
-
           <div>
             <Label htmlFor="pin">Transaction PIN</Label>
             <Input

@@ -3,6 +3,7 @@ import { Lock, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -78,6 +79,9 @@ export const SetupTransactionPinModal = ({
             <Lock className="w-5 h-5" />
             Set Up Transaction PIN
           </DialogTitle>
+          <DialogDescription>
+            Create a 4-digit PIN to secure utility purchases and wallet operations.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -89,10 +93,6 @@ export const SetupTransactionPinModal = ({
               </p>
             </div>
           )}
-
-          <p className="text-sm text-muted-foreground">
-            Create a 4-digit PIN. You'll need to enter this PIN before making sensitive transactions like utility purchases or wallet withdrawals.
-          </p>
 
           <div className="space-y-4 border-t border-border pt-4">
             <div>

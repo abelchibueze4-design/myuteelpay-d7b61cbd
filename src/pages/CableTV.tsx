@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tv, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,9 +12,15 @@ import { CableTVPrices } from "@/components/services/CableTVPrices";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+type CableProvider = {
+  id: string;
+  name: string;
+  provider_id: number;
+};
+
 const CableTV = () => {
   const navigate = useNavigate();
-  const [provider, setProvider] = useState<any>(null);
+  const [provider, setProvider] = useState<CableProvider | null>(null);
   const [planId, setPlanId] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [smartcard, setSmartcard] = useState("");
@@ -28,9 +34,10 @@ const CableTV = () => {
   const { data: providers } = useQuery({
     queryKey: ["cable_providers"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("cable_providers").select("*").eq("is_active", true).order("name");
+      const db = supabase as any;
+      const { data, error } = await db.from("cable_providers").select("*").eq("is_active", true).order("name");
       if (error) throw error;
-      return data;
+      return (data || []) as CableProvider[];
     }
   });
   

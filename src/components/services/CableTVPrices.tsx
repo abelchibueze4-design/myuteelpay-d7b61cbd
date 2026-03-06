@@ -10,27 +10,39 @@ interface CableTVPricesProps {
   selectedPlanId?: string;
 }
 
+type CableProviderRow = {
+  id: string;
+};
+
+type CablePlanRow = {
+  id: string;
+  plan_id: number;
+  name: string;
+  price: number;
+};
+
 export const CableTVPrices = ({ providerId, onSelect, selectedPlanId }: CableTVPricesProps) => {
   const { data: dbPlans, isLoading, error } = useQuery({
     queryKey: ["cable_plans", providerId],
     queryFn: async () => {
-      // Get provider UUID first
-      const { data: provider, error: pError } = await supabase
+      const db = supabase as any;
+      const { data: provider, error: pError } = await db
         .from("cable_providers")
         .select("id")
         .eq("provider_id", providerId)
         .single();
       
       if (pError || !provider) throw new Error("Provider not found");
+      const providerRow = provider as CableProviderRow;
 
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("cable_plans")
         .select("*")
-        .eq("provider_id", provider.id)
+        .eq("provider_id", providerRow.id)
         .eq("is_active", true);
       
       if (error) throw error;
-      return data;
+      return (data || []) as CablePlanRow[];
     },
     enabled: !!providerId
   });
@@ -38,7 +50,7 @@ export const CableTVPrices = ({ providerId, onSelect, selectedPlanId }: CableTVP
   const filteredPlans = useMemo(() => {
     if (!dbPlans) return [];
     
-    return dbPlans.map((p: any) => ({
+    return dbPlans.map((p) => ({
       label: p.name,
       plan_id: String(p.plan_id),
       price: Number(p.price),

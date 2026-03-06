@@ -22,17 +22,19 @@ export const useSecuritySettings = () => {
 
     const fetchSettings = async () => {
       try {
-        const { data, error } = await supabase
+        const db = supabase as any;
+        const { data, error } = await db
           .from("profiles")
           .select("two_fa_enabled, transaction_pin_enabled")
           .eq("id", user.id)
           .single();
 
         if (error) throw error;
+        const profile = (data || {}) as { two_fa_enabled?: boolean; transaction_pin_enabled?: boolean };
 
         setSettings({
-          twoFaEnabled: data.two_fa_enabled || false,
-          transactionPinEnabled: data.transaction_pin_enabled || false,
+          twoFaEnabled: profile.two_fa_enabled || false,
+          transactionPinEnabled: profile.transaction_pin_enabled || false,
         });
       } catch (err) {
         console.error("Failed to load security settings:", err);

@@ -1,21 +1,29 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Smartphone, Check, Loader2, ChevronRight, Filter } from "lucide-react";
+import { Smartphone, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useKvdata, useKvdataQuery } from "@/hooks/useKvdata";
+import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { DataPrices } from "@/components/services/DataPrices";
-import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+type Network = {
+    id: string;
+    name: string;
+    provider_id: number;
+};
+
+type DataPlanTypeRow = {
+    type: string;
+};
+
 const Data = () => {
     const navigate = useNavigate();
-    const [network, setNetwork] = useState<any>(null);
+    const [network, setNetwork] = useState<Network | null>(null);
     const [category, setCategory] = useState("");
     const [phone, setPhone] = useState("");
     const [planId, setPlanId] = useState("");
@@ -29,24 +37,26 @@ const Data = () => {
     const { data: networks } = useQuery({
         queryKey: ["networks"],
         queryFn: async () => {
-            const { data, error } = await supabase.from("networks").select("*").eq("is_active", true).order("name");
+            const db = supabase as any;
+            const { data, error } = await db.from("networks").select("*").eq("is_active", true).order("name");
             if (error) throw error;
-            return data;
+            return (data || []) as Network[];
         }
     });
 
     const { data: categories } = useQuery({
         queryKey: ["categories", network?.id],
         queryFn: async () => {
-            const { data, error } = await supabase
+            const db = supabase as any;
+            const { data, error } = await db
                 .from("data_plans")
                 .select("type")
-                .eq("network_id", network.id)
+                .eq("network_id", network!.id)
                 .eq("is_active", true);
             
             if (error) throw error;
-            // Get unique types
-            const types = new Set(data.map(p => p.type));
+            const rows = (data || []) as DataPlanTypeRow[];
+            const types = new Set(rows.map((p) => p.type));
             return Array.from(types);
         },
         enabled: !!network
