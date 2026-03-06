@@ -119,7 +119,7 @@ export const SecuritySettings = () => {
       setConfirmPin("");
       setShowPinSetup(false);
     } else {
-      toast.error("Failed to set transaction PIN");
+      toast.error(hookError || "Failed to set transaction PIN");
     }
   };
 

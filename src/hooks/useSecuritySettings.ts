@@ -79,13 +79,19 @@ export const useSecuritySettings = () => {
       return false;
     }
 
+    const normalizedPin = pin.trim();
+    if (!/^[0-9]{4}$/.test(normalizedPin)) {
+      setError("PIN must be exactly 4 digits");
+      return false;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
       // Use the secure RPC function to set the PIN in Supabase
       const { error: rpcError } = await supabase.rpc("set_transaction_pin", {
-        p_pin: pin,
+        p_pin: normalizedPin,
       });
 
       if (rpcError) {
@@ -97,7 +103,9 @@ export const useSecuritySettings = () => {
       return true;
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Failed to set transaction PIN";
+        err && typeof err === "object" && "message" in err
+          ? String((err as { message?: string }).message || "Failed to set transaction PIN")
+          : "Failed to set transaction PIN";
       console.error("PIN setup error:", err);
       setError(message);
       return false;

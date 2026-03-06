@@ -19,7 +19,7 @@ SET search_path = public
 AS $$
 BEGIN
   -- Only allow exactly 4 numeric digits as requested
-  IF p_pin !~ '^\d{4}$' THEN
+  IF p_pin !~ '^[0-9]{4}$' THEN
     RAISE EXCEPTION 'PIN must be exactly 4 digits long';
   END IF;
 
