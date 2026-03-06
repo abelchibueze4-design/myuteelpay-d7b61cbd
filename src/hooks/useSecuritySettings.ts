@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -15,6 +15,32 @@ export const useSecuritySettings = () => {
     twoFaEnabled: false,
     transactionPinEnabled: false,
   });
+
+  // Fetch initial settings
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const fetchSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("two_fa_enabled, transaction_pin_enabled")
+          .eq("id", user.id)
+          .single();
+
+        if (error) throw error;
+
+        setSettings({
+          twoFaEnabled: data.two_fa_enabled || false,
+          transactionPinEnabled: data.transaction_pin_enabled || false,
+        });
+      } catch (err) {
+        console.error("Failed to load security settings:", err);
+      }
+    };
+
+    fetchSettings();
+  }, [user]);
 
   const updatePassword = async (
     currentPassword: string,
