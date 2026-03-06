@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useKvdata, useKvdataQuery } from "@/hooks/useKvdata";
+import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Electricity = () => {
   const navigate = useNavigate();
@@ -21,26 +23,27 @@ const Electricity = () => {
   const [pinOpen, setPinOpen] = useState(false);
   
   const kvdata = useKvdata();
-  const { data: apiDiscos, isLoading: isLoadingDiscos } = useKvdataQuery({ action: "get_electricity_discos" });
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
-  const discos = useMemo(() => {
-    if (!apiDiscos) return [];
-    const discosArray = Array.isArray(apiDiscos) ? apiDiscos : (apiDiscos.discos || []);
-    return discosArray.map((d: any) => ({
-        name: d.disco_name || d.name,
-        id: d.id || d.disco_id
-    }));
-  }, [apiDiscos]);
+  const { data: discos, isLoading: isLoadingDiscos } = useQuery({
+    queryKey: ["electricity_discos"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("electricity_discos").select("*").eq("is_active", true).order("name");
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const handleValidateMeter = async () => {
     if (!meter || !disco) return;
     try {
+      const selectedDisco = discos?.find(d => String(d.provider_id) === disco);
       const res = await kvdata.mutateAsync({
         action: "validate_meter",
         meter_number: meter,
-        disco_name: disco,
+        disco_name: Number(disco), // Pass ID
         meter_type: type,
+        disco_label: selectedDisco?.name
       });
       setCustomerName(res?.Customer_Name || res?.name || "Validated");
     } catch {
@@ -59,12 +62,14 @@ const Electricity = () => {
     if (!isValid) return false;
 
     try {
+      const selectedDisco = discos?.find(d => String(d.provider_id) === disco);
       const res = await kvdata.mutateAsync({
         action: "buy_electricity",
-        disco_name: disco,
+        disco_name: Number(disco),
         meter_number: meter,
         meter_type: type,
         amount: Number(amount),
+        disco_label: selectedDisco?.name
       });
       setToken(res?.kvdata?.token || res?.kvdata?.Token || "");
       setShowSuccess(true);
@@ -99,15 +104,9 @@ const Electricity = () => {
                 <SelectValue placeholder={isLoadingDiscos ? "Loading discos..." : "Select disco"} />
               </SelectTrigger>
               <SelectContent>
-                {isLoadingDiscos ? (
-                    <div className="flex items-center justify-center p-4">
-                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    </div>
-                ) : (
-                    discos.map((d: any) => (
-                        <SelectItem key={d.name} value={d.name}>{d.name}</SelectItem>
-                    ))
-                )}
+                {discos?.map((d) => (
+                    <SelectItem key={d.id} value={String(d.provider_id)}>{d.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

@@ -9,18 +9,27 @@ import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { AirtimePrices } from "@/components/services/AirtimePrices";
-
-const networks = ["MTN", "Glo", "Airtel", "9mobile"];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Airtime = () => {
     const navigate = useNavigate();
-    const [network, setNetwork] = useState("");
+    const [network, setNetwork] = useState<any>(null);
     const [phone, setPhone] = useState("");
     const [amount, setAmount] = useState("");
     const [showSuccess, setShowSuccess] = useState(false);
     const [pinOpen, setPinOpen] = useState(false);
     const kvdata = useKvdata();
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+
+    const { data: networks } = useQuery({
+        queryKey: ["networks"],
+        queryFn: async () => {
+            const { data, error } = await supabase.from("networks").select("*").eq("is_active", true).order("name");
+            if (error) throw error;
+            return data;
+        }
+    });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,7 +44,8 @@ const Airtime = () => {
         try {
             await kvdata.mutateAsync({
                 action: "buy_airtime",
-                network,
+                network: network.provider_id, // Pass the ID directly
+                network_name: network.name,
                 phone,
                 amount: Number(amount),
             });
@@ -59,25 +69,25 @@ const Airtime = () => {
                     <div className="space-y-3">
                         <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Select Network</label>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {networks.map((n) => (
+                            {networks?.map((n) => (
                                 <button
-                                    key={n}
+                                    key={n.id}
                                     type="button"
                                     onClick={() => setNetwork(n)}
                                     className={`py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
-                                        network === n 
+                                        network?.id === n.id 
                                         ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
                                         : "border-border/50 hover:border-primary/30"
                                     }`}
                                 >
                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black ${
-                                        n === "MTN" ? "bg-yellow-100 text-yellow-700" :
-                                        n === "Glo" ? "bg-green-100 text-green-700" :
-                                        n === "Airtel" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
+                                        n.name === "MTN" ? "bg-yellow-100 text-yellow-700" :
+                                        n.name === "GLO" ? "bg-green-100 text-green-700" :
+                                        n.name === "AIRTEL" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
                                     }`}>
-                                        {n[0]}
+                                        {n.name[0]}
                                     </div>
-                                    <span className="text-[10px] font-bold uppercase">{n}</span>
+                                    <span className="text-[10px] font-bold uppercase">{n.name}</span>
                                 </button>
                             ))}
                         </div>

@@ -10,17 +10,12 @@ import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerifica
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { DataPrices } from "@/components/services/DataPrices";
 import { Badge } from "@/components/ui/badge";
-
-const networks = [
-    { name: "MTN", id: 1 },
-    { name: "Glo", id: 2 },
-    { name: "Airtel", id: 3 },
-    { name: "9mobile", id: 4 }
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Data = () => {
     const navigate = useNavigate();
-    const [network, setNetwork] = useState("");
+    const [network, setNetwork] = useState<any>(null);
     const [category, setCategory] = useState("");
     const [phone, setPhone] = useState("");
     const [planId, setPlanId] = useState("");
@@ -29,25 +24,33 @@ const Data = () => {
     const [pinOpen, setPinOpen] = useState(false);
     
     const kvdata = useKvdata();
-    const { data: apiPlans } = useKvdataQuery({ action: "get_data_plans" });
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
-    const selectedNetwork = networks.find(n => n.name === network);
-    
-    const plansArray = useMemo(() => {
-        if (!apiPlans) return [];
-        return Array.isArray(apiPlans) ? apiPlans : (apiPlans.plans || []);
-    }, [apiPlans]);
+    const { data: networks } = useQuery({
+        queryKey: ["networks"],
+        queryFn: async () => {
+            const { data, error } = await supabase.from("networks").select("*").eq("is_active", true).order("name");
+            if (error) throw error;
+            return data;
+        }
+    });
 
-    const categories = useMemo(() => {
-        if (!plansArray || !selectedNetwork) return [];
-        const types = new Set(
-            plansArray
-                .filter((p: any) => p.network === selectedNetwork.id)
-                .map((p: any) => p.plan_type || "Standard")
-        );
-        return Array.from(types);
-    }, [plansArray, selectedNetwork]);
+    const { data: categories } = useQuery({
+        queryKey: ["categories", network?.id],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from("data_plans")
+                .select("type")
+                .eq("network_id", network.id)
+                .eq("is_active", true);
+            
+            if (error) throw error;
+            // Get unique types
+            const types = new Set(data.map(p => p.type));
+            return Array.from(types);
+        },
+        enabled: !!network
+    });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -64,9 +67,10 @@ const Data = () => {
         try {
             await kvdata.mutateAsync({
                 action: "buy_data",
-                network,
+                network: network.provider_id,
+                network_name: network.name,
                 phone,
-                plan_id: selectedPlan.plan_id,
+                plan_id: selectedPlan.plan_id, // Use the KVData plan ID
                 plan_label: selectedPlan.label,
                 amount: selectedPlan.price,
             });
@@ -91,21 +95,21 @@ const Data = () => {
                     <div className="space-y-3">
                         <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Select Network</label>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {networks.map((n) => (
+                            {networks?.map((n) => (
                                 <button
-                                    key={n.name}
+                                    key={n.id}
                                     type="button"
-                                    onClick={() => { setNetwork(n.name); setCategory(""); setPlanId(""); setSelectedPlan(null); }}
+                                    onClick={() => { setNetwork(n); setCategory(""); setPlanId(""); setSelectedPlan(null); }}
                                     className={`py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
-                                        network === n.name 
+                                        network?.id === n.id 
                                         ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
                                         : "border-border/50 hover:border-primary/30"
                                     }`}
                                 >
                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black ${
                                         n.name === "MTN" ? "bg-yellow-100 text-yellow-700" :
-                                        n.name === "Glo" ? "bg-green-100 text-green-700" :
-                                        n.name === "Airtel" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
+                                        n.name === "GLO" ? "bg-green-100 text-green-700" :
+                                        n.name === "AIRTEL" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
                                     }`}>
                                         {n.name[0]}
                                     </div>
@@ -116,7 +120,7 @@ const Data = () => {
                     </div>
 
                     {/* Category Selection */}
-                    {network && categories.length > 0 && (
+                    {network && categories && categories.length > 0 && (
                         <div className="space-y-3">
                             <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Data Category</label>
                             <div className="flex flex-wrap gap-2">
@@ -170,7 +174,7 @@ const Data = () => {
                         <div className="space-y-3">
                             <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Select Plan</label>
                             <DataPrices 
-                                networkId={selectedNetwork!.id} 
+                                networkId={network.provider_id} 
                                 category={category} 
                                 selectedPlanId={planId}
                                 onSelect={(plan) => {

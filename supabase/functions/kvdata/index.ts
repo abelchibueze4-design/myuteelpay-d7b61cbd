@@ -176,8 +176,10 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case "buy_airtime": {
-        const networkId = NETWORK_IDS[params.network];
+        // Allow network to be ID or name (fallback to map)
+        const networkId = typeof params.network === 'number' ? params.network : NETWORK_IDS[params.network];
         if (!networkId) return json({ error: "Invalid network" }, 400);
+
         kvResult = await kvdataRequest("/topup/", "POST", {
           network: networkId,
           amount: params.amount,
@@ -186,13 +188,14 @@ Deno.serve(async (req) => {
           airtime_type: "VTU",
         });
         txType = "airtime";
-        description = `${params.network} Airtime ₦${amount} - ${params.phone}`;
+        description = `${params.network_name || "Airtime"} ₦${amount} - ${params.phone}`;
         break;
       }
 
       case "buy_data": {
-        const networkId = NETWORK_IDS[params.network];
+        const networkId = typeof params.network === 'number' ? params.network : NETWORK_IDS[params.network];
         if (!networkId) return json({ error: "Invalid network" }, 400);
+        
         kvResult = await kvdataRequest("/data/", "POST", {
           network: networkId,
           mobile_number: params.phone,
@@ -200,26 +203,28 @@ Deno.serve(async (req) => {
           Ported_number: true,
         });
         txType = "data";
-        description = `${params.network} ${params.plan_label || "Data"} - ${params.phone}`;
+        description = `${params.network_name || "Data"} ${params.plan_label || "Bundle"} - ${params.phone}`;
         break;
       }
 
       case "buy_cable": {
-        const cableId = CABLE_IDS[params.cablename];
+        const cableId = typeof params.cablename === 'number' ? params.cablename : CABLE_IDS[params.cablename];
         if (!cableId) return json({ error: "Invalid cable provider" }, 400);
+
         kvResult = await kvdataRequest("/cablesub/", "POST", {
           cablename: cableId,
           cableplan: params.cableplan_id,
           smart_card_number: params.smart_card_number,
         });
         txType = "cable_tv";
-        description = `${params.cablename} ${params.plan_label || "Subscription"} - ${params.smart_card_number}`;
+        description = `${params.cable_name || "Cable"} ${params.plan_label || "Subscription"} - ${params.smart_card_number}`;
         break;
       }
 
       case "buy_electricity": {
-        const discoId = DISCO_IDS[params.disco_name];
+        const discoId = typeof params.disco_name === 'number' ? params.disco_name : DISCO_IDS[params.disco_name];
         if (!discoId) return json({ error: "Invalid disco" }, 400);
+
         kvResult = await kvdataRequest("/billpayment/", "POST", {
           disco_name: discoId,
           amount: params.amount,
@@ -227,7 +232,7 @@ Deno.serve(async (req) => {
           MeterType: params.meter_type === "prepaid" ? 1 : 2,
         });
         txType = "electricity";
-        description = `${params.disco_name} ${params.meter_type} - Meter ${params.meter_number}`;
+        description = `${params.disco_label || "Electricity"} ${params.meter_type} - Meter ${params.meter_number}`;
         break;
       }
 

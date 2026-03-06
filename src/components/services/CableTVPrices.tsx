@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { useKvdataQuery } from "@/hooks/useKvdata";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { PriceCard } from "../common/PriceCard";
 import { Loader2 } from "lucide-react";
 
@@ -10,20 +11,40 @@ interface CableTVPricesProps {
 }
 
 export const CableTVPrices = ({ providerId, onSelect, selectedPlanId }: CableTVPricesProps) => {
-  const { data: apiPlans, isLoading, error } = useKvdataQuery({ action: "get_cable_plans" });
+  const { data: dbPlans, isLoading, error } = useQuery({
+    queryKey: ["cable_plans", providerId],
+    queryFn: async () => {
+      // Get provider UUID first
+      const { data: provider, error: pError } = await supabase
+        .from("cable_providers")
+        .select("id")
+        .eq("provider_id", providerId)
+        .single();
+      
+      if (pError || !provider) throw new Error("Provider not found");
+
+      const { data, error } = await supabase
+        .from("cable_plans")
+        .select("*")
+        .eq("provider_id", provider.id)
+        .eq("is_active", true);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!providerId
+  });
 
   const filteredPlans = useMemo(() => {
-    if (!apiPlans || !providerId) return [];
-    const plansArray = Array.isArray(apiPlans) ? apiPlans : (apiPlans.plans || []);
-    return plansArray
-      .filter((p: any) => p.cablename === providerId)
-      .map((p: any) => ({
-        label: p.package || p.name || p.plan_name,
-        plan_id: String(p.id || p.plan_id),
-        price: Number(p.plan_amount || p.amount || p.price),
-        raw: p
-      }));
-  }, [apiPlans, providerId]);
+    if (!dbPlans) return [];
+    
+    return dbPlans.map((p: any) => ({
+      label: p.name,
+      plan_id: String(p.plan_id),
+      price: Number(p.price),
+      raw: p
+    }));
+  }, [dbPlans]);
 
   if (isLoading) {
     return (

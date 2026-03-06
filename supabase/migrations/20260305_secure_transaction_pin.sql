@@ -4,7 +4,12 @@
 -- 1. Ensure pgcrypto extension is enabled
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- 2. Function to set/update transaction PIN
+-- 2. Add transaction PIN columns to profiles table if they don't exist
+ALTER TABLE public.profiles 
+ADD COLUMN IF NOT EXISTS transaction_pin_hash TEXT,
+ADD COLUMN IF NOT EXISTS transaction_pin_enabled BOOLEAN DEFAULT FALSE;
+
+-- 3. Function to set/update transaction PIN
 -- Securely hashes the PIN before storing it in the transaction_pin_hash column.
 CREATE OR REPLACE FUNCTION public.set_transaction_pin(p_pin TEXT)
 RETURNS VOID
@@ -13,9 +18,9 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  -- Only allow numeric PINs (usually 4 or 6 digits)
-  IF p_pin !~ '^\d{4,6}$' THEN
-    RAISE EXCEPTION 'PIN must be 4 to 6 digits long';
+  -- Only allow exactly 4 numeric digits as requested
+  IF p_pin !~ '^\d{4}$' THEN
+    RAISE EXCEPTION 'PIN must be exactly 4 digits long';
   END IF;
 
   UPDATE public.profiles
@@ -27,7 +32,7 @@ BEGIN
 END;
 $$;
 
--- 3. Function to verify transaction PIN
+-- 4. Function to verify transaction PIN
 -- Returns true if the provided PIN matches the stored hash.
 CREATE OR REPLACE FUNCTION public.verify_transaction_pin(p_pin TEXT)
 RETURNS BOOLEAN
@@ -55,7 +60,7 @@ BEGIN
 END;
 $$;
 
--- 4. Revoke direct access to the hash column for security
+-- 5. Revoke direct access to the hash column for security
 -- Users should only interact with the PIN via the RPC functions.
 -- We can use a column-level RLS or just ensure the frontend doesn't select it.
 -- In Supabase, we can also use a view or just be careful.

@@ -38,8 +38,8 @@ export const PinVerificationDialog = ({
       return;
     }
 
-    if (!/^\d{4,6}$/.test(pin)) {
-      setVerifyError("PIN must be 4-6 digits");
+    if (!/^\d{4}$/.test(pin)) {
+      setVerifyError("PIN must be exactly 4 digits");
       return;
     }
 
@@ -61,7 +61,7 @@ export const PinVerificationDialog = ({
 
   const handleInputChange = (value: string) => {
     const numericValue = value.replace(/\D/g, "");
-    if (numericValue.length <= 6) {
+    if (numericValue.length <= 4) {
       setPin(numericValue);
       if (verifyError) setVerifyError(null);
     }
@@ -87,7 +87,7 @@ export const PinVerificationDialog = ({
               type="password"
               inputMode="numeric"
               placeholder="••••"
-              maxLength={6}
+              maxLength={4}
               value={pin}
               onChange={(e) => handleInputChange(e.target.value)}
               className={verifyError ? "border-destructive" : ""}

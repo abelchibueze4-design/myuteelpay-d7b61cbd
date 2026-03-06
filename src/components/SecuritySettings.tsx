@@ -93,8 +93,8 @@ export const SecuritySettings = () => {
 
     if (!newPin) {
       errors.pin = "PIN is required";
-    } else if (!/^\d{4,6}$/.test(newPin)) {
-      errors.pin = "PIN must be 4-6 digits";
+    } else if (!/^\d{4}$/.test(newPin)) {
+      errors.pin = "PIN must be exactly 4 digits";
     }
 
     if (!confirmPin) {
@@ -380,21 +380,24 @@ export const SecuritySettings = () => {
         {showPinSetup && (
           <form onSubmit={handleSetTransactionPin} className="space-y-4 pt-4">
             <div>
-              <Label htmlFor="newPin">New PIN (4-6 digits)</Label>
+              <Label htmlFor="newPin">New PIN (4 digits)</Label>
               <Input
                 id="newPin"
                 type="password"
-                maxLength={6}
+                maxLength={4}
+                inputMode="numeric"
                 value={newPin}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, "");
-                  setNewPin(val);
+                  if (val.length <= 4) {
+                    setNewPin(val);
+                  }
                   if (pinErrors.pin) {
                     setPinErrors({ ...pinErrors, pin: "" });
                   }
                 }}
                 className={pinErrors.pin ? "border-destructive" : ""}
-                placeholder="Enter 4-6 digits"
+                placeholder="Enter 4 digits"
               />
               {pinErrors.pin && (
                 <p className="text-xs text-destructive mt-1">{pinErrors.pin}</p>
@@ -406,17 +409,20 @@ export const SecuritySettings = () => {
               <Input
                 id="confirmPin"
                 type="password"
-                maxLength={6}
+                maxLength={4}
+                inputMode="numeric"
                 value={confirmPin}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, "");
-                  setConfirmPin(val);
+                  if (val.length <= 4) {
+                    setConfirmPin(val);
+                  }
                   if (pinErrors.confirmPin) {
                     setPinErrors({ ...pinErrors, confirmPin: "" });
                   }
                 }}
                 className={pinErrors.confirmPin ? "border-destructive" : ""}
-                placeholder="Confirm your PIN"
+                placeholder="Confirm your 4-digit PIN"
               />
               {pinErrors.confirmPin && (
                 <p className="text-xs text-destructive mt-1">

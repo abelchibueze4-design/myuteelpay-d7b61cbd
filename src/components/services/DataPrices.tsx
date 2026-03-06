@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { useKvdataQuery } from "@/hooks/useKvdata";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { PriceCard } from "../common/PriceCard";
 import { Loader2 } from "lucide-react";
 
@@ -11,23 +12,44 @@ interface DataPricesProps {
 }
 
 export const DataPrices = ({ networkId, category, onSelect, selectedPlanId }: DataPricesProps) => {
-  const { data: apiPlans, isLoading, error } = useKvdataQuery({ action: "get_data_plans" });
+  const { data: dbPlans, isLoading, error } = useQuery({
+    queryKey: ["data_plans", networkId],
+    queryFn: async () => {
+      // First get the network UUID from the provider_id (integer)
+      const { data: network, error: netError } = await supabase
+        .from("networks")
+        .select("id")
+        .eq("provider_id", networkId)
+        .single();
+      
+      if (netError || !network) throw new Error("Network not found");
+
+      const { data, error } = await supabase
+        .from("data_plans")
+        .select("*")
+        .eq("network_id", network.id)
+        .eq("is_active", true);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!networkId
+  });
 
   const filteredPlans = useMemo(() => {
-    if (!apiPlans || !networkId) return [];
-    const plansArray = Array.isArray(apiPlans) ? apiPlans : (apiPlans.plans || []);
-    return plansArray
+    if (!dbPlans) return [];
+    
+    return dbPlans
       .filter((p: any) => 
-        p.network === networkId && 
-        (!category || (p.plan_type || "Standard") === category)
+        (!category || (p.type || "Standard") === category)
       )
       .map((p: any) => ({
-        label: p.plan_name || p.name || `${p.plan_type} ${p.plan_size}`,
-        plan_id: String(p.id || p.plan_id),
-        price: Number(p.plan_amount || p.amount || p.price),
+        label: p.name,
+        plan_id: String(p.plan_id), // Use the KVData plan ID for the API
+        price: Number(p.price),
         raw: p
       }));
-  }, [apiPlans, networkId, category]);
+  }, [dbPlans, category]);
 
   if (isLoading) {
     return (
