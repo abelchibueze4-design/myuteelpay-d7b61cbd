@@ -40,9 +40,6 @@ export const useTransactionPinVerification = () => {
     }
   };
 
-  return { verifyPin, isLoading, error };
-};
-
   const checkIfPinRequired = async (): Promise<boolean> => {
     if (!user?.id) return false;
 
@@ -61,10 +58,5 @@ export const useTransactionPinVerification = () => {
     }
   };
 
-  return {
-    verifyPin,
-    checkIfPinRequired,
-    isLoading,
-    error,
-  };
+  return { verifyPin, checkIfPinRequired, isLoading, error };
 };
