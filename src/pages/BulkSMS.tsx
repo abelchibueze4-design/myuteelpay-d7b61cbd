@@ -21,7 +21,7 @@ const BulkSMS = () => {
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
-  const smsPrice = 2.5; // Fixed price per SMS unit
+  const smsPrice = 6; // ₦6 per SMS unit
 
   const recipientCount = recipients.split(",").filter((r) => r.trim()).length;
   const charCount = message.length;
