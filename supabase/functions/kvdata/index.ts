@@ -15,7 +15,7 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-const KVDATA_BASE = "https://kvdataapi.net/api";
+const KVDATA_BASE = "https://www.kvdataapi.net/api";
 
 async function kvdataRequest(path: string, method: "GET" | "POST", body?: unknown) {
   const token = Deno.env.get("KVDATA_API_KEY");
@@ -30,7 +30,17 @@ async function kvdataRequest(path: string, method: "GET" | "POST", body?: unknow
   };
   if (body && method === "POST") opts.body = JSON.stringify(body);
 
-  const res = await fetch(`${KVDATA_BASE}${path}`, opts);
+  const url = `${KVDATA_BASE}${path}`;
+  console.log(`KVData request: ${method} ${url}`);
+  const res = await fetch(url, opts);
+  const contentType = res.headers.get("content-type") || "";
+
+  if (!contentType.includes("application/json")) {
+    const text = await res.text();
+    console.error("Non-JSON response from KVData:", res.status, text.substring(0, 300));
+    throw new Error(`KVData returned non-JSON response (status ${res.status}) for ${path}`);
+  }
+
   const data = await res.json();
   if (!res.ok) throw new Error(JSON.stringify(data));
   return data;
