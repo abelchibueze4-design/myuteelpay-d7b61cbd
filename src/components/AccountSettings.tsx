@@ -29,6 +29,13 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isOpen, setIsOpen] = useState(open ?? false);
+
+  // Sync internal state with prop
+  useEffect(() => {
+    if (open !== undefined) {
+      setIsOpen(open);
+    }
+  }, [open]);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");

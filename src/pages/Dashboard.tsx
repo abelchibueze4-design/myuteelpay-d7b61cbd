@@ -65,8 +65,14 @@ const Dashboard = () => {
     enabled: !!user,
   });
 
-  const referrerBonus = (referredUsers as any[])?.filter(r => !r.is_claimed).reduce((sum, r) => sum + (r.reward_amount || 10), 0) || 0;
-  const signupBonus = (mySignupReferral && !(mySignupReferral as any).referee_is_claimed) ? (mySignupReferral as any).referee_reward_amount || 10 : 0;
+  const referrerBonus = Array.isArray(referredUsers) 
+    ? referredUsers.filter(r => !r.is_claimed).reduce((sum, r) => sum + (Number(r.reward_amount) || 10), 0) 
+    : 0;
+  
+  const signupBonus = (mySignupReferral && !mySignupReferral.referee_is_claimed) 
+    ? (Number(mySignupReferral.referee_reward_amount) || 10) 
+    : 0;
+    
   const bonusBalance = referrerBonus + signupBonus;
 
   const activeTab = searchParams.get("tab");
@@ -212,7 +218,7 @@ const Dashboard = () => {
                 </DialogContent>
               </Dialog>
 
-              <Link to="/referral?tab=bonus" className="flex-1">
+              <Link to="/services/referral?tab=bonus" className="flex-1">
                 <Button variant="outline" className="w-full h-11 rounded-2xl text-xs font-bold border-2 border-accent/20 text-accent-foreground hover:bg-accent/5 gap-1.5 tap-target">
                   <Gift className="w-4 h-4 text-accent" />
                   <span>Bonus ₦{(bonusBalance || 0).toLocaleString()}</span>

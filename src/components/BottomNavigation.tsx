@@ -5,7 +5,7 @@ const navItems = [
   { icon: Home, label: "Home", path: "/dashboard", key: "home" },
   { icon: Zap, label: "Services", path: "/services", key: "services" },
   { icon: Wallet, label: "Wallet", path: "/dashboard?tab=wallet", key: "wallet" },
-  { icon: Gift, label: "Referrals", path: "/referral", key: "referrals" },
+  { icon: Gift, label: "Referrals", path: "/services/referral", key: "referrals" },
   { icon: User, label: "Profile", path: "/dashboard?tab=settings", key: "profile" },
 ];
 

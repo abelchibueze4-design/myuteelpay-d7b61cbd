@@ -26,18 +26,20 @@ export const DashboardTopBar = () => {
           
           <AccountSettings />
 
-          {/* Avatar with initials or image */}
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt={displayName}
-              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-border"
-            />
-          ) : (
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
-              {initials}
-            </div>
-          )}
+          {/* Avatar with initials or image - Hidden on mobile as BottomNav handles profile */}
+          <div className="hidden sm:block">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={displayName}
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-border"
+              />
+            ) : (
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
+                {initials}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

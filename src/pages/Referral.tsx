@@ -89,13 +89,13 @@ const Referral = () => {
     toast.success("Referral link copied!");
   };
 
-  const unclaimedUsers = (referredUsers as any[])?.filter(r => !r.is_claimed) || [];
+  const unclaimedUsers = Array.isArray(referredUsers) ? referredUsers.filter(r => !r.is_claimed) : [];
   const totalReferrals = unclaimedUsers.length;
 
   // Sum of: Unclaimed Referral rewards + Unclaimed Referee (Signup) reward
-  const referrerBonus = unclaimedUsers.reduce((sum, r) => sum + (r.reward_amount || 10), 0);
-  const signupBonus = (mySignupReferral && !(mySignupReferral as any).referee_is_claimed)
-    ? (mySignupReferral as any).referee_reward_amount || 10
+  const referrerBonus = unclaimedUsers.reduce((sum, r) => sum + (Number(r.reward_amount) || 10), 0);
+  const signupBonus = (mySignupReferral && !mySignupReferral.referee_is_claimed)
+    ? (Number(mySignupReferral.referee_reward_amount) || 10)
     : 0;
 
   const totalEarnings = referrerBonus + signupBonus;
