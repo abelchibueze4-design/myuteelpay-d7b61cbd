@@ -1,15 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-
-const toHex = (bytes: Uint8Array): string =>
-  Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
-
-const sha256Hex = async (value: string): Promise<string> => {
-  const encoded = new TextEncoder().encode(value);
-  const digest = await crypto.subtle.digest("SHA-256", encoded);
-  return toHex(new Uint8Array(digest));
-};
+import bcrypt from "bcryptjs";
 
 export const useTransactionPinVerification = () => {
   const { user } = useAuth();
@@ -47,23 +39,34 @@ export const useTransactionPinVerification = () => {
           return false;
         }
 
+        // Check if it's our previous SHA-256 format (legacy support)
         if (pinHash.startsWith("sha256$")) {
+          // Force reset if legacy format found, or just support it for now.
+          // Let's support it for now to avoid locking users out if they just set it.
           const parts = pinHash.split("$");
-          if (parts.length !== 3) {
-            setError("Incorrect PIN");
-            return false;
+          if (parts.length === 3) {
+            const salt = parts[1];
+            const expectedHash = parts[2];
+            const encoder = new TextEncoder();
+            const data = encoder.encode(salt + pin);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const actualHash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+            
+            if (actualHash === expectedHash) return true;
           }
-          const salt = parts[1];
-          const expectedHash = parts[2];
-          const actualHash = await sha256Hex(`${salt}${pin}`);
-          if (actualHash !== expectedHash) {
-            setError("Incorrect PIN");
-            return false;
-          }
-          return true;
+        }
+        
+        // Try bcrypt compare
+        try {
+          const isMatch = bcrypt.compareSync(pin, pinHash);
+          if (isMatch) return true;
+        } catch (e) {
+          console.error("Bcrypt compare error:", e);
         }
 
-        throw rpcError;
+        setError("Incorrect PIN");
+        return false;
       }
 
       if (data === false) {

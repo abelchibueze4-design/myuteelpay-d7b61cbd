@@ -1,30 +1,17 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import bcrypt from "bcryptjs";
 
 interface SecuritySettings {
   twoFaEnabled: boolean;
   transactionPinEnabled: boolean;
 }
 
-const toHex = (bytes: Uint8Array): string =>
-  Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
-
-const randomHex = (length = 16): string => {
-  const bytes = new Uint8Array(length / 2);
-  crypto.getRandomValues(bytes);
-  return toHex(bytes);
-};
-
-const sha256Hex = async (value: string): Promise<string> => {
-  const encoded = new TextEncoder().encode(value);
-  const digest = await crypto.subtle.digest("SHA-256", encoded);
-  return toHex(new Uint8Array(digest));
-};
-
 export const useSecuritySettings = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSettingsLoading, setIsSettingsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<SecuritySettings>({
     twoFaEnabled: false,
@@ -33,26 +20,35 @@ export const useSecuritySettings = () => {
 
   // Fetch initial settings
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setIsSettingsLoading(false);
+      return;
+    }
 
     const fetchSettings = async () => {
       try {
         const db = supabase as any;
         const { data, error } = await db
           .from("profiles")
-          .select("two_fa_enabled, transaction_pin_enabled")
+          .select("two_fa_enabled, transaction_pin_enabled, transaction_pin_hash")
           .eq("id", user.id)
           .single();
 
         if (error) throw error;
-        const profile = (data || {}) as { two_fa_enabled?: boolean; transaction_pin_enabled?: boolean };
+        const profile = (data || {}) as { two_fa_enabled?: boolean; transaction_pin_enabled?: boolean; transaction_pin_hash?: string };
+        
+        // Check if hash exists effectively
+        const hasPinHash = !!profile.transaction_pin_hash;
+        const isPinEnabled = profile.transaction_pin_enabled || false;
 
         setSettings({
           twoFaEnabled: profile.two_fa_enabled || false,
-          transactionPinEnabled: profile.transaction_pin_enabled || false,
+          transactionPinEnabled: isPinEnabled && hasPinHash,
         });
       } catch (err) {
         console.error("Failed to load security settings:", err);
+      } finally {
+        setIsSettingsLoading(false);
       }
     };
 
@@ -112,14 +108,17 @@ export const useSecuritySettings = () => {
       });
 
       if (rpcError) {
-        const salt = randomHex(16);
-        const hash = await sha256Hex(`${salt}${normalizedPin}`);
-        const fallbackHash = `sha256$${salt}$${hash}`;
-
+        // Fallback to client-side bcrypt hashing if RPC fails (e.g. missing pgcrypto)
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(normalizedPin, salt);
+        // We store it with a prefix to identify it's a bcrypt hash handled by client if needed,
+        // or just store as is. The user requested "transaction_pin" column, but we are using "transaction_pin_hash".
+        // We will stick to the existing column for compatibility but ensure it is hashed.
+        
         const { error: fallbackError } = await supabase
           .from("profiles")
           .update({
-            transaction_pin_hash: fallbackHash,
+            transaction_pin_hash: hash,
             transaction_pin_enabled: true,
             updated_at: new Date().toISOString(),
           })
@@ -216,6 +215,7 @@ export const useSecuritySettings = () => {
   return {
     settings,
     isLoading,
+    isSettingsLoading,
     error,
     updatePassword,
     setTransactionPin,

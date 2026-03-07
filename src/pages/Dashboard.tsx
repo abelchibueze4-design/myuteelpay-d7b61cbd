@@ -13,9 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
+import { SetupTransactionPinModal } from "@/components/SetupTransactionPinModal";
 import { DashboardTopBar } from "@/components/DashboardTopBar";
 import { AccountSettings } from "@/components/AccountSettings";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSecuritySettings } from "@/hooks/useSecuritySettings";
 import { useWallet } from "@/hooks/useWallet";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useFundWallet } from "@/hooks/useFundWallet";
@@ -39,11 +41,21 @@ const Dashboard = () => {
   const { data: wallet } = useWallet();
   const { data: transactions } = useTransactions(5);
   const { initializePayment, verifyPayment, isInitializing } = useFundWallet();
+  const { settings, isSettingsLoading } = useSecuritySettings();
   const [searchParams, setSearchParams] = useSearchParams();
   const [fundOpen, setFundOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [pinSetupOpen, setPinSetupOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [showBalance, setShowBalance] = useState(true);
+
+  useEffect(() => {
+    if (!isSettingsLoading && !settings.transactionPinEnabled) {
+      // Check if user has already skipped or we should force it.
+      // For now, let's just show it if not set.
+      setPinSetupOpen(true);
+    }
+  }, [isSettingsLoading, settings.transactionPinEnabled]);
 
   const { data: referredUsers } = useQuery({
     queryKey: ["referredUsers", user?.id],
@@ -127,6 +139,11 @@ const Dashboard = () => {
             setSearchParams(newParams, { replace: true });
           }
         }} 
+      />
+      <SetupTransactionPinModal
+        open={pinSetupOpen}
+        onComplete={() => setPinSetupOpen(false)}
+        isRequired={false}
       />
       {/* Mobile Header */}
       <div className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-border/30">
