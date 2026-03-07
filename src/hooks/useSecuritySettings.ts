@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import bcrypt from "bcryptjs";
 
 interface SecuritySettings {
-  twoFaEnabled: boolean;
   transactionPinEnabled: boolean;
 }
 
@@ -14,7 +13,6 @@ export const useSecuritySettings = () => {
   const [isSettingsLoading, setIsSettingsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<SecuritySettings>({
-    twoFaEnabled: false,
     transactionPinEnabled: false,
   });
 
@@ -30,19 +28,18 @@ export const useSecuritySettings = () => {
         const db = supabase as any;
         const { data, error } = await db
           .from("profiles")
-          .select("two_fa_enabled, transaction_pin_enabled, transaction_pin_hash")
+          .select("transaction_pin_enabled, transaction_pin_hash")
           .eq("id", user.id)
           .single();
 
         if (error) throw error;
-        const profile = (data || {}) as { two_fa_enabled?: boolean; transaction_pin_enabled?: boolean; transaction_pin_hash?: string };
+        const profile = (data || {}) as { transaction_pin_enabled?: boolean; transaction_pin_hash?: string };
         
         // Check if hash exists effectively
         const hasPinHash = !!profile.transaction_pin_hash;
         const isPinEnabled = profile.transaction_pin_enabled || false;
 
         setSettings({
-          twoFaEnabled: profile.two_fa_enabled || false,
           transactionPinEnabled: isPinEnabled && hasPinHash,
         });
       } catch (err) {
@@ -180,38 +177,6 @@ export const useSecuritySettings = () => {
     }
   };
 
-  const toggleTwoFA = async (enabled: boolean): Promise<boolean> => {
-    if (!user?.id) {
-      setError("User not authenticated");
-      return false;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          two_fa_enabled: enabled,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
-      setSettings((prev) => ({ ...prev, twoFaEnabled: enabled }));
-      return true;
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to update 2FA settings";
-      setError(message);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return {
     settings,
     isLoading,
@@ -220,6 +185,5 @@ export const useSecuritySettings = () => {
     updatePassword,
     setTransactionPin,
     removeTransactionPin,
-    toggleTwoFA,
   };
 };

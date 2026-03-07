@@ -3,7 +3,6 @@ import { Eye, EyeOff, Lock, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { useSecuritySettings } from "@/hooks/useSecuritySettings";
 import { toast } from "sonner";
@@ -16,7 +15,6 @@ export const SecuritySettings = () => {
     updatePassword,
     setTransactionPin,
     removeTransactionPin,
-    toggleTwoFA,
   } = useSecuritySettings();
 
   // Password change state
@@ -36,13 +34,6 @@ export const SecuritySettings = () => {
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [pinErrors, setPinErrors] = useState<Record<string, string>>({});
-
-  // 2FA state
-  const [twoFaEnabled, setTwoFaEnabled] = useState(settings.twoFaEnabled);
-
-  useEffect(() => {
-    setTwoFaEnabled(settings.twoFaEnabled);
-  }, [settings.twoFaEnabled]);
 
   const validatePasswordChange = (): boolean => {
     const errors: Record<string, string> = {};
@@ -129,21 +120,6 @@ export const SecuritySettings = () => {
       toast.success("Transaction PIN removed");
     } else {
       toast.error("Failed to remove transaction PIN");
-    }
-  };
-
-  const handleToggle2FA = async () => {
-    const newState = !twoFaEnabled;
-    const success = await toggleTwoFA(newState);
-    if (success) {
-      setTwoFaEnabled(newState);
-      toast.success(
-        newState
-          ? "Two-factor authentication enabled"
-          : "Two-factor authentication disabled"
-      );
-    } else {
-      toast.error("Failed to update 2FA settings");
     }
   };
 
@@ -305,38 +281,6 @@ export const SecuritySettings = () => {
               </Button>
             </div>
           </form>
-        )}
-      </div>
-
-      {/* Two-Factor Authentication Section */}
-      <div className="border border-border rounded-lg p-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Smartphone className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground">
-                Two-Factor Authentication
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                {twoFaEnabled
-                  ? "Enabled - Extra security for your account"
-                  : "Disabled - Enable for stronger security"}
-              </p>
-            </div>
-          </div>
-          <Switch
-            checked={twoFaEnabled}
-            onCheckedChange={handleToggle2FA}
-            disabled={isLoading}
-          />
-        </div>
-        {twoFaEnabled && (
-          <div className="bg-blue-500/5 border border-blue-500/20 rounded p-3 text-xs text-muted-foreground">
-            Your account is protected with two-factor authentication. You'll be
-            required to enter a code from your authenticator app on login.
-          </div>
         )}
       </div>
 

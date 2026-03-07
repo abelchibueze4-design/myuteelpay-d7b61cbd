@@ -79,13 +79,6 @@ const AdminSettings = () => {
                     <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
-                                <Label className="text-white">Mandatory Two-Factor</Label>
-                                <p className="text-xs text-slate-500">Require 2FA for all administrative accounts</p>
-                            </div>
-                            <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-0.5">
                                 <Label className="text-white">Admin Session Timeout</Label>
                                 <p className="text-xs text-slate-500">Automatically logout admins after inactivity</p>
                             </div>
