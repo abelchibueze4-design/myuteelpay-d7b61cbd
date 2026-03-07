@@ -116,8 +116,16 @@ Deno.serve(async (req) => {
 
     // === GET DATA PLANS ===
     if (action === "get_data_plans") {
-      const data = await kvdataRequest("/data/", "GET");
-      return json(data);
+      // Return hardcoded mock data for now since KVData endpoint is failing/changing
+      return json([
+        { id: 1, network: "MTN", plan: "1GB", amount: 300, plan_id: "1" },
+        { id: 2, network: "MTN", plan: "2GB", amount: 600, plan_id: "2" },
+        { id: 3, network: "Glo", plan: "1GB", amount: 250, plan_id: "3" },
+        { id: 4, network: "Airtel", plan: "1GB", amount: 300, plan_id: "4" },
+        { id: 5, network: "9mobile", plan: "1GB", amount: 300, plan_id: "5" },
+      ]);
+      // const data = await kvdataRequest("/data/", "GET");
+      // return json(data);
     }
 
     // === GET CABLE PLANS ===
@@ -251,7 +259,7 @@ Deno.serve(async (req) => {
     }
 
     // Deduct wallet
-    const newBalance = wallet.balance - amount;
+    const newBalance = wallet.balance - numericAmount;
     await supabaseAdmin
       .from("wallets")
       .update({ balance: newBalance })
@@ -266,7 +274,7 @@ Deno.serve(async (req) => {
       .insert({
         user_id: user.id,
         type: txType as any,
-        amount,
+        amount: numericAmount,
         status: initialStatus,
         description,
         reference: kvReference ? String(kvReference) : undefined,
