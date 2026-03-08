@@ -94,8 +94,10 @@ const Data = () => {
         }
     };
 
+    if (networksLoading) return <ServicePageSkeleton />;
+
     return (
-        <div className="min-h-screen bg-secondary pb-12">
+        <PageTransition className="min-h-screen bg-secondary pb-12">
             <div className="gradient-hero px-4 py-6 mb-6">
                 <div className="container mx-auto">
                     <h1 className="text-lg font-bold text-primary-foreground">Buy Data</h1>
