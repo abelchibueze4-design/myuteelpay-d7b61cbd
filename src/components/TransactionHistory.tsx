@@ -244,31 +244,29 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       <DashboardTopBar />
 
       {/* Header Section */}
-      <div className="relative overflow-hidden bg-primary px-4 pt-10 pb-20 sm:pt-12 lg:px-8">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden bg-primary px-4 pt-6 pb-14 sm:pt-8 lg:px-8">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
         <div className="container mx-auto relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <h1 className="text-3xl font-black text-white tracking-tight">
+              <h1 className="text-xl font-black text-white tracking-tight">
                 {filter === "wallet" ? "Wallet Summary" : filter === "services" ? "Service History" : "Financial Records"}
               </h1>
-              <p className="text-white/60 text-sm mt-1 font-medium italic">
-                {filter === "wallet" ? "All credits, debits, and bonuses" : filter === "services" ? "Track your utility and service payments" : `${transactions?.length ?? 0} total entries documented`}
+              <p className="text-white/60 text-[11px] mt-0.5 font-medium">
+                {filter === "wallet" ? "Credits, debits & bonuses" : filter === "services" ? "Utility & service payments" : `${transactions?.length ?? 0} entries`}
               </p>
             </div>
-            <div className="flex gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl gap-2 h-10 px-4 font-bold">
-                    <Download className="w-4 h-4" /> Export Data
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-2xl border-none shadow-2xl min-w-[180px]">
-                  <DropdownMenuItem onClick={() => handleExport("csv")} className="font-bold py-3 cursor-pointer">Export as CSV</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleExport("pdf")} className="font-bold py-3 cursor-pointer">Export as PDF/Print</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl gap-1.5 h-8 px-3 text-xs font-bold">
+                  <Download className="w-3.5 h-3.5" /> Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="rounded-xl border-none shadow-2xl min-w-[160px]">
+                <DropdownMenuItem onClick={() => handleExport("csv")} className="font-bold py-2 text-xs cursor-pointer">Export as CSV</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport("pdf")} className="font-bold py-2 text-xs cursor-pointer">Export as PDF</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
