@@ -1,4 +1,4 @@
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, Check, CheckCheck, CreditCard, Wallet, Gift, Lock, Users, Settings as SettingsIcon, BellRing } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
