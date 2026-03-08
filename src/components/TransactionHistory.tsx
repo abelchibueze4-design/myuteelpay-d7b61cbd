@@ -7,8 +7,10 @@ import { format, parseISO, isAfter, isBefore, startOfDay, endOfDay } from "date-
 import {
   Search, Filter, ArrowDownLeft, ArrowUpRight, X,
   Calendar, RotateCcw, FileText, Download, ChevronRight,
-  Receipt, MessageCircle, Printer, CalendarIcon, RotateCw,
+  Receipt, MessageCircle, Printer, CalendarIcon, RotateCw, Copy, Share2,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import logo from "@/assets/logo.png";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -174,8 +176,34 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
     }
   };
 
+  const handleCopyRef = (ref: string) => {
+    navigator.clipboard.writeText(ref);
+    toast.success("Reference copied to clipboard");
+  };
+
+  const handleShareReceipt = (t: any) => {
+    const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
+    const text = [
+      `UteelPay Receipt`,
+      `Service: ${TYPE_LABELS[t.type] || t.type}`,
+      `Amount: ${formatAmount(t.amount, t.type)}`,
+      `Status: ${t.status.toUpperCase()}`,
+      `Reference: ${t.reference || t.id}`,
+      `Date: ${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")}`,
+      `Description: ${t.description || "N/A"}`,
+      `\nPowered by UteelPay — www.uteelpay.com`,
+    ].join("\n");
+    if (navigator.share) {
+      navigator.share({ title: "UteelPay Receipt", text });
+    } else {
+      navigator.clipboard.writeText(text);
+      toast.success("Receipt copied to clipboard");
+    }
+  };
+
   const handleDownloadReceipt = (t: any) => {
     const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
+    const qrData = JSON.stringify({ ref: t.reference || t.id, amount: t.amount, status: t.status, date: t.created_at });
     const receiptHtml = `
       <!DOCTYPE html>
       <html>
@@ -184,47 +212,74 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background: #f8f9fa; }
-          .receipt { max-width: 400px; margin: 0 auto; background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
-          .header { text-align: center; border-bottom: 2px dashed #e2e8f0; padding-bottom: 20px; margin-bottom: 20px; }
-          .header h1 { font-size: 22px; color: #7c3aed; font-weight: 800; }
-          .header p { font-size: 11px; color: #94a3b8; margin-top: 4px; }
-          .status { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 8px; }
-          .status.success { background: #ecfdf5; color: #059669; }
-          .status.pending { background: #fffbeb; color: #d97706; }
-          .status.failed { background: #fef2f2; color: #dc2626; }
-          .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
-          .row .label { color: #64748b; font-size: 13px; }
-          .row .value { color: #1e293b; font-size: 13px; font-weight: 600; text-align: right; max-width: 55%; word-break: break-all; }
-          .amount-row { margin-top: 16px; padding: 16px; border-radius: 12px; text-align: center; }
-          .amount-row.credit { background: #ecfdf5; }
-          .amount-row.debit { background: #faf5ff; }
-          .amount { font-size: 28px; font-weight: 800; }
+          .receipt { max-width: 420px; margin: 0 auto; background: white; border-radius: 16px; padding: 0; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden; }
+          .header { background: linear-gradient(135deg, #7c3aed, #9333ea); padding: 28px 24px; text-align: center; color: white; }
+          .header .brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
+          .header .brand img { width: 36px; height: 36px; border-radius: 8px; }
+          .header .brand h1 { font-size: 22px; font-weight: 800; }
+          .header p { font-size: 11px; opacity: 0.7; }
+          .status { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 10px; }
+          .status.success { background: rgba(255,255,255,0.2); color: white; }
+          .status.pending { background: rgba(255,255,255,0.2); color: #fef08a; }
+          .status.failed { background: rgba(255,255,255,0.2); color: #fca5a5; }
+          .amount-row { text-align: center; padding: 20px 24px; border-bottom: 2px dashed #e2e8f0; }
+          .amount-row .label { color: #64748b; font-size: 11px; margin-bottom: 4px; }
+          .amount { font-size: 32px; font-weight: 800; }
           .amount.credit { color: #059669; }
           .amount.debit { color: #7c3aed; }
-          .footer { text-align: center; margin-top: 24px; padding-top: 16px; border-top: 2px dashed #e2e8f0; }
+          .details { padding: 20px 24px; }
+          .details h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700; margin-bottom: 12px; }
+          .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+          .row:last-child { border-bottom: none; }
+          .row .label { color: #64748b; font-size: 12px; }
+          .row .value { color: #1e293b; font-size: 12px; font-weight: 600; text-align: right; max-width: 55%; word-break: break-all; }
+          .qr-section { text-align: center; padding: 16px 24px 8px; border-top: 2px dashed #e2e8f0; }
+          .qr-section p { font-size: 9px; color: #94a3b8; margin-top: 6px; }
+          .footer { text-align: center; padding: 16px 24px 24px; }
           .footer p { font-size: 10px; color: #94a3b8; }
+          .footer .support { margin-top: 8px; font-size: 10px; color: #7c3aed; font-weight: 600; }
         </style>
       </head>
       <body>
         <div class="receipt">
           <div class="header">
-            <h1>UteelPay</h1>
+            <div class="brand">
+              <img src="${window.location.origin}/favicon.png" alt="UteelPay" />
+              <h1>UteelPay</h1>
+            </div>
             <p>Transaction Receipt</p>
-            <span class="status ${t.status}">${t.status}</span>
+            <span class="status ${t.status}">${t.status.toUpperCase()}</span>
           </div>
-          <div class="row"><span class="label">Service</span><span class="value">${TYPE_LABELS[t.type] || t.type}</span></div>
-          <div class="row"><span class="label">Description</span><span class="value">${t.description || 'N/A'}</span></div>
-          <div class="row"><span class="label">Reference</span><span class="value">${t.reference || t.id}</span></div>
-          <div class="row"><span class="label">Date</span><span class="value">${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")}</span></div>
-          <div class="amount-row ${isCredit ? 'credit' : 'debit'}">
-            <p style="font-size:11px;color:#64748b;margin-bottom:4px;">Amount</p>
+          <div class="amount-row">
+            <p class="label">Amount</p>
             <p class="amount ${isCredit ? 'credit' : 'debit'}">${formatAmount(t.amount, t.type)}</p>
+          </div>
+          <div class="details">
+            <h3>Transaction Details</h3>
+            <div class="row"><span class="label">Service</span><span class="value">${TYPE_LABELS[t.type] || t.type}</span></div>
+            <div class="row"><span class="label">Description</span><span class="value">${t.description || 'N/A'}</span></div>
+            <div class="row"><span class="label">Reference</span><span class="value">${t.reference || t.id}</span></div>
+            <div class="row"><span class="label">Transaction ID</span><span class="value" style="font-size:10px;">${t.id}</span></div>
+            <div class="row"><span class="label">Date & Time</span><span class="value">${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm:ss")}</span></div>
+            <div class="row"><span class="label">Payment Method</span><span class="value">Wallet Balance</span></div>
+          </div>
+          <div class="qr-section">
+            <svg id="qr-placeholder" width="80" height="80"></svg>
+            <p>Scan to verify this transaction</p>
           </div>
           <div class="footer">
             <p>Thank you for using UteelPay</p>
-            <p style="margin-top:4px;">For support, contact us on WhatsApp</p>
+            <p class="support">Support: wa.me/2349022334478</p>
+            <p style="margin-top:6px;">www.uteelpay.com</p>
           </div>
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+        <script>
+          var qr = qrcode(0, 'M');
+          qr.addData(${JSON.stringify(qrData)});
+          qr.make();
+          document.getElementById('qr-placeholder').outerHTML = qr.createSvgTag({ cellSize: 3, margin: 0 });
+        </script>
       </body>
       </html>
     `;
@@ -233,7 +288,7 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       printWindow.document.write(receiptHtml);
       printWindow.document.close();
       printWindow.focus();
-      setTimeout(() => printWindow.print(), 500);
+      setTimeout(() => printWindow.print(), 800);
     }
   };
 
@@ -440,12 +495,16 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
           {selectedTx && (() => {
             const t = selectedTx;
             const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
+            const qrData = JSON.stringify({ ref: t.reference || t.id, amount: t.amount, status: t.status });
             return (
               <div ref={receiptRef}>
-                {/* Receipt header */}
-                <div className="bg-primary px-6 pt-8 pb-6 text-center">
-                  <h2 className="text-xl font-black text-white">UteelPay</h2>
-                  <p className="text-white/50 text-xs mt-1">Transaction Receipt</p>
+                {/* Receipt header with logo */}
+                <div className="bg-primary px-6 pt-7 pb-5 text-center">
+                  <div className="flex items-center justify-center gap-2.5 mb-2">
+                    <img src={logo} alt="UteelPay" className="w-9 h-9 rounded-lg object-contain" />
+                    <h2 className="text-xl font-black text-white">UteelPay</h2>
+                  </div>
+                  <p className="text-white/50 text-xs">Transaction Receipt</p>
                   <Badge variant="outline" className={cn("mt-3 text-[10px] font-black uppercase tracking-[0.15em] border-none", STATUS_COLORS[t.status])}>
                     {t.status}
                   </Badge>
@@ -460,18 +519,32 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 </div>
 
                 {/* Details */}
-                <div className="px-6 py-5 space-y-3">
+                <div className="px-6 py-4 space-y-0">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-3">Transaction Details</p>
                   {[
                     ["Service", TYPE_LABELS[t.type] || t.type],
                     ["Description", t.description || "N/A"],
                     ["Reference", t.reference || t.id],
-                    ["Date", format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")],
+                    ["Transaction ID", t.id],
+                    ["Date & Time", format(parseISO(t.created_at), "MMM d, yyyy · HH:mm:ss")],
+                    ["Payment Method", "Wallet Balance"],
                   ].map(([label, value]) => (
-                    <div key={label} className="flex justify-between items-start gap-4">
+                    <div key={label} className="flex justify-between items-start gap-4 py-2 border-b border-border/30 last:border-0">
                       <span className="text-xs text-muted-foreground font-medium shrink-0">{label}</span>
-                      <span className="text-xs font-bold text-foreground text-right break-all">{value}</span>
+                      <span className="text-xs font-bold text-foreground text-right break-all max-w-[60%]">{value}</span>
                     </div>
                   ))}
+                </div>
+
+                {/* QR Code */}
+                <div className="flex flex-col items-center py-4 border-t border-dashed border-border/50">
+                  <QRCodeSVG
+                    value={qrData}
+                    size={80}
+                    level="M"
+                    className="rounded"
+                  />
+                  <p className="text-[9px] text-muted-foreground mt-2">Scan to verify this transaction</p>
                 </div>
 
                 {/* Actions */}
@@ -481,14 +554,30 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                       onClick={() => handleDownloadReceipt(t)}
                       className="flex-1 rounded-2xl h-12 font-bold gap-2 bg-primary hover:bg-primary/90"
                     >
-                      <Printer className="w-4 h-4" /> Receipt
+                      <Printer className="w-4 h-4" /> Print
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleShareReceipt(t)}
+                      className="flex-1 rounded-2xl h-12 font-bold gap-2 border-2"
+                    >
+                      <Share2 className="w-4 h-4" /> Share
+                    </Button>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleCopyRef(t.reference || t.id)}
+                      className="flex-1 rounded-2xl h-11 font-bold gap-2 border-2 text-xs"
+                    >
+                      <Copy className="w-3.5 h-3.5" /> Copy Ref
                     </Button>
                     <Button
                       variant="outline"
                       onClick={() => handleReportTransaction(t)}
-                      className="flex-1 rounded-2xl h-12 font-bold gap-2 border-2 border-green-500 text-green-600 hover:bg-green-50"
+                      className="flex-1 rounded-2xl h-11 font-bold gap-2 border-2 border-green-500 text-green-600 hover:bg-green-50 text-xs"
                     >
-                      <MessageCircle className="w-4 h-4" /> Report
+                      <MessageCircle className="w-3.5 h-3.5" /> Report
                     </Button>
                   </div>
                   {SERVICE_ROUTES[t.type] && (
