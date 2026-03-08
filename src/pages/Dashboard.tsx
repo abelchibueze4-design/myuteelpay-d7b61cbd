@@ -282,16 +282,16 @@ const Dashboard = () => {
         {/* KYC Banner */}
         {!isKycVerified && (
           <Link to="/kyc">
-            <div className="fintech-card p-4 border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 hover:shadow-md transition-all">
+            <div className="fintech-card p-4 border-2 border-amber-500/30 bg-amber-500/10 hover:shadow-md transition-all">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-5 h-5 text-amber-600" />
+                <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-extrabold text-foreground">Complete KYC Verification</p>
                   <p className="text-[10px] text-muted-foreground">Your balance limit is ₦{BALANCE_LIMIT_UNVERIFIED.toLocaleString()}. Verify to unlock premium services.</p>
                 </div>
-                <ArrowRight className="w-4 h-4 text-amber-600 shrink-0" />
+                <ArrowRight className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
               </div>
             </div>
           </Link>
