@@ -8,6 +8,7 @@ import ibedcLogo from "@/assets/ibedc-logo.png";
 import kaedcoLogo from "@/assets/kaedco-logo.png";
 import eedcLogo from "@/assets/eedc-logo.png";
 import bedcLogo from "@/assets/bedc-logo.png";
+import yedcLogo from "@/assets/yedc-logo.png";
 import { cn } from "@/lib/utils";
 import { Zap } from "lucide-react";
 
