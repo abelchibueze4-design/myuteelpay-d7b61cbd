@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { passwordRules, validatePassword, validateUsername } from "@/lib/passwordValidation";
+import logo from "@/assets/logo.png";
 
 const Signup = () => {
   const [searchParams] = useSearchParams();
@@ -53,7 +54,7 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center bg-secondary px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link to="/" className="text-2xl font-bold text-gradient">Uteelpay</Link>
+          <Link to="/" className="inline-block"><img src={logo} alt="Uteelpay" className="h-12 w-auto mx-auto" /></Link>
           <h1 className="text-2xl font-bold mt-4">Create Account</h1>
           <p className="text-sm text-muted-foreground mt-1">Join thousands of Nigerians saving on bills</p>
         </div>

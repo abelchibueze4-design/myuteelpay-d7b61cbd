@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import {
   Smartphone, Tv, Zap, MessageSquare, GraduationCap,
@@ -80,8 +81,8 @@ function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border hidden lg:flex">
       <SidebarContent className="flex flex-col h-full">
         <div className="p-4 flex items-center gap-2">
-          {!collapsed && <span className="text-xl font-bold text-gradient">Uteelpay</span>}
-          {collapsed && <span className="text-xl font-bold text-gradient">U</span>}
+          {!collapsed && <span className="flex items-center gap-2"><img src={logo} alt="Uteelpay" className="h-7 w-auto" /><span className="text-xl font-bold text-gradient">Uteelpay</span></span>}
+          {collapsed && <img src={logo} alt="U" className="h-7 w-auto" />}
         </div>
 
         <SidebarGroup>
@@ -182,7 +183,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             <SidebarTrigger className="mr-4">
               <Menu className="h-5 w-5" />
             </SidebarTrigger>
-            <span className="text-lg font-bold text-gradient">Uteelpay</span>
+            <span className="flex items-center gap-2"><img src={logo} alt="Uteelpay" className="h-7 w-auto" /><span className="text-lg font-bold text-gradient">Uteelpay</span></span>
           </header>
           <main className="flex-1 overflow-auto pb-20 lg:pb-0">{children}</main>
           {/* Mobile bottom nav */}
