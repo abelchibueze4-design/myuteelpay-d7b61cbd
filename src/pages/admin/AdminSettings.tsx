@@ -38,7 +38,7 @@ const AdminSettings = () => {
 
     // Security settings
     const [forceTransactionPin, setForceTransactionPin] = useState(false);
-    const [maxLoginAttempts, setMaxLoginAttempts] = useState("5");
+    const [maxLoginAttempts, setMaxLoginAttempts] = useState("15");
     const [minPasswordLength, setMinPasswordLength] = useState("8");
     const [requireKycForTransactions, setRequireKycForTransactions] = useState(false);
     const [disableSuspiciousAccounts, setDisableSuspiciousAccounts] = useState(true);
@@ -72,7 +72,7 @@ const AdminSettings = () => {
             setPlatformName(d.platform_name as string ?? "UteelPay");
             setSessionTimeout(d.session_timeout as string ?? "30m");
             setForceTransactionPin(d.force_transaction_pin as boolean ?? false);
-            setMaxLoginAttempts(String(d.max_login_attempts ?? "5"));
+            setMaxLoginAttempts(String(d.max_login_attempts ?? "15"));
             setMinPasswordLength(String(d.min_password_length ?? "8"));
             setRequireKycForTransactions(d.require_kyc_for_transactions as boolean ?? false);
             setDisableSuspiciousAccounts(d.disable_suspicious_accounts as boolean ?? true);
