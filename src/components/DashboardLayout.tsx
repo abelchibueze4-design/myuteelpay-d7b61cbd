@@ -31,6 +31,7 @@ const mainItems = [
   { title: "Fund Wallet", url: "/dashboard?fund=true", icon: Plus },
   { title: "Wallet History", url: "/dashboard?tab=wallet", icon: Wallet },
   { title: "History", url: "/dashboard?tab=history", icon: History },
+  { title: "KYC Verification", url: "/kyc", icon: ShieldCheck },
   { title: "Referral", url: "/referral", icon: Gift },
   { title: "Bonus to Wallet", url: "/referral?tab=bonus", icon: Coins },
 ];

@@ -126,6 +126,13 @@ const Dashboard = () => {
   const handleFund = () => {
     const val = Number(amount);
     if (!val || val < 100) { toast.error("Minimum amount is ₦100"); return; }
+    if (!isKycVerified) {
+      const currentBalance = wallet?.balance ?? 0;
+      if (currentBalance + val > BALANCE_LIMIT_UNVERIFIED) {
+        toast.error(`Without KYC, your balance cannot exceed ₦${BALANCE_LIMIT_UNVERIFIED.toLocaleString()}. Complete KYC to remove this limit.`);
+        return;
+      }
+    }
     setFundOpen(false);
     initializePayment(val);
   };
