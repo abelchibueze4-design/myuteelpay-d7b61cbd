@@ -7,8 +7,10 @@ import { format, parseISO, isAfter, isBefore, startOfDay, endOfDay } from "date-
 import {
   Search, Filter, ArrowDownLeft, ArrowUpRight, X,
   Calendar, RotateCcw, FileText, Download, ChevronRight,
-  Receipt, MessageCircle, Printer, CalendarIcon, RotateCw,
+  Receipt, MessageCircle, Printer, CalendarIcon, RotateCw, Copy, Share2,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import logo from "@/assets/logo.png";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
