@@ -172,11 +172,32 @@ const WalletFinance = () => {
 
             {/* Internal Ledger */}
             <div className="bg-card border border-border rounded-2xl">
-                <div className="flex items-center justify-between p-6 border-b border-border">
+                <div className="flex items-center justify-between p-6 border-b border-border flex-wrap gap-3">
                     <div>
                         <h3 className="font-bold text-base">Internal Ledger</h3>
                         <p className="text-xs text-muted-foreground">Recent financial movements</p>
                     </div>
+                    <DateRangeExport
+                        reportTitle="Internal Ledger"
+                        headers={["Type", "User", "Debit", "Credit", "Status", "Date"]}
+                        getFilteredData={(from, to) => {
+                            const rows = allTx.filter((t) => {
+                                const d = new Date(t.created_at);
+                                const mf = !from || !isBefore(d, startOfDay(from));
+                                const mt = !to || !isAfter(d, endOfDay(to));
+                                return mf && mt;
+                            });
+                            return rows.map((t) => [
+                                (t.type || "tx").replace(/_/g, " "),
+                                t.user_name,
+                                t.amount < 0 ? `₦${Math.abs(t.amount).toLocaleString()}` : "—",
+                                t.amount >= 0 ? `₦${t.amount.toLocaleString()}` : "—",
+                                t.status,
+                                format(new Date(t.created_at), "yyyy-MM-dd HH:mm"),
+                            ]);
+                        }}
+                        compact
+                    />
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
