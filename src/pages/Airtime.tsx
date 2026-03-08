@@ -101,11 +101,48 @@ const Airtime = () => {
                                 value={phone} 
                                 onChange={(e) => setPhone(e.target.value)} 
                                 placeholder="080X XXX XXXX" 
-                                className="h-14 rounded-2xl border-2 border-border/50 pl-12 focus-visible:ring-primary/20 bg-secondary/20 font-bold" 
+                                className="h-14 rounded-2xl border-2 border-border/50 pl-12 pr-12 focus-visible:ring-primary/20 bg-secondary/20 font-bold" 
                                 type="tel" 
                                 required 
                             />
+                            {phone.length >= 10 && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (isFavorited(phone)) {
+                                            const fav = favorites.find(f => f.identifier === phone);
+                                            if (fav) removeFavorite.mutate(fav.id);
+                                        } else {
+                                            addFavorite.mutate({ label: phone, identifier: phone, metadata: { network: network?.network_name } });
+                                        }
+                                    }}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1"
+                                    title={isFavorited(phone) ? "Remove from favorites" : "Save to favorites"}
+                                >
+                                    <Star className={`w-4 h-4 transition-colors ${isFavorited(phone) ? "fill-accent text-accent" : "text-muted-foreground"}`} />
+                                </button>
+                            )}
                         </div>
+                        {/* Saved numbers */}
+                        {favorites.length > 0 && (
+                            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                                {favorites.map((fav) => (
+                                    <button
+                                        key={fav.id}
+                                        type="button"
+                                        onClick={() => setPhone(fav.identifier)}
+                                        className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-bold transition-all ${
+                                            phone === fav.identifier 
+                                                ? "border-primary bg-primary/5 text-primary" 
+                                                : "border-border/50 text-muted-foreground hover:border-primary/30"
+                                        }`}
+                                    >
+                                        <Star className="w-3 h-3 fill-accent text-accent" />
+                                        {fav.identifier}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-3">
