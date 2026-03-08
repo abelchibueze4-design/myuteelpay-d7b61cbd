@@ -158,6 +158,14 @@ function App() {
                   </ProtectedWithLayout>
                 }
               />
+              <Route
+                path="/kyc"
+                element={
+                  <ProtectedWithLayout>
+                    <KycVerification />
+                  </ProtectedWithLayout>
+                }
+              />
               <Route path="/faqs" element={<FAQs />} />
 
               {/* Admin Protected Routes */}
