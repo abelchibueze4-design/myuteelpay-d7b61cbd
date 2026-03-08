@@ -201,8 +201,8 @@ const Dashboard = () => {
             <div className="flex gap-2.5">
               <Dialog open={fundOpen} onOpenChange={setFundOpen}>
                 <DialogTrigger asChild>
-                   <Button className="flex-1 bg-white text-primary font-bold h-11 rounded-2xl text-sm gap-1.5 tap-target hover:bg-white/90">
-                     <Plus className="w-4 h-4" /> Add Money
+                   <Button className="flex-1 bg-white/95 text-primary font-bold h-11 rounded-2xl text-sm gap-1.5 tap-target hover:bg-white shadow-lg shadow-black/10">
+                     <Plus className="w-4 h-4 text-primary" /> Add Money
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="rounded-3xl border-none shadow-2xl max-w-[380px] mx-auto">
@@ -235,9 +235,9 @@ const Dashboard = () => {
               </Dialog>
 
               <Link to="/services/referral?tab=bonus" className="flex-1">
-                <Button variant="outline" className="w-full h-11 rounded-2xl text-xs font-bold border-2 border-white/30 text-white hover:bg-white/10 gap-1.5 tap-target">
-                  <Gift className="w-4 h-4 text-white/80" />
-                  <span>Bonus ₦{(bonusBalance || 0).toLocaleString()}</span>
+                 <Button variant="outline" className="w-full h-11 rounded-2xl text-xs font-bold border-2 border-white/40 bg-white/15 text-white hover:bg-white/25 gap-1.5 tap-target backdrop-blur-sm">
+                   <Gift className="w-4 h-4 text-accent" />
+                   <span>Bonus ₦{(bonusBalance || 0).toLocaleString()}</span>
                 </Button>
               </Link>
             </div>
