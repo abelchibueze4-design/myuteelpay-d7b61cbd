@@ -24,7 +24,7 @@ const defaults: PlatformSettings = {
   platform_name: "UteelPay",
   session_timeout: "30m",
   force_transaction_pin: false,
-  max_login_attempts: 5,
+  max_login_attempts: 15,
   min_password_length: 8,
   require_kyc_for_transactions: false,
   disable_suspicious_accounts: true,
