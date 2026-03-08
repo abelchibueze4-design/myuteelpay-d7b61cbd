@@ -427,7 +427,7 @@ const Reconciliation = () => {
                                 <TableRow>
                                     <TableCell colSpan={9} className="text-center text-muted-foreground py-16 italic">
                                         {statusFilter === "all"
-                                            ? "No reconciliation cases detected. System is clean ✅"
+                                            ? "No reconciliation cases detected. System is clean."
                                             : `No ${statusFilter} cases found.`}
                                     </TableCell>
                                 </TableRow>
