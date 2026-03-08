@@ -316,7 +316,7 @@ const Footer = () => (
       {/* Desktop: multi-column footer */}
       <div className="hidden lg:grid lg:grid-cols-4 gap-8 mb-8">
         <div>
-          <p className="font-extrabold text-gradient text-xl mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-7 w-auto" /> Uteelpay</p>
+          <p className="font-extrabold text-gradient text-xl mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-10 w-auto" /> Uteelpay</p>
           <p className="text-sm text-muted-foreground leading-relaxed">Nigeria's trusted platform for fast utility payments with zero hidden fees.</p>
         </div>
         <div>
