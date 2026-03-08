@@ -10,7 +10,27 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export const SecuritySettings = () => {
+const PinInput = ({ id, value, onChange, error, placeholder }: {
+  id: string; value: string; onChange: (v: string) => void; error?: string; placeholder?: string;
+}) => (
+  <div>
+    <Input
+      id={id}
+      type="password"
+      maxLength={4}
+      inputMode="numeric"
+      value={value}
+      onChange={(e) => {
+        const val = e.target.value.replace(/\D/g, "");
+        if (val.length <= 4) onChange(val);
+      }}
+      className={error ? "border-destructive" : ""}
+      placeholder={placeholder || "Enter 4 digits"}
+    />
+    {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+  </div>
+);
+
   const {
     settings,
     isLoading,
