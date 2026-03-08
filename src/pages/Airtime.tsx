@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkIcon } from "@/components/NetworkIcon";
 import { Smartphone, Check, Loader2, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
@@ -13,6 +12,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 import { useFavorites } from "@/hooks/useFavorites";
+import { PageTransition, ScaleTap } from "@/components/PageTransition";
+import { ServicePageSkeleton } from "@/components/DashboardSkeleton";
+import { TransactionResultScreen } from "@/components/TransactionResultScreen";
+import { useSmartNetworkDefault } from "@/hooks/useSmartNetworkDefault";
 
 const Airtime = () => {
     const navigate = useNavigate();
