@@ -115,27 +115,46 @@ const Electricity = () => {
         <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Distribution Company</label>
-            <div className="grid grid-cols-3 gap-2">
-              {isLoadingDiscos ? (
-                <div className="col-span-3 flex justify-center py-4">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setDiscoDropdownOpen(!discoDropdownOpen)}
+                className="w-full flex items-center justify-between gap-3 px-3 py-3 rounded-xl border-2 border-border bg-card text-left transition-all hover:border-primary/30"
+              >
+                {disco && discos ? (
+                  <div className="flex items-center gap-3">
+                    <DiscoIcon discoName={discos.find(d => String(d.disco_id) === disco)?.disco_name || ""} />
+                    <span className="text-sm font-medium">{discos.find(d => String(d.disco_id) === disco)?.disco_name}</span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground">Select distribution company</span>
+                )}
+                <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${discoDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {discoDropdownOpen && (
+                <div className="absolute z-50 mt-1 w-full bg-card border border-border rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                  {isLoadingDiscos ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    discos?.map((d) => (
+                      <button
+                        key={d.disco_id}
+                        type="button"
+                        onClick={() => { setDisco(String(d.disco_id)); setCustomerName(""); setDiscoDropdownOpen(false); }}
+                        className={`w-full flex items-center gap-3 px-3 py-3 transition-all hover:bg-primary/5 ${
+                          disco === String(d.disco_id) ? "bg-primary/5" : ""
+                        } first:rounded-t-xl last:rounded-b-xl`}
+                      >
+                        <DiscoIcon discoName={d.disco_name} />
+                        <span className="text-sm font-medium">{d.disco_name}</span>
+                        {disco === String(d.disco_id) && <Check className="w-4 h-4 text-primary ml-auto" />}
+                      </button>
+                    ))
+                  )}
                 </div>
-              ) : (
-                discos?.map((d) => (
-                  <button
-                    key={d.disco_id}
-                    type="button"
-                    onClick={() => { setDisco(String(d.disco_id)); setCustomerName(""); }}
-                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
-                      disco === String(d.disco_id)
-                        ? "border-primary bg-primary/5 shadow-sm"
-                        : "border-border bg-card hover:border-primary/30"
-                    }`}
-                  >
-                    <DiscoIcon discoName={d.disco_name} />
-                    <span className="text-[10px] font-medium text-center leading-tight line-clamp-2">{d.disco_name}</span>
-                  </button>
-                ))
               )}
             </div>
           </div>
