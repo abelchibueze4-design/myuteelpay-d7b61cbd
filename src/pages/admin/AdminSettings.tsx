@@ -38,7 +38,7 @@ const AdminSettings = () => {
 
     // Security settings
     const [forceTransactionPin, setForceTransactionPin] = useState(false);
-    const [maxLoginAttempts, setMaxLoginAttempts] = useState("5");
+    const [maxLoginAttempts, setMaxLoginAttempts] = useState("15");
     const [minPasswordLength, setMinPasswordLength] = useState("8");
     const [requireKycForTransactions, setRequireKycForTransactions] = useState(false);
     const [disableSuspiciousAccounts, setDisableSuspiciousAccounts] = useState(true);
