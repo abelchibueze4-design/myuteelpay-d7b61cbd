@@ -47,7 +47,6 @@ const serviceItems = [
 ];
 
 const otherItems = [
-  { title: "Settings", url: "#", icon: Settings, isSettings: true },
   { title: "FAQs", url: "/faqs", icon: HelpCircle },
 ];
 
