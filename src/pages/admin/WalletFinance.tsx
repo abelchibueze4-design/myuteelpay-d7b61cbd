@@ -74,6 +74,32 @@ const WalletFinance = () => {
         }
     };
 
+    const handleLedgerExport = (type: "csv" | "pdf", from?: Date, to?: Date) => {
+        const rows = allTx.filter((t) => {
+            const d = new Date(t.created_at);
+            const mf = !from || !isBefore(d, startOfDay(from));
+            const mt = !to || !isAfter(d, endOfDay(to));
+            return mf && mt;
+        });
+        const headers = ["Type", "User", "Debit", "Credit", "Status", "Date"];
+        const data = rows.map((t) => [
+            (t.type || "tx").replace(/_/g, " "),
+            t.user_name,
+            t.amount < 0 ? `₦${Math.abs(t.amount).toLocaleString()}` : "—",
+            t.amount >= 0 ? `₦${t.amount.toLocaleString()}` : "—",
+            t.status,
+            format(new Date(t.created_at), "yyyy-MM-dd HH:mm"),
+        ]);
+
+        if (type === "csv") {
+            exportToCSV(headers, data, "internal_ledger");
+            toast.success("Ledger exported to CSV");
+        } else {
+            printPDF("Internal Ledger Report", headers, data);
+            toast.success("PDF report generated");
+        }
+    };
+
     return (
         <div className="max-w-screen-2xl space-y-8">
             <PageHeader
