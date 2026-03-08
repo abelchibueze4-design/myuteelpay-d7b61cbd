@@ -57,7 +57,7 @@ function AppSidebar() {
   const { signOut, user } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  
 
   const handleLogout = async () => {
     if (isMobile) setOpenMobile(false);
