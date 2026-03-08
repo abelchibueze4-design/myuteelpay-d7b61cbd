@@ -25,7 +25,7 @@ const menuItems = [
 const SettingsPage = () => {
   const [, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const handleBack = () => {
     if (activeSection) {
