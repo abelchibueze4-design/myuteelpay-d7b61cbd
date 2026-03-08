@@ -16,15 +16,15 @@ export const PriceCard = ({ label, price, onClick, className, active }: PriceCar
       variant="outline"
       onClick={onClick}
       className={cn(
-        "flex flex-col items-start p-4 h-auto rounded-2xl border-2 transition-all text-left w-full",
+        "flex flex-col items-center justify-center p-3 h-auto rounded-xl border-2 transition-all text-center w-full min-h-[72px]",
         active 
           ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
           : "border-border/50 hover:border-primary/30",
         className
       )}
     >
-      <span className="font-bold text-sm tracking-tight mb-1">{label}</span>
-      <span className="text-xs text-primary font-black uppercase tracking-wider">₦{price.toLocaleString()}</span>
+      <span className="font-bold text-xs tracking-tight mb-0.5 line-clamp-2">{label}</span>
+      <span className="text-[11px] text-primary font-black uppercase tracking-wider">₦{price.toLocaleString()}</span>
     </Button>
   );
 };
