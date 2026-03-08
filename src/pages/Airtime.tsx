@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkIcon } from "@/components/NetworkIcon";
-import { Smartphone, Check, Loader2 } from "lucide-react";
+import { Smartphone, Check, Loader2, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -12,6 +12,7 @@ import { AirtimePrices } from "@/components/services/AirtimePrices";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTransactionGuard } from "@/hooks/useTransactionGuard";
+import { useFavorites } from "@/hooks/useFavorites";
 
 const Airtime = () => {
     const navigate = useNavigate();
