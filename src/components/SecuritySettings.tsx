@@ -1,10 +1,13 @@
-import { useState, useEffect } from "react";
-import { Eye, EyeOff, Lock, Smartphone } from "lucide-react";
+import { useState } from "react";
+import { Eye, EyeOff, Lock, KeyRound, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { useSecuritySettings } from "@/hooks/useSecuritySettings";
+import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const SecuritySettings = () => {
@@ -16,6 +19,8 @@ export const SecuritySettings = () => {
     setTransactionPin,
     removeTransactionPin,
   } = useSecuritySettings();
+  const { verifyPin } = useTransactionPinVerification();
+  const { user } = useAuth();
 
   // Password change state
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -25,103 +30,142 @@ export const SecuritySettings = () => {
   const [showCurrentPass, setShowCurrentPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
-  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>(
-    {}
-  );
+  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
 
-  // Transaction PIN state
-  const [showPinSetup, setShowPinSetup] = useState(false);
+  // PIN change state
+  const [pinMode, setPinMode] = useState<null | "change" | "reset">(null);
+  const [currentPin, setCurrentPin] = useState("");
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
+  const [pinVerified, setPinVerified] = useState(false);
   const [pinErrors, setPinErrors] = useState<Record<string, string>>({});
 
+  // Reset PIN state
+  const [resetPassword, setResetPassword] = useState("");
+  const [showResetPass, setShowResetPass] = useState(false);
+  const [resetPasswordVerified, setResetPasswordVerified] = useState(false);
+
+  const resetPinForm = () => {
+    setPinMode(null);
+    setCurrentPin("");
+    setNewPin("");
+    setConfirmPin("");
+    setPinVerified(false);
+    setPinErrors({});
+    setResetPassword("");
+    setResetPasswordVerified(false);
+  };
+
+  // === Password Validation ===
   const validatePasswordChange = (): boolean => {
     const errors: Record<string, string> = {};
-
-    if (!currentPassword) {
-      errors.currentPassword = "Current password is required";
-    }
-
-    if (!newPassword) {
-      errors.newPassword = "New password is required";
-    } else if (newPassword.length < 8) {
-      errors.newPassword = "Password must be at least 8 characters";
-    }
-
-    if (!confirmPassword) {
-      errors.confirmPassword = "Please confirm your password";
-    } else if (newPassword !== confirmPassword) {
-      errors.confirmPassword = "Passwords do not match";
-    }
-
-    if (currentPassword === newPassword) {
-      errors.newPassword = "New password must be different from current";
-    }
-
+    if (!currentPassword) errors.currentPassword = "Current password is required";
+    if (!newPassword) errors.newPassword = "New password is required";
+    else if (newPassword.length < 8) errors.newPassword = "Password must be at least 8 characters";
+    if (!confirmPassword) errors.confirmPassword = "Please confirm your password";
+    else if (newPassword !== confirmPassword) errors.confirmPassword = "Passwords do not match";
+    if (currentPassword === newPassword) errors.newPassword = "New password must be different from current";
     setPasswordErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validatePasswordChange()) return;
-
     const success = await updatePassword(currentPassword, newPassword);
     if (success) {
       toast.success("Password changed successfully");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+      setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
       setShowPasswordChange(false);
     } else {
       toast.error("Failed to change password");
     }
   };
 
-  const validatePinSetup = (): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (!newPin) {
-      errors.pin = "PIN is required";
-    } else if (!/^\d{4}$/.test(newPin)) {
-      errors.pin = "PIN must be exactly 4 digits";
+  // === Verify Current PIN ===
+  const handleVerifyCurrentPin = async () => {
+    if (!/^\d{4}$/.test(currentPin)) {
+      setPinErrors({ currentPin: "Enter your current 4-digit PIN" });
+      return;
     }
-
-    if (!confirmPin) {
-      errors.confirmPin = "Please confirm your PIN";
-    } else if (newPin !== confirmPin) {
-      errors.confirmPin = "PINs do not match";
+    const valid = await verifyPin(currentPin);
+    if (valid) {
+      setPinVerified(true);
+      setPinErrors({});
+      toast.success("Current PIN verified");
+    } else {
+      setPinErrors({ currentPin: "Incorrect PIN" });
     }
-
-    setPinErrors(errors);
-    return Object.keys(errors).length === 0;
   };
 
-  const handleSetTransactionPin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // === Verify Password for Reset ===
+  const handleVerifyPasswordForReset = async () => {
+    if (!resetPassword) {
+      setPinErrors({ resetPassword: "Enter your account password" });
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: user?.email || "",
+        password: resetPassword,
+      });
+      if (error) {
+        setPinErrors({ resetPassword: "Incorrect password" });
+        return;
+      }
+      setResetPasswordVerified(true);
+      setPinErrors({});
+      toast.success("Password verified. Set your new PIN.");
+    } catch {
+      setPinErrors({ resetPassword: "Verification failed" });
+    }
+  };
 
-    if (!validatePinSetup()) return;
+  // === Set New PIN ===
+  const handleSetNewPin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const errors: Record<string, string> = {};
+    if (!newPin) errors.pin = "PIN is required";
+    else if (!/^\d{4}$/.test(newPin)) errors.pin = "PIN must be exactly 4 digits";
+    if (!confirmPin) errors.confirmPin = "Please confirm your PIN";
+    else if (newPin !== confirmPin) errors.confirmPin = "PINs do not match";
+    if (Object.keys(errors).length > 0) { setPinErrors(errors); return; }
 
     const success = await setTransactionPin(newPin);
     if (success) {
-      toast.success("Transaction PIN set successfully");
-      setNewPin("");
-      setConfirmPin("");
-      setShowPinSetup(false);
+      toast.success(pinMode === "reset" ? "PIN reset successfully" : "PIN changed successfully");
+      resetPinForm();
     } else {
-      toast.error(hookError || "Failed to set transaction PIN");
+      toast.error(hookError || "Failed to set PIN");
     }
   };
 
-  const handleRemoveTransactionPin = async () => {
+  const handleRemovePin = async () => {
     const success = await removeTransactionPin();
-    if (success) {
-      toast.success("Transaction PIN removed");
-    } else {
-      toast.error("Failed to remove transaction PIN");
-    }
+    if (success) toast.success("Transaction PIN removed");
+    else toast.error("Failed to remove PIN");
   };
+
+  const PinInput = ({ id, value, onChange, error, placeholder }: {
+    id: string; value: string; onChange: (v: string) => void; error?: string; placeholder?: string;
+  }) => (
+    <div>
+      <Input
+        id={id}
+        type="password"
+        maxLength={4}
+        inputMode="numeric"
+        value={value}
+        onChange={(e) => {
+          const val = e.target.value.replace(/\D/g, "");
+          if (val.length <= 4) onChange(val);
+        }}
+        className={error ? "border-destructive" : ""}
+        placeholder={placeholder || "Enter 4 digits"}
+      />
+      {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -134,151 +178,56 @@ export const SecuritySettings = () => {
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Change Password</h3>
-              <p className="text-xs text-muted-foreground">
-                Update your account password
-              </p>
+              <p className="text-xs text-muted-foreground">Update your account password</p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowPasswordChange(!showPasswordChange)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowPasswordChange(!showPasswordChange)}>
             {showPasswordChange ? "Cancel" : "Edit"}
           </Button>
         </div>
 
         {showPasswordChange && (
           <form onSubmit={handleChangePassword} className="space-y-4 pt-4">
-            {/* Current Password */}
             <div>
               <Label htmlFor="currentPassword">Current Password</Label>
               <div className="relative">
-                <Input
-                  id="currentPassword"
-                  type={showCurrentPass ? "text" : "password"}
-                  value={currentPassword}
-                  onChange={(e) => {
-                    setCurrentPassword(e.target.value);
-                    if (passwordErrors.currentPassword) {
-                      setPasswordErrors({
-                        ...passwordErrors,
-                        currentPassword: "",
-                      });
-                    }
-                  }}
-                  className={passwordErrors.currentPassword ? "border-destructive" : ""}
-                  placeholder="Enter current password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowCurrentPass(!showCurrentPass)}
-                  className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  {showCurrentPass ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
+                <Input id="currentPassword" type={showCurrentPass ? "text" : "password"} value={currentPassword}
+                  onChange={(e) => { setCurrentPassword(e.target.value); if (passwordErrors.currentPassword) setPasswordErrors({ ...passwordErrors, currentPassword: "" }); }}
+                  className={passwordErrors.currentPassword ? "border-destructive" : ""} placeholder="Enter current password" />
+                <button type="button" onClick={() => setShowCurrentPass(!showCurrentPass)} className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground">
+                  {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {passwordErrors.currentPassword && (
-                <p className="text-xs text-destructive mt-1">
-                  {passwordErrors.currentPassword}
-                </p>
-              )}
+              {passwordErrors.currentPassword && <p className="text-xs text-destructive mt-1">{passwordErrors.currentPassword}</p>}
             </div>
-
-            {/* New Password */}
             <div>
               <Label htmlFor="newPassword">New Password</Label>
               <div className="relative">
-                <Input
-                  id="newPassword"
-                  type={showNewPass ? "text" : "password"}
-                  value={newPassword}
-                  onChange={(e) => {
-                    setNewPassword(e.target.value);
-                    if (passwordErrors.newPassword) {
-                      setPasswordErrors({ ...passwordErrors, newPassword: "" });
-                    }
-                  }}
-                  className={passwordErrors.newPassword ? "border-destructive" : ""}
-                  placeholder="Enter new password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPass(!showNewPass)}
-                  className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  {showNewPass ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
+                <Input id="newPassword" type={showNewPass ? "text" : "password"} value={newPassword}
+                  onChange={(e) => { setNewPassword(e.target.value); if (passwordErrors.newPassword) setPasswordErrors({ ...passwordErrors, newPassword: "" }); }}
+                  className={passwordErrors.newPassword ? "border-destructive" : ""} placeholder="Enter new password" />
+                <button type="button" onClick={() => setShowNewPass(!showNewPass)} className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground">
+                  {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {passwordErrors.newPassword && (
-                <p className="text-xs text-destructive mt-1">
-                  {passwordErrors.newPassword}
-                </p>
-              )}
+              {passwordErrors.newPassword && <p className="text-xs text-destructive mt-1">{passwordErrors.newPassword}</p>}
               {newPassword && <PasswordStrengthIndicator password={newPassword} />}
             </div>
-
-            {/* Confirm Password */}
             <div>
               <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPass ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (passwordErrors.confirmPassword) {
-                      setPasswordErrors({
-                        ...passwordErrors,
-                        confirmPassword: "",
-                      });
-                    }
-                  }}
-                  className={
-                    passwordErrors.confirmPassword ? "border-destructive" : ""
-                  }
-                  placeholder="Confirm your new password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPass(!showConfirmPass)}
-                  className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  {showConfirmPass ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
+                <Input id="confirmPassword" type={showConfirmPass ? "text" : "password"} value={confirmPassword}
+                  onChange={(e) => { setConfirmPassword(e.target.value); if (passwordErrors.confirmPassword) setPasswordErrors({ ...passwordErrors, confirmPassword: "" }); }}
+                  className={passwordErrors.confirmPassword ? "border-destructive" : ""} placeholder="Confirm your new password" />
+                <button type="button" onClick={() => setShowConfirmPass(!showConfirmPass)} className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground">
+                  {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {passwordErrors.confirmPassword && (
-                <p className="text-xs text-destructive mt-1">
-                  {passwordErrors.confirmPassword}
-                </p>
-              )}
+              {passwordErrors.confirmPassword && <p className="text-xs text-destructive mt-1">{passwordErrors.confirmPassword}</p>}
             </div>
-
             <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowPasswordChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading} className="flex-1">
-                {isLoading ? "Updating..." : "Update Password"}
-              </Button>
+              <Button type="button" variant="outline" className="flex-1" onClick={() => setShowPasswordChange(false)}>Cancel</Button>
+              <Button type="submit" disabled={isLoading} className="flex-1">{isLoading ? "Updating..." : "Update Password"}</Button>
             </div>
           </form>
         )}
@@ -288,123 +237,110 @@ export const SecuritySettings = () => {
       <div className="border border-border rounded-lg p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-              <Lock className="w-5 h-5 text-green-600" />
+            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+              <KeyRound className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">
-                Transaction PIN
-              </h3>
+              <h3 className="font-semibold text-foreground">Transaction PIN</h3>
               <p className="text-xs text-muted-foreground">
-                {settings.transactionPinEnabled
-                  ? "Enabled - Required for sensitive operations"
-                  : "Disabled - Set a PIN for additional security"}
+                {settings.transactionPinEnabled ? "Enabled — Required for purchases" : "Disabled — Set a PIN for security"}
               </p>
             </div>
           </div>
-          {!settings.transactionPinEnabled ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowPinSetup(!showPinSetup)}
-            >
-              {showPinSetup ? "Cancel" : "Set PIN"}
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowPinSetup(!showPinSetup)}
-            >
-              {showPinSetup ? "Cancel" : "Change PIN"}
-            </Button>
+          {!pinMode && (
+            <div className="flex gap-2">
+              {!settings.transactionPinEnabled ? (
+                <Button variant="outline" size="sm" onClick={() => { setPinMode("change"); setPinVerified(true); }}>
+                  Set PIN
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => setPinMode("change")}>
+                  Change PIN
+                </Button>
+              )}
+            </div>
           )}
         </div>
 
-        {showPinSetup && (
-          <form onSubmit={handleSetTransactionPin} className="space-y-4 pt-4">
+        {/* Change PIN flow — verify current first */}
+        {pinMode === "change" && settings.transactionPinEnabled && !pinVerified && (
+          <div className="space-y-3 pt-4 border-t border-border">
+            <p className="text-sm font-medium text-foreground">Enter your current PIN to continue</p>
+            <PinInput id="currentPin" value={currentPin} onChange={(v) => { setCurrentPin(v); setPinErrors({}); }}
+              error={pinErrors.currentPin} placeholder="Current 4-digit PIN" />
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" className="flex-1" onClick={resetPinForm}>Cancel</Button>
+              <Button type="button" className="flex-1" onClick={handleVerifyCurrentPin} disabled={isLoading}>
+                {isLoading ? "Verifying..." : "Verify PIN"}
+              </Button>
+            </div>
+            <button type="button" onClick={() => { resetPinForm(); setPinMode("reset"); }}
+              className="text-xs text-primary font-semibold hover:underline flex items-center gap-1 mt-1">
+              <RotateCcw className="w-3 h-3" /> Forgot PIN? Reset with password
+            </button>
+          </div>
+        )}
+
+        {/* Reset PIN flow — verify password */}
+        {pinMode === "reset" && !resetPasswordVerified && (
+          <div className="space-y-3 pt-4 border-t border-border">
+            <p className="text-sm font-medium text-foreground">Enter your account password to reset PIN</p>
+            <div>
+              <Label htmlFor="resetPassword">Account Password</Label>
+              <div className="relative">
+                <Input id="resetPassword" type={showResetPass ? "text" : "password"} value={resetPassword}
+                  onChange={(e) => { setResetPassword(e.target.value); setPinErrors({}); }}
+                  className={pinErrors.resetPassword ? "border-destructive" : ""} placeholder="Enter your login password" />
+                <button type="button" onClick={() => setShowResetPass(!showResetPass)} className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground">
+                  {showResetPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {pinErrors.resetPassword && <p className="text-xs text-destructive mt-1">{pinErrors.resetPassword}</p>}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" className="flex-1" onClick={resetPinForm}>Cancel</Button>
+              <Button type="button" className="flex-1" onClick={handleVerifyPasswordForReset} disabled={isLoading}>
+                {isLoading ? "Verifying..." : "Verify Password"}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* New PIN form — shown after verification */}
+        {((pinMode === "change" && pinVerified) || (pinMode === "reset" && resetPasswordVerified)) && (
+          <form onSubmit={handleSetNewPin} className="space-y-4 pt-4 border-t border-border">
+            <p className="text-sm font-medium text-foreground">
+              {pinMode === "reset" ? "Set your new PIN" : settings.transactionPinEnabled ? "Enter your new PIN" : "Create a 4-digit PIN"}
+            </p>
             <div>
               <Label htmlFor="newPin">New PIN (4 digits)</Label>
-              <Input
-                id="newPin"
-                type="password"
-                maxLength={4}
-                inputMode="numeric"
-                value={newPin}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "");
-                  if (val.length <= 4) {
-                    setNewPin(val);
-                  }
-                  if (pinErrors.pin) {
-                    setPinErrors({ ...pinErrors, pin: "" });
-                  }
-                }}
-                className={pinErrors.pin ? "border-destructive" : ""}
-                placeholder="Enter 4 digits"
-              />
-              {pinErrors.pin && (
-                <p className="text-xs text-destructive mt-1">{pinErrors.pin}</p>
-              )}
+              <PinInput id="newPin" value={newPin} onChange={(v) => { setNewPin(v); if (pinErrors.pin) setPinErrors({ ...pinErrors, pin: "" }); }}
+                error={pinErrors.pin} placeholder="Enter 4 digits" />
             </div>
-
             <div>
               <Label htmlFor="confirmPin">Confirm PIN</Label>
-              <Input
-                id="confirmPin"
-                type="password"
-                maxLength={4}
-                inputMode="numeric"
-                value={confirmPin}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "");
-                  if (val.length <= 4) {
-                    setConfirmPin(val);
-                  }
-                  if (pinErrors.confirmPin) {
-                    setPinErrors({ ...pinErrors, confirmPin: "" });
-                  }
-                }}
-                className={pinErrors.confirmPin ? "border-destructive" : ""}
-                placeholder="Confirm your 4-digit PIN"
-              />
-              {pinErrors.confirmPin && (
-                <p className="text-xs text-destructive mt-1">
-                  {pinErrors.confirmPin}
-                </p>
-              )}
+              <PinInput id="confirmPin" value={confirmPin} onChange={(v) => { setConfirmPin(v); if (pinErrors.confirmPin) setPinErrors({ ...pinErrors, confirmPin: "" }); }}
+                error={pinErrors.confirmPin} placeholder="Confirm your 4-digit PIN" />
             </div>
-
             <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => {
-                  setShowPinSetup(false);
-                  setNewPin("");
-                  setConfirmPin("");
-                }}
-              >
-                Cancel
-              </Button>
+              <Button type="button" variant="outline" className="flex-1" onClick={resetPinForm}>Cancel</Button>
               <Button type="submit" disabled={isLoading} className="flex-1">
-                {isLoading ? "Setting..." : "Set PIN"}
+                {isLoading ? "Setting..." : pinMode === "reset" ? "Reset PIN" : "Set PIN"}
               </Button>
             </div>
           </form>
         )}
 
-        {settings.transactionPinEnabled && !showPinSetup && (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={handleRemoveTransactionPin}
-              disabled={isLoading}
-            >
+        {/* Remove PIN button */}
+        {settings.transactionPinEnabled && !pinMode && (
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" size="sm" className="text-destructive border-destructive/30 hover:bg-destructive/5"
+              onClick={handleRemovePin} disabled={isLoading}>
               Remove PIN
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setPinMode("reset")}
+              className="text-primary font-semibold gap-1">
+              <RotateCcw className="w-3.5 h-3.5" /> Reset PIN
             </Button>
           </div>
         )}
