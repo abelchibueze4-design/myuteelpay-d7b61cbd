@@ -25,7 +25,7 @@ const BottomNavigation = () => {
   const activeKey = getActiveKey();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-border/50 lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/50 lg:hidden">
       <div className="max-w-[420px] mx-auto flex items-center justify-around h-16 px-2">
         {navItems.map((item) => {
           const isActive = activeKey === item.key;
