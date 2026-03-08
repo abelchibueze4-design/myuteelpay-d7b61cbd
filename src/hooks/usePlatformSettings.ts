@@ -38,6 +38,7 @@ const defaults: PlatformSettings = {
   min_wallet_fund: 100,
   service_status: "operational",
   service_status_message: "All services are running smoothly",
+  service_status_visible: false,
 };
 
 export function usePlatformSettings() {
