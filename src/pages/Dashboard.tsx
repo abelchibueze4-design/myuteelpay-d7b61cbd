@@ -158,8 +158,7 @@ const Dashboard = () => {
             <Menu className="w-5 h-5 text-foreground" />
           </button>
           <div className="text-center flex-1">
-            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Welcome back</p>
-            <h1 className="text-base font-extrabold text-foreground">Hey, {displayName} 👋</h1>
+            <h1 className="text-base font-extrabold text-foreground">Welcome, {displayName} 👋</h1>
           </div>
           <NotificationsDropdown />
         </div>
@@ -175,7 +174,7 @@ const Dashboard = () => {
           </div>
           <div className="container mx-auto relative z-10">
             <p className="text-white/70 text-sm font-medium uppercase tracking-wide">Overview Dashboard</p>
-            <h1 className="text-3xl font-extrabold text-white mt-1">Hey, {displayName} <span className="animate-wave inline-block">👋</span></h1>
+            <h1 className="text-3xl font-extrabold text-white mt-1">Welcome, {displayName} <span className="animate-wave inline-block">👋</span></h1>
             <p className="text-white/60 text-sm mt-2">Ready to pay your bills today?</p>
           </div>
         </div>
@@ -189,19 +188,19 @@ const Dashboard = () => {
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
           <div className="absolute bottom-0 left-0 w-28 h-28 bg-accent/20 rounded-full -ml-10 -mb-10 blur-2xl" />
           <div className="relative z-10">
-             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/15 text-white rounded-full">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/15 text-white rounded-full mb-3">
                 <Wallet className="w-3 h-3" />
                 <span className="text-[9px] font-bold uppercase tracking-widest">Main Wallet</span>
               </div>
+
+            <div className="flex items-center gap-2 mb-4">
+              <p className="text-3xl lg:text-4xl font-black tracking-tighter text-white">
+                {showBalance ? `₦${(wallet?.balance ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}` : "₦ • • • • • •"}
+              </p>
               <button onClick={() => setShowBalance(!showBalance)} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors tap-target">
                 {showBalance ? <EyeOff className="w-4 h-4 text-white/70" /> : <Eye className="w-4 h-4 text-white/70" />}
               </button>
             </div>
-
-            <p className="text-3xl lg:text-4xl font-black tracking-tighter text-white mb-4">
-              {showBalance ? `₦${(wallet?.balance ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}` : "₦ • • • • • •"}
-            </p>
 
             <div className="flex gap-2.5">
               <Dialog open={fundOpen} onOpenChange={setFundOpen}>
