@@ -1,4 +1,5 @@
 import { ReactNode, useState } from "react";
+import logo from "@/assets/logo.png";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import {
     LayoutDashboard, Users, Receipt, Settings, ShieldCheck, Bell,
