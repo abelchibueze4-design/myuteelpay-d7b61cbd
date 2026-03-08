@@ -119,26 +119,6 @@ const UserManagement = () => {
         }
     };
 
-    const handleExport = (type: "csv" | "pdf") => {
-        const headers = ["Name", "Username", "Phone", "Wallet Balance", "Status", "Joined"];
-        const data = filtered.map((u) => [
-            u.full_name,
-            u.username,
-            u.phone_number,
-            `N${(u.wallet_balance ?? 0).toLocaleString()}`,
-            u.status,
-            format(new Date(u.created_at), "yyyy-MM-dd")
-        ]);
-
-        if (type === "csv") {
-            exportToCSV(headers, data, "users_report");
-            toast.success("Users exported to CSV");
-        } else {
-            printPDF("User Management Report", headers, data);
-            toast.success("Print dialog opened for PDF report");
-        }
-    };
-
     return (
         <div className="max-w-screen-2xl space-y-6">
             <PageHeader
@@ -147,23 +127,26 @@ const UserManagement = () => {
                 icon={Users}
                 badge={`${(users ?? []).length} total`}
                 actions={
-                    <div className="flex gap-2">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                    <Download className="w-3.5 h-3.5 mr-1.5" /> Export Data
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => handleExport("csv")}>
-                                    Export as CSV
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleExport("pdf")}>
-                                    Export as PDF/Print
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
+                    <DateRangeExport
+                        reportTitle="User Management Report"
+                        headers={["Name", "Username", "Phone", "Wallet Balance", "Status", "Joined"]}
+                        getFilteredData={(from, to) => {
+                            const rows = (users ?? []).filter((u) => {
+                                const d = new Date(u.created_at);
+                                const mf = !from || !isBefore(d, startOfDay(from));
+                                const mt = !to || !isAfter(d, endOfDay(to));
+                                return mf && mt;
+                            });
+                            return rows.map((u) => [
+                                u.full_name,
+                                u.username,
+                                u.phone_number,
+                                `N${(u.wallet_balance ?? 0).toLocaleString()}`,
+                                u.status,
+                                format(new Date(u.created_at), "yyyy-MM-dd"),
+                            ]);
+                        }}
+                    />
                 }
             />
 
