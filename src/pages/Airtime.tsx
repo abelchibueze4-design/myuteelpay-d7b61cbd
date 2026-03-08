@@ -11,6 +11,7 @@ import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { AirtimePrices } from "@/components/services/AirtimePrices";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 
 const Airtime = () => {
     const navigate = useNavigate();
@@ -21,6 +22,7 @@ const Airtime = () => {
     const [pinOpen, setPinOpen] = useState(false);
     const kvdata = useKvdata();
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+    const { guardTransaction } = useTransactionGuard();
 
     const { data: networks } = useQuery({
         queryKey: ["networks"],
@@ -34,6 +36,8 @@ const Airtime = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!network || !phone || !amount) return;
+        const { allowed } = guardTransaction(Number(amount));
+        if (!allowed) return;
         setPinOpen(true);
     };
 

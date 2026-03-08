@@ -9,6 +9,7 @@ import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { toast } from "sonner";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 
 const BulkSMS = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const BulkSMS = () => {
 
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+  const { guardTransaction } = useTransactionGuard();
 
   const smsPrice = 6; // ₦6 per SMS unit
 
@@ -30,6 +32,8 @@ const BulkSMS = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!sender || !recipients || !message) return;
+    const { allowed } = guardTransaction(totalCost);
+    if (!allowed) return;
     setPinOpen(true);
   };
 

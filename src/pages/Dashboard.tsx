@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useKycVerified, BALANCE_LIMIT_UNVERIFIED } from "@/hooks/useKyc";
 
@@ -48,6 +49,7 @@ const Dashboard = () => {
   const { data: transactions } = useTransactions(5);
   const { initializePayment, verifyPayment, isInitializing } = useFundWallet();
   const { settings, isSettingsLoading } = useSecuritySettings();
+  const { settings: platformSettings } = usePlatformSettings();
   const [searchParams, setSearchParams] = useSearchParams();
   const [fundOpen, setFundOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -123,9 +125,11 @@ const Dashboard = () => {
   if (activeTab === "wallet") return <TransactionHistory filter="wallet" />;
   if (activeTab === "settings") return <SettingsPage />;
 
+
   const handleFund = () => {
     const val = Number(amount);
-    if (!val || val < 100) { toast.error("Minimum amount is ₦100"); return; }
+    const minFund = platformSettings.min_wallet_fund || 100;
+    if (!val || val < minFund) { toast.error(`Minimum amount is ₦${minFund.toLocaleString()}`); return; }
     if (!isKycVerified) {
       const currentBalance = wallet?.balance ?? 0;
       if (currentBalance + val > BALANCE_LIMIT_UNVERIFIED) {

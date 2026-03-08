@@ -10,6 +10,7 @@ import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerifica
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 
 const Electricity = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const Electricity = () => {
   
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+  const { guardTransaction } = useTransactionGuard();
 
   const { data: discos, isLoading: isLoadingDiscos } = useQuery({
     queryKey: ["electricity_companies"],
@@ -54,6 +56,8 @@ const Electricity = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!disco || !meter || !amount) return;
+    const { allowed } = guardTransaction(Number(amount));
+    if (!allowed) return;
     setPinOpen(true);
   };
 

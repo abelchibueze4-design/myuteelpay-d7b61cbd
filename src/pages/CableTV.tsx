@@ -11,6 +11,7 @@ import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { CableTVPrices } from "@/components/services/CableTVPrices";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 
 const CableTV = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const CableTV = () => {
   
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+  const { guardTransaction } = useTransactionGuard();
 
   const { data: providers } = useQuery({
     queryKey: ["cables"],
@@ -52,6 +54,8 @@ const CableTV = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlan || !smartcard) return;
+    const { allowed } = guardTransaction(selectedPlan?.price || 0);
+    if (!allowed) return;
     setPinOpen(true);
   };
 

@@ -11,6 +11,7 @@ import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { DataPrices } from "@/components/services/DataPrices";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 
 const Data = () => {
     const navigate = useNavigate();
@@ -24,6 +25,7 @@ const Data = () => {
     
     const kvdata = useKvdata();
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+    const { guardTransaction } = useTransactionGuard();
 
     const { data: networks } = useQuery({
         queryKey: ["networks"],
@@ -52,6 +54,8 @@ const Data = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!network || !phone || !planId) return;
+        const { allowed } = guardTransaction(selectedPlan?.price || 0);
+        if (!allowed) return;
         setPinOpen(true);
     };
 

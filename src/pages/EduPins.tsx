@@ -8,6 +8,7 @@ import { useKvdata, useKvdataQuery } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { EduPinsPrices } from "@/components/services/EduPinsPrices";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 
 const EduPins = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const EduPins = () => {
   
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+  const { guardTransaction } = useTransactionGuard();
 
   const total = useMemo(() => 
     selectedExam ? selectedExam.price * parseInt(quantity) : 0,
@@ -29,6 +31,8 @@ const EduPins = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedExam) return;
+    const { allowed } = guardTransaction(total);
+    if (!allowed) return;
     setPinOpen(true);
   };
 

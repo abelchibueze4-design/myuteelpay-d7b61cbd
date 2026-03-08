@@ -12,6 +12,7 @@ import { DataCardPrices } from "@/components/services/DataCardPrices";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 
 const DataCard = () => {
     const navigate = useNavigate();
@@ -24,6 +25,7 @@ const DataCard = () => {
     
     const kvdata = useKvdata();
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+    const { guardTransaction } = useTransactionGuard();
 
     const { data: networks } = useQuery({
         queryKey: ["networks"],
@@ -37,6 +39,8 @@ const DataCard = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!network || !planId) return;
+        const { allowed } = guardTransaction(selectedPlan?.amount || 0);
+        if (!allowed) return;
         setPinOpen(true);
     };
 
