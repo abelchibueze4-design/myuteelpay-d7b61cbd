@@ -136,6 +136,62 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_submissions: {
+        Row: {
+          address: string
+          admin_notes: string | null
+          created_at: string
+          date_of_birth: string
+          full_name: string
+          id: string
+          id_number: string
+          id_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          admin_notes?: string | null
+          created_at?: string
+          date_of_birth: string
+          full_name: string
+          id?: string
+          id_number: string
+          id_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          admin_notes?: string | null
+          created_at?: string
+          date_of_birth?: string
+          full_name?: string
+          id?: string
+          id_number?: string
+          id_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kyc_submissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       networks: {
         Row: {
           network_id: number
@@ -356,6 +412,7 @@ export type Database = {
           email: string | null
           full_name: string
           id: string
+          kyc_verified: boolean
           phone_number: string | null
           role: string | null
           transaction_pin: string | null
@@ -371,6 +428,7 @@ export type Database = {
           email?: string | null
           full_name?: string
           id: string
+          kyc_verified?: boolean
           phone_number?: string | null
           role?: string | null
           transaction_pin?: string | null
@@ -386,6 +444,7 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          kyc_verified?: boolean
           phone_number?: string | null
           role?: string | null
           transaction_pin?: string | null
