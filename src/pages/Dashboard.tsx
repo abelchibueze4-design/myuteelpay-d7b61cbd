@@ -180,28 +180,29 @@ const Dashboard = () => {
       <div className="max-w-[420px] lg:max-w-7xl mx-auto px-4 lg:px-4 lg:-mt-16 relative z-20 space-y-4 lg:space-y-8 pb-24 lg:pb-12 pt-4 lg:pt-0">
 
         {/* Wallet Balance Card */}
-        <div className="fintech-card p-5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-12 -mt-12 blur-2xl" />
+        <div className="fintech-card p-5 relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-accent/80 text-primary-foreground border-none shadow-xl">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+          <div className="absolute bottom-0 left-0 w-28 h-28 bg-accent/20 rounded-full -ml-10 -mb-10 blur-2xl" />
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 text-primary rounded-full">
+             <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/15 text-white rounded-full">
                 <Wallet className="w-3 h-3" />
                 <span className="text-[9px] font-bold uppercase tracking-widest">Main Wallet</span>
               </div>
-              <button onClick={() => setShowBalance(!showBalance)} className="p-1.5 hover:bg-secondary rounded-lg transition-colors tap-target">
-                {showBalance ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
+              <button onClick={() => setShowBalance(!showBalance)} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors tap-target">
+                {showBalance ? <EyeOff className="w-4 h-4 text-white/70" /> : <Eye className="w-4 h-4 text-white/70" />}
               </button>
             </div>
 
-            <p className="text-3xl lg:text-4xl font-black tracking-tighter text-foreground mb-4">
+            <p className="text-3xl lg:text-4xl font-black tracking-tighter text-white mb-4">
               {showBalance ? `₦${(wallet?.balance ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}` : "₦ • • • • • •"}
             </p>
 
             <div className="flex gap-2.5">
               <Dialog open={fundOpen} onOpenChange={setFundOpen}>
                 <DialogTrigger asChild>
-                  <Button className="flex-1 gradient-primary text-primary-foreground font-bold h-11 rounded-2xl text-sm gap-1.5 tap-target">
-                    <Plus className="w-4 h-4" /> Add Money
+                   <Button className="flex-1 bg-white text-primary font-bold h-11 rounded-2xl text-sm gap-1.5 tap-target hover:bg-white/90">
+                     <Plus className="w-4 h-4" /> Add Money
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="rounded-3xl border-none shadow-2xl max-w-[380px] mx-auto">
@@ -234,8 +235,8 @@ const Dashboard = () => {
               </Dialog>
 
               <Link to="/services/referral?tab=bonus" className="flex-1">
-                <Button variant="outline" className="w-full h-11 rounded-2xl text-xs font-bold border-2 border-accent/20 text-accent-foreground hover:bg-accent/5 gap-1.5 tap-target">
-                  <Gift className="w-4 h-4 text-accent" />
+                <Button variant="outline" className="w-full h-11 rounded-2xl text-xs font-bold border-2 border-white/30 text-white hover:bg-white/10 gap-1.5 tap-target">
+                  <Gift className="w-4 h-4 text-white/80" />
                   <span>Bonus ₦{(bonusBalance || 0).toLocaleString()}</span>
                 </Button>
               </Link>
