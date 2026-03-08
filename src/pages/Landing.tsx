@@ -75,7 +75,7 @@ const services = [
 
 const HeroSection = () => (
   <section className="pt-[72px] lg:pt-[100px] pb-8 lg:pb-16 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-6xl mx-auto text-center lg:text-left">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto text-center lg:text-left">
       <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] lg:text-xs font-bold mb-4 animate-fade-in">
         <Star className="w-3 h-3 text-accent" />
         Nigeria's Trusted Platform
@@ -105,7 +105,7 @@ const HeroSection = () => (
 /* ---------------- Services Grid ---------------- */
 const ServicesGrid = () => (
   <section id="services" className="py-8 lg:py-16 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <h2 className="text-lg lg:text-3xl font-extrabold text-center mb-2 lg:mb-3 text-foreground">Our Services</h2>
       <p className="text-xs lg:text-base text-muted-foreground text-center mb-5 lg:mb-10">Everything you need to stay connected and powered</p>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-5 max-w-xs lg:max-w-none mx-auto">
@@ -133,7 +133,7 @@ const features = [
 
 const FeaturesSection = () => (
   <section className="py-6 lg:py-14 px-4 lg:px-8 bg-secondary/50">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="grid grid-cols-3 gap-2 lg:gap-8">
         {features.map((f, i) => (
           <div key={i} className="fintech-card p-3 lg:p-8 text-center">
@@ -153,7 +153,7 @@ const FeaturesSection = () => (
 /* ---------------- Bill Payment Showcase ---------------- */
 const BillPaymentShowcase = () => (
   <section className="py-8 lg:py-20 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-6xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="text-center mb-6 lg:mb-12">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-[11px] lg:text-xs font-bold mb-3">
           <BadgeDollarSign className="w-3 h-3" /> Save More With Every Payment
@@ -217,7 +217,7 @@ const BillPaymentShowcase = () => (
 /* ---------------- About Section ---------------- */
 const AboutSection = () => (
   <section id="about" className="py-8 lg:py-20 px-4 lg:px-8 bg-secondary/50">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-[11px] lg:text-xs font-bold mb-3 lg:mb-4">
@@ -263,7 +263,7 @@ const steps = [
 
 const HowItWorks = () => (
   <section id="how-it-works" className="py-8 lg:py-20 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <h2 className="text-lg lg:text-3xl font-extrabold text-center mb-2 lg:mb-3 text-foreground">How It Works</h2>
       <p className="text-xs lg:text-base text-muted-foreground text-center mb-5 lg:mb-10 hidden lg:block">Get started in three simple steps</p>
       <div className="grid grid-cols-3 gap-2 lg:gap-8">
@@ -311,7 +311,7 @@ const testimonials = [
 
 const TestimonialsSection = () => (
   <section id="testimonials" className="py-8 lg:py-20 px-4 lg:px-8 bg-secondary/50">
-    <div className="max-w-[420px] lg:max-w-6xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="text-center mb-5 lg:mb-12">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] lg:text-xs font-bold mb-3">
           <Users className="w-3 h-3" /> What Our Users Say
@@ -349,7 +349,7 @@ const TestimonialsSection = () => (
 /* ---------------- Referral Banner ---------------- */
 const ReferralBanner = () => (
   <section className="py-6 lg:py-16 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-4xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="fintech-card p-5 lg:p-12 bg-accent/5 border-accent/20 text-center">
         <Gift className="w-8 h-8 lg:w-12 lg:h-12 text-accent mx-auto mb-2 lg:mb-4" />
         <h3 className="text-base lg:text-2xl font-extrabold text-foreground mb-1 lg:mb-2">Refer & Earn</h3>
@@ -374,7 +374,7 @@ const pricingData = [
 
 const PricingSection = () => (
   <section id="pricing" className="py-8 lg:py-20 px-4 lg:px-8 bg-secondary/50">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <h2 className="text-lg lg:text-3xl font-extrabold text-center mb-1 lg:mb-2 text-foreground">Affordable Pricing</h2>
       <p className="text-xs lg:text-base text-muted-foreground text-center mb-5 lg:mb-10">No hidden charges. Best rates guaranteed.</p>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-5">
@@ -393,7 +393,7 @@ const PricingSection = () => (
 /* ---------------- Download App CTA ---------------- */
 const DownloadAppSection = () => (
   <section className="py-8 lg:py-20 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="fintech-card p-5 lg:p-0 lg:overflow-hidden lg:grid lg:grid-cols-2 lg:items-center bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/10">
         {/* Text side */}
         <div className="lg:p-12 text-center lg:text-left">
@@ -436,7 +436,7 @@ const faqs = [
 
 const FAQSection = () => (
   <section id="faqs" className="py-8 lg:py-20 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-3xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <h2 className="text-lg lg:text-3xl font-extrabold text-center mb-5 lg:mb-10 text-foreground">FAQs</h2>
       <div className="space-y-3 lg:space-y-4">
         {faqs.map((f, i) => (
@@ -462,7 +462,7 @@ const FAQSection = () => (
 /* ---------------- Trust Bar ---------------- */
 const TrustBar = () => (
   <section className="py-6 lg:py-12 px-4 lg:px-8 border-t border-border/30">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
         {[
           { icon: Shield, text: "Secure Payments", color: "text-primary" },
@@ -482,7 +482,7 @@ const TrustBar = () => (
 /* ---------------- Footer ---------------- */
 const Footer = () => (
   <footer className="py-6 lg:py-12 px-4 lg:px-8 border-t border-border/30 bg-card">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="hidden lg:grid lg:grid-cols-4 gap-8 mb-8">
         <div>
           <p className="font-extrabold text-gradient text-xl mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-10 w-auto" /> Uteelpay</p>
