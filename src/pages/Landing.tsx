@@ -347,7 +347,7 @@ const Footer = () => (
 
       {/* Mobile: compact footer */}
       <div className="lg:hidden text-center">
-        <p className="font-extrabold text-gradient text-lg mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-6 w-auto" /> Uteelpay</p>
+        <p className="font-extrabold text-gradient text-lg mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-9 w-auto" /> Uteelpay</p>
         <div className="flex flex-wrap justify-center gap-4 text-[11px] font-semibold text-muted-foreground mb-4">
           <a href="#services" className="hover:text-primary">Services</a>
           <a href="#pricing" className="hover:text-primary">Pricing</a>
