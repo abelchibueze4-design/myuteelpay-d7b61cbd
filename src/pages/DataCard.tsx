@@ -67,7 +67,7 @@ const DataCard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] pb-24">
+        <div className="min-h-screen bg-background pb-24">
             <div className="bg-primary px-4 py-12 mb-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
                 <div className="container mx-auto relative z-10 flex flex-col items-center text-center max-w-2xl">

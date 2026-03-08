@@ -51,7 +51,7 @@ const FAQs = () => {
     const filteredFaqs = faqs.filter(f => f.category === activeCategory);
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] pb-24">
+        <div className="min-h-screen bg-background pb-24">
             {/* Hero Header */}
             <div className="bg-primary pt-12 pb-20 px-6 overflow-hidden relative">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />

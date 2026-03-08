@@ -38,7 +38,7 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="bg-[#F8FAFC] dark:bg-[#0F172A] min-h-screen flex flex-col font-sans">
+    <div className="bg-background min-h-screen flex flex-col font-sans">
       <DashboardTopBar />
 
       {/* Header */}

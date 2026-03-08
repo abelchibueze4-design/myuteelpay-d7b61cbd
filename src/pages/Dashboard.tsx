@@ -35,11 +35,11 @@ import { useKycVerified, BALANCE_LIMIT_UNVERIFIED } from "@/hooks/useKyc";
 
 const quickActions = [
   { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "text-primary bg-primary/10", border: "border-primary/20" },
-  { icon: Smartphone, label: "Data", path: "/services/data", color: "text-blue-600 bg-blue-50", border: "border-blue-100" },
-  { icon: Tv, label: "Cable TV", path: "/services/cable", color: "text-orange-600 bg-orange-50", border: "border-orange-100" },
+  { icon: Smartphone, label: "Data", path: "/services/data", color: "text-blue-600 dark:text-blue-400 bg-blue-500/10", border: "border-blue-500/20" },
+  { icon: Tv, label: "Cable TV", path: "/services/cable", color: "text-orange-600 dark:text-orange-400 bg-orange-500/10", border: "border-orange-500/20" },
   { icon: Zap, label: "Electricity", path: "/services/electricity", color: "text-accent-foreground bg-accent/15", border: "border-accent/20" },
-  { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "text-pink-600 bg-pink-50", border: "border-pink-100" },
-  { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "text-emerald-600 bg-emerald-50", border: "border-emerald-100" },
+  { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "text-pink-600 dark:text-pink-400 bg-pink-500/10", border: "border-pink-500/20" },
+  { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10", border: "border-emerald-500/20" },
 ];
 
 const Dashboard = () => {
@@ -164,7 +164,7 @@ const Dashboard = () => {
         isRequired={false}
       />
       {/* Mobile Header */}
-      <div className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-border/30">
+      <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/30">
         <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => setOpenMobile(true)}
@@ -266,9 +266,9 @@ const Dashboard = () => {
         {/* Service status banner */}
         {platformSettings.service_status_visible && (() => {
           const statusStyles = {
-            operational: "bg-emerald-50 border-emerald-200 text-emerald-700",
-            degraded: "bg-amber-50 border-amber-200 text-amber-700",
-            outage: "bg-red-50 border-red-200 text-red-700",
+            operational: "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400",
+            degraded: "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400",
+            outage: "bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400",
           };
           const st = platformSettings.service_status || "operational";
           return (
@@ -282,25 +282,25 @@ const Dashboard = () => {
         {/* KYC Banner */}
         {!isKycVerified && (
           <Link to="/kyc">
-            <div className="fintech-card p-4 border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 hover:shadow-md transition-all">
+            <div className="fintech-card p-4 border-2 border-amber-500/30 bg-amber-500/10 hover:shadow-md transition-all">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-5 h-5 text-amber-600" />
+                <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-extrabold text-foreground">Complete KYC Verification</p>
                   <p className="text-[10px] text-muted-foreground">Your balance limit is ₦{BALANCE_LIMIT_UNVERIFIED.toLocaleString()}. Verify to unlock premium services.</p>
                 </div>
-                <ArrowRight className="w-4 h-4 text-amber-600 shrink-0" />
+                <ArrowRight className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
               </div>
             </div>
           </Link>
         )}
         {isKycVerified && (
-          <div className="fintech-card p-3 border border-emerald-200 bg-emerald-50/50">
+          <div className="fintech-card p-3 border border-emerald-500/30 bg-emerald-500/10">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span className="text-[11px] font-bold text-emerald-700">KYC Verified — Premium Account</span>
+              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">KYC Verified — Premium Account</span>
             </div>
           </div>
         )}
