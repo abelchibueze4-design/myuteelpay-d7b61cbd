@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+import { Bell, Check, CheckCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,78 +7,52 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { useMyNotifications, useMarkRead } from "@/hooks/useNotifications";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: "info" | "success" | "warning" | "error";
-  timestamp: Date;
-  read: boolean;
-}
+const getNotificationIcon = (type: string) => {
+  switch (type) {
+    case "transaction": return "💳";
+    case "wallet": return "💰";
+    case "promo": return "🎁";
+    case "security": return "🔒";
+    case "referral": return "👥";
+    case "system": return "⚙️";
+    default: return "🔔";
+  }
+};
 
-interface NotificationsDropdownProps {
-  notifications?: Notification[];
-}
+export const NotificationsDropdown = () => {
+  const { data: notifications = [] } = useMyNotifications();
+  const markRead = useMarkRead();
+  const queryClient = useQueryClient();
 
-export const NotificationsDropdown = ({
-  notifications = [],
-}: NotificationsDropdownProps) => {
-  // Mock notifications for demonstration
-  const mockNotifications: Notification[] = [
-    {
-      id: "1",
-      title: "Wallet Funded",
-      message: "Your wallet has been successfully funded with ₦5,000",
-      type: "success",
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      read: false,
-    },
-    {
-      id: "2",
-      title: "Transaction Completed",
-      message: "Airtime purchase of ₦1,000 completed successfully",
-      type: "success",
-      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-      read: false,
-    },
-    {
-      id: "3",
-      title: "Special Offer",
-      message: "Get 10% bonus on your next wallet fund",
-      type: "info",
-      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-      read: true,
-    },
-  ];
+  // Realtime subscription for new notifications
+  useEffect(() => {
+    const channel = supabase
+      .channel("user-notifications")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "notifications" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["my_notifications"] });
+        }
+      )
+      .subscribe();
 
-  const displayNotifications = notifications.length > 0 ? notifications : mockNotifications;
-  const unreadCount = displayNotifications.filter((n) => !n.read).length;
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
-  const formatTime = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
-
-  const getNotificationColor = (type: string) => {
-    switch (type) {
-      case "success":
-        return "text-green-600";
-      case "error":
-        return "text-destructive";
-      case "warning":
-        return "text-yellow-600";
-      default:
-        return "text-blue-600";
+  const handleMarkRead = (id: string, isRead: boolean) => {
+    if (!isRead) {
+      markRead.mutate(id);
     }
   };
 
@@ -91,54 +65,79 @@ export const NotificationsDropdown = ({
         >
           <Bell className="w-5 h-5 text-foreground" />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
+            <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
+      <DropdownMenuContent align="end" className="w-80 max-w-[calc(100vw-2rem)]">
         <DropdownMenuLabel className="flex items-center justify-between">
           <span>Notifications</span>
           {unreadCount > 0 && (
-            <span className="text-xs bg-destructive text-destructive-foreground px-2 py-1 rounded-full">
+            <span className="text-xs bg-destructive text-destructive-foreground px-2 py-0.5 rounded-full">
               {unreadCount} new
             </span>
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {displayNotifications.length > 0 ? (
+        {notifications.length > 0 ? (
           <div className="max-h-96 overflow-y-auto">
-            {displayNotifications.map((notification) => (
-              <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3 cursor-pointer gap-1">
+            {notifications.slice(0, 20).map((notification) => (
+              <DropdownMenuItem
+                key={notification.id}
+                className="flex flex-col items-start p-3 cursor-pointer gap-1"
+                onClick={() => handleMarkRead(notification.id, notification.is_read)}
+              >
                 <div className="flex items-start justify-between w-full gap-2">
-                  <div className="flex-1">
-                    <p className={`text-sm font-semibold ${notification.read ? "text-muted-foreground" : "text-foreground"}`}>
-                      {notification.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">
-                      {notification.message}
-                    </p>
+                  <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <span className="text-base mt-0.5 shrink-0">
+                      {getNotificationIcon(notification.type)}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={`text-sm font-semibold truncate ${
+                          notification.is_read ? "text-muted-foreground" : "text-foreground"
+                        }`}
+                      >
+                        {notification.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {notification.body}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                      </p>
+                    </div>
                   </div>
-                  {!notification.read && (
-                    <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1" />
+                  {!notification.is_read && (
+                    <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
                   )}
                 </div>
-                <p className={`text-xs ${getNotificationColor(notification.type)}`}>
-                  {formatTime(notification.timestamp)}
-                </p>
               </DropdownMenuItem>
             ))}
           </div>
         ) : (
-          <div className="p-4 text-center text-sm text-muted-foreground">
-            No notifications yet
+          <div className="p-6 text-center">
+            <Bell className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No notifications yet</p>
+            <p className="text-xs text-muted-foreground/60 mt-0.5">
+              You'll see transaction updates and announcements here
+            </p>
           </div>
         )}
 
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-center justify-center text-primary cursor-pointer hover:bg-primary/5">
-          View All Notifications
-        </DropdownMenuItem>
+        {notifications.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            <div className="p-2 text-center">
+              <p className="text-xs text-muted-foreground">
+                Showing latest {Math.min(notifications.length, 20)} notifications
+              </p>
+            </div>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
