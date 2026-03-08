@@ -475,20 +475,34 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 </div>
 
                 {/* Actions */}
-                <div className="px-6 pb-6 flex gap-3">
-                  <Button
-                    onClick={() => handleDownloadReceipt(t)}
-                    className="flex-1 rounded-2xl h-12 font-bold gap-2 bg-primary hover:bg-primary/90"
-                  >
-                    <Printer className="w-4 h-4" /> Download Receipt
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleReportTransaction(t)}
-                    className="flex-1 rounded-2xl h-12 font-bold gap-2 border-2 border-green-500 text-green-600 hover:bg-green-50"
-                  >
-                    <MessageCircle className="w-4 h-4" /> Report Issue
-                  </Button>
+                <div className="px-6 pb-6 space-y-2">
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => handleDownloadReceipt(t)}
+                      className="flex-1 rounded-2xl h-12 font-bold gap-2 bg-primary hover:bg-primary/90"
+                    >
+                      <Printer className="w-4 h-4" /> Receipt
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleReportTransaction(t)}
+                      className="flex-1 rounded-2xl h-12 font-bold gap-2 border-2 border-green-500 text-green-600 hover:bg-green-50"
+                    >
+                      <MessageCircle className="w-4 h-4" /> Report
+                    </Button>
+                  </div>
+                  {SERVICE_ROUTES[t.type] && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedTx(null);
+                        navigate(SERVICE_ROUTES[t.type]);
+                      }}
+                      className="w-full rounded-2xl h-11 font-bold gap-2 border-2 text-xs"
+                    >
+                      <RotateCw className="w-3.5 h-3.5" /> Buy Again
+                    </Button>
+                  )}
                 </div>
               </div>
             );
