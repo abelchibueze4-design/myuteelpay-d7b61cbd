@@ -489,7 +489,188 @@ const Reconciliation = () => {
                 </div>
             </div>
 
-            {/* Recent Reconciliation Reports */}
+            {/* ─── Pending / Failed Transactions Reconciliation Panel ─── */}
+            <div className="bg-card border border-border rounded-2xl">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 border-b border-border">
+                    <div>
+                        <h3 className="font-bold text-base flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-amber-500" /> Pending &amp; Failed Transactions
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                            {pendingCount} pending · {failedCount} failed — take action to reconcile
+                        </p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => refetchPF()}>
+                        <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
+                    </Button>
+                </div>
+                <div className="overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="border-border hover:bg-transparent">
+                                <TableHead className="font-semibold text-xs uppercase">User</TableHead>
+                                <TableHead className="font-semibold text-xs uppercase">Type</TableHead>
+                                <TableHead className="font-semibold text-xs uppercase text-right">Amount</TableHead>
+                                <TableHead className="font-semibold text-xs uppercase">Status</TableHead>
+                                <TableHead className="font-semibold text-xs uppercase">Reference</TableHead>
+                                <TableHead className="font-semibold text-xs uppercase">Age</TableHead>
+                                <TableHead className="text-right font-semibold text-xs uppercase">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {loadingPF ? (
+                                Array.from({ length: 3 }).map((_, i) => (
+                                    <TableRow key={i} className="animate-pulse border-border">
+                                        {Array.from({ length: 7 }).map((_, j) => (
+                                            <TableCell key={j}><div className="h-6 bg-accent rounded" /></TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))
+                            ) : (pendingFailedTxns ?? []).length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center text-muted-foreground py-12 italic">
+                                        No pending or failed transactions. All clear ✅
+                                    </TableCell>
+                                </TableRow>
+                            ) : (pendingFailedTxns ?? []).map((tx: any) => (
+                                <TableRow key={tx.id} className={cn("border-border", tx.status === "failed" ? "bg-red-50/30 hover:bg-red-50/50" : "hover:bg-accent/20")}>
+                                    <TableCell className="text-xs font-medium">{tx.user_name}</TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline" className="text-[10px] capitalize">
+                                            {tx.type?.replace(/_/g, " ")}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right text-sm font-bold">₦{Math.abs(tx.amount).toLocaleString("en-NG")}</TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline" className={cn("text-[10px]",
+                                            tx.status === "pending" ? "bg-amber-50 text-amber-700 border-amber-300" : "bg-red-50 text-red-700 border-red-300"
+                                        )}>
+                                            {tx.status === "pending" ? <Clock className="w-3 h-3 mr-1" /> : <XCircle className="w-3 h-3 mr-1" />}
+                                            {tx.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <code className="text-[10px] font-mono text-muted-foreground">{tx.reference?.slice(0, 16) || "—"}</code>
+                                    </TableCell>
+                                    <TableCell className="text-xs text-muted-foreground">
+                                        {formatDistanceToNow(new Date(tx.created_at), { addSuffix: true })}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex items-center justify-end gap-1">
+                                            {tx.status === "pending" && (
+                                                <>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-7 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                                        onClick={() => setConfirmAction({ type: "resolve", tx })}
+                                                    >
+                                                        <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Resolve
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        onClick={() => setConfirmAction({ type: "fail", tx })}
+                                                    >
+                                                        <XCircle className="w-3.5 h-3.5 mr-1" /> Fail
+                                                    </Button>
+                                                </>
+                                            )}
+                                            {tx.status === "failed" && !(tx.metadata as any)?.admin_refunded && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-7 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                    onClick={() => setConfirmAction({ type: "refund", tx })}
+                                                >
+                                                    <Wallet className="w-3.5 h-3.5 mr-1" /> Refund
+                                                </Button>
+                                            )}
+                                            {tx.status === "failed" && (tx.metadata as any)?.admin_refunded && (
+                                                <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200">
+                                                    Refunded ✓
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+
+            {/* Confirm Action Dialog for Pending/Failed Txns */}
+            <Dialog open={!!confirmAction} onOpenChange={(o) => !o && setConfirmAction(null)}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            {confirmAction?.type === "resolve" && <><CheckCircle2 className="w-5 h-5 text-emerald-600" /> Force Resolve Transaction</>}
+                            {confirmAction?.type === "refund" && <><Wallet className="w-5 h-5 text-blue-600" /> Refund Failed Transaction</>}
+                            {confirmAction?.type === "fail" && <><XCircle className="w-5 h-5 text-red-600" /> Mark as Failed</>}
+                        </DialogTitle>
+                    </DialogHeader>
+                    {confirmAction && (
+                        <div className="space-y-3 pt-1">
+                            <div className="p-3 bg-accent/40 rounded-xl space-y-1 text-sm">
+                                <p><span className="font-semibold">User:</span> {confirmAction.tx.user_name}</p>
+                                <p><span className="font-semibold">Amount:</span> ₦{Math.abs(confirmAction.tx.amount).toLocaleString("en-NG")}</p>
+                                <p><span className="font-semibold">Type:</span> {confirmAction.tx.type?.replace(/_/g, " ")}</p>
+                                <p><span className="font-semibold">Reference:</span> <code className="text-xs">{confirmAction.tx.reference || "—"}</code></p>
+                            </div>
+                            {confirmAction.type === "resolve" && (
+                                <p className="text-xs text-amber-700 bg-amber-50 p-2 rounded-lg">
+                                    This will mark the transaction as <strong>successful</strong>. If it's a wallet funding, the user's wallet will be credited.
+                                </p>
+                            )}
+                            {confirmAction.type === "refund" && (
+                                <p className="text-xs text-blue-700 bg-blue-50 p-2 rounded-lg">
+                                    This will credit <strong>₦{Math.abs(confirmAction.tx.amount).toLocaleString("en-NG")}</strong> back to the user's wallet and log a refund transaction.
+                                </p>
+                            )}
+                            {confirmAction.type === "fail" && (
+                                <p className="text-xs text-red-700 bg-red-50 p-2 rounded-lg">
+                                    This will mark the pending transaction as <strong>failed</strong>. You can refund it afterwards if needed.
+                                </p>
+                            )}
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button variant="outline" size="sm" onClick={() => setConfirmAction(null)}>Cancel</Button>
+                        <Button
+                            size="sm"
+                            disabled={forceResolve.isPending || refundTx.isPending || markFailed.isPending}
+                            className={cn(
+                                confirmAction?.type === "resolve" && "bg-emerald-600 hover:bg-emerald-700",
+                                confirmAction?.type === "refund" && "bg-blue-600 hover:bg-blue-700",
+                                confirmAction?.type === "fail" && "bg-red-600 hover:bg-red-700",
+                            )}
+                            onClick={async () => {
+                                if (!confirmAction) return;
+                                const tx = confirmAction.tx;
+                                if (confirmAction.type === "resolve") {
+                                    await forceResolve.mutateAsync({ txId: tx.id, userId: tx.user_id, amount: Math.abs(tx.amount) });
+                                } else if (confirmAction.type === "refund") {
+                                    await refundTx.mutateAsync({ txId: tx.id, userId: tx.user_id, amount: tx.amount, reference: tx.reference });
+                                } else if (confirmAction.type === "fail") {
+                                    await markFailed.mutateAsync({ txId: tx.id });
+                                }
+                                await logAction.mutateAsync({
+                                    action: `Transaction ${confirmAction.type}: ${tx.reference || tx.id.slice(0, 8)}`,
+                                    target_type: "transaction",
+                                    target_id: tx.id,
+                                    metadata: { type: confirmAction.type, amount: tx.amount, user_id: tx.user_id },
+                                });
+                                setConfirmAction(null);
+                            }}
+                        >
+                            {(forceResolve.isPending || refundTx.isPending || markFailed.isPending) ? "Processing..." : "Confirm"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             {(reports ?? []).length > 0 && (
                 <div className="bg-card border border-border rounded-2xl overflow-hidden">
                     <div className="flex items-center justify-between p-6 border-b border-border">
