@@ -197,9 +197,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         >
             {/* Logo */}
             <div className="h-16 flex items-center gap-3 px-4 border-b border-border shrink-0">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-purple-700 flex items-center justify-center shadow-md">
-                    <Zap className="w-4 h-4 text-white" />
-                </div>
+                <img src={logo} alt="Uteelpay" className="w-8 h-8 rounded-xl object-contain" />
                 {(!collapsed || mobile) && (
                     <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm text-foreground leading-none">UteelPay</p>

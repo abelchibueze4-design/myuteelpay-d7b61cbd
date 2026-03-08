@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { passwordRules, validatePassword, validateUsername } from "@/lib/passwordValidation";
+import logo from "@/assets/logo.png";
 
 const Signup = () => {
   const [searchParams] = useSearchParams();
