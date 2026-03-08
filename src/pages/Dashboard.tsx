@@ -90,11 +90,7 @@ const Dashboard = () => {
 
   const activeTab = searchParams.get("tab");
 
-  useEffect(() => {
-    if (activeTab === "settings") {
-      setSettingsOpen(true);
-    }
-  }, [activeTab]);
+  // No longer opening a dialog for settings
 
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
 
