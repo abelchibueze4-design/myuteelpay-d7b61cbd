@@ -127,17 +127,19 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <AccountSettings 
-        open={settingsOpen} 
-        onOpenChange={(open) => {
-          setSettingsOpen(open);
-          if (!open && activeTab === "settings") {
-            const newParams = new URLSearchParams(searchParams);
-            newParams.delete("tab");
-            setSearchParams(newParams, { replace: true });
-          }
-        }} 
-      />
+      <div className="hidden">
+        <AccountSettings 
+          open={settingsOpen} 
+          onOpenChange={(open) => {
+            setSettingsOpen(open);
+            if (!open && activeTab === "settings") {
+              const newParams = new URLSearchParams(searchParams);
+              newParams.delete("tab");
+              setSearchParams(newParams, { replace: true });
+            }
+          }} 
+        />
+      </div>
       <SetupTransactionPinModal
         open={pinSetupOpen}
         onComplete={() => setPinSetupOpen(false)}
