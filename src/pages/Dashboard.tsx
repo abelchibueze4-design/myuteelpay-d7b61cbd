@@ -35,11 +35,11 @@ import { useKycVerified, BALANCE_LIMIT_UNVERIFIED } from "@/hooks/useKyc";
 
 const quickActions = [
   { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "text-primary bg-primary/10", border: "border-primary/20" },
-  { icon: Smartphone, label: "Data", path: "/services/data", color: "text-blue-600 bg-blue-50", border: "border-blue-100" },
-  { icon: Tv, label: "Cable TV", path: "/services/cable", color: "text-orange-600 bg-orange-50", border: "border-orange-100" },
+  { icon: Smartphone, label: "Data", path: "/services/data", color: "text-blue-600 dark:text-blue-400 bg-blue-500/10", border: "border-blue-500/20" },
+  { icon: Tv, label: "Cable TV", path: "/services/cable", color: "text-orange-600 dark:text-orange-400 bg-orange-500/10", border: "border-orange-500/20" },
   { icon: Zap, label: "Electricity", path: "/services/electricity", color: "text-accent-foreground bg-accent/15", border: "border-accent/20" },
-  { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "text-pink-600 bg-pink-50", border: "border-pink-100" },
-  { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "text-emerald-600 bg-emerald-50", border: "border-emerald-100" },
+  { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "text-pink-600 dark:text-pink-400 bg-pink-500/10", border: "border-pink-500/20" },
+  { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10", border: "border-emerald-500/20" },
 ];
 
 const Dashboard = () => {
