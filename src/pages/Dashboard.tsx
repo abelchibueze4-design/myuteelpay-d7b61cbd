@@ -8,6 +8,7 @@ import {
   ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
 } from "lucide-react";
 import TransactionHistory from "@/components/TransactionHistory";
+import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -360,12 +361,14 @@ const Dashboard = () => {
                 );
               })
             ) : (
-              <div className="p-8 text-center">
-                <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center mx-auto mb-2 opacity-40">
-                  <Activity className="w-4 h-4" />
-                </div>
-                <p className="text-[10px] text-muted-foreground">Your recent payments will appear here</p>
-              </div>
+              <EmptyState
+                icon={Activity}
+                emoji="📭"
+                title="No activity yet"
+                description="Fund your wallet and start using services — your transactions will show up here."
+                actionLabel="Fund Wallet"
+                onAction={() => setFundOpen(true)}
+              />
             )}
           </div>
         </div>
