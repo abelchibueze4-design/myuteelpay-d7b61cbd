@@ -94,25 +94,31 @@ const TransactionMonitoring = () => {
                 icon={Receipt}
                 badge={`${(transactions ?? []).length}`}
                 actions={
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                         <Button variant="outline" size="sm" onClick={() => refetch()}>
                             <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
                         </Button>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button size="sm">
-                                    <Download className="w-3.5 h-3.5 mr-1.5" /> Export Data
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => handleExport("csv")}>
-                                    Export as CSV
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleExport("pdf")}>
-                                    Export as PDF/Print
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <DateRangeExport
+                            reportTitle="Transaction Audit Report"
+                            headers={["Reference", "User", "Type", "Amount", "Status", "Date"]}
+                            getFilteredData={(from, to) => {
+                                const rows = (transactions ?? []).filter((t) => {
+                                    const txDate = new Date(t.created_at);
+                                    const matchFrom = !from || !isBefore(txDate, startOfDay(from));
+                                    const matchTo = !to || !isAfter(txDate, endOfDay(to));
+                                    return matchFrom && matchTo;
+                                });
+                                return rows.map((t) => [
+                                    t.reference || t.id.split("-")[0].toUpperCase(),
+                                    t.user_name,
+                                    t.type?.replace(/_/g, " "),
+                                    `N${Math.abs(t.amount).toLocaleString()}`,
+                                    t.status,
+                                    format(new Date(t.created_at), "yyyy-MM-dd HH:mm"),
+                                ]);
+                            }}
+                            onDateRangeChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
+                        />
                     </div>
                 }
             />
