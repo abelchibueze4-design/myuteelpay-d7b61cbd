@@ -4,13 +4,6 @@ import logo from "@/assets/logo.png";
 import heroBillPayment from "@/assets/hero-bill-payment.jpg";
 import heroBillPayment2 from "@/assets/hero-bill-payment-2.jpg";
 import appMockup from "@/assets/app-mockup.png";
-import mtnLogo from "@/assets/mtn-logo.png";
-import airtelLogo from "@/assets/airtel-logo.png";
-import gloLogo from "@/assets/glo-logo.png";
-import nineMobileLogo from "@/assets/9mobile-logo.png";
-import dstvLogo from "@/assets/dstv-logo.png";
-import gotvLogo from "@/assets/gotv-logo.png";
-import startimesLogo from "@/assets/startimes-logo.png";
 import {
   Zap, Shield, Clock, Star, Smartphone, Tv, GraduationCap,
   MessageSquare, Users, ArrowRight, Phone, Gift, HelpCircle, CheckCircle,
@@ -72,9 +65,9 @@ const Navbar = () => (
 
 /* ---------------- Hero Section ---------------- */
 const services = [
-  { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "bg-primary/10 text-primary", logos: [mtnLogo, airtelLogo, gloLogo, nineMobileLogo] },
-  { icon: Smartphone, label: "Data", path: "/services/data", color: "bg-blue-100 text-blue-600", logos: [mtnLogo, airtelLogo, gloLogo, nineMobileLogo] },
-  { icon: Tv, label: "Cable TV", path: "/services/cable", color: "bg-orange-100 text-orange-600", logos: [dstvLogo, gotvLogo, startimesLogo] },
+  { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "bg-primary/10 text-primary" },
+  { icon: Smartphone, label: "Data", path: "/services/data", color: "bg-blue-100 text-blue-600" },
+  { icon: Tv, label: "Cable TV", path: "/services/cable", color: "bg-orange-100 text-orange-600" },
   { icon: Zap, label: "Electricity", path: "/services/electricity", color: "bg-accent/15 text-accent-foreground" },
   { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "bg-pink-100 text-pink-600" },
   { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "bg-emerald-100 text-emerald-600" },
@@ -118,18 +111,10 @@ const ServicesGrid = () => (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-5 max-w-xs lg:max-w-none mx-auto">
         {services.map((service, i) => (
           <Link key={i} to={service.path}>
-            <div className="fintech-card p-3 lg:p-5 tap-target hover:scale-[1.03] transition-all min-h-[120px] lg:min-h-[160px] flex flex-col items-center justify-center">
-              {service.logos ? (
-                <div className="flex flex-wrap items-center justify-center gap-2 lg:gap-3 mb-2 lg:mb-3 w-full">
-                  {service.logos.map((logoSrc, j) => (
-                    <img key={j} src={logoSrc} alt="" className="w-12 h-12 lg:w-16 lg:h-16 object-contain rounded-lg" />
-                  ))}
-                </div>
-              ) : (
-                <div className={`w-14 h-14 lg:w-20 lg:h-20 rounded-2xl ${service.color} flex items-center justify-center mb-2 lg:mb-3`}>
-                  <service.icon className="w-7 h-7 lg:w-10 lg:h-10" />
-                </div>
-              )}
+            <div className="fintech-card p-4 lg:p-6 tap-target hover:scale-[1.03] transition-all">
+              <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl ${service.color} flex items-center justify-center mb-2 mx-auto`}>
+                <service.icon className="w-5 h-5 lg:w-6 lg:h-6" />
+              </div>
               <p className="text-xs lg:text-sm font-bold text-foreground text-center">{service.label}</p>
             </div>
           </Link>
@@ -138,6 +123,8 @@ const ServicesGrid = () => (
     </div>
   </section>
 );
+
+/* ---------------- Features Row ---------------- */
 const features = [
   { icon: Shield, title: "Secure", desc: "Bank-grade encryption on every transaction" },
   { icon: Clock, title: "Instant", desc: "Processing under 5 seconds guaranteed" },
