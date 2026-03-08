@@ -22,10 +22,22 @@ const Electricity = () => {
   const [token, setToken] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [pinOpen, setPinOpen] = useState(false);
+  const [discoDropdownOpen, setDiscoDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
   const { guardTransaction } = useTransactionGuard();
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDiscoDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const { data: discos, isLoading: isLoadingDiscos } = useQuery({
     queryKey: ["electricity_companies"],
