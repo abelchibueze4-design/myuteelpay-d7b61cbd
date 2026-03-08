@@ -172,7 +172,7 @@ function App() {
               <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
-              <Route path="/admin/users/kyc" element={<AdminLayout><UserManagement /></AdminLayout>} />
+              <Route path="/admin/users/kyc" element={<AdminLayout><AdminKycReview /></AdminLayout>} />
               <Route path="/admin/transactions" element={<AdminLayout><TransactionMonitoring /></AdminLayout>} />
               <Route path="/admin/finance" element={<AdminLayout><WalletFinance /></AdminLayout>} />
               <Route path="/admin/finance/refunds" element={<AdminLayout><WalletFinance /></AdminLayout>} />
