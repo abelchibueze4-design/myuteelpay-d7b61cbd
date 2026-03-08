@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { NetworkIcon } from "@/components/NetworkIcon";
 import { Check, CreditCard, Download, Share2, Printer, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,13 +92,7 @@ const DataCard = () => {
                                             : "border-border/50 hover:border-primary/30"
                                     )}
                                 >
-                                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black",
-                                        n.network_name === "MTN" ? "bg-yellow-100 text-yellow-700" :
-                                            n.network_name === "GLO" ? "bg-green-100 text-green-700" :
-                                                n.network_name === "AIRTEL" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
-                                    )}>
-                                        {n.network_name[0]}
-                                    </div>
+                                    <NetworkIcon networkName={n.network_name} />
                                     <span className="text-[10px] font-bold uppercase">{n.network_name}</span>
                                 </button>
                             ))}
