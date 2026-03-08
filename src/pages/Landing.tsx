@@ -153,7 +153,7 @@ const FeaturesSection = () => (
 /* ---------------- Bill Payment Showcase ---------------- */
 const BillPaymentShowcase = () => (
   <section className="py-8 lg:py-20 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-6xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="text-center mb-6 lg:mb-12">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-[11px] lg:text-xs font-bold mb-3">
           <BadgeDollarSign className="w-3 h-3" /> Save More With Every Payment
