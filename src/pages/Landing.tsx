@@ -4,6 +4,13 @@ import logo from "@/assets/logo.png";
 import heroBillPayment from "@/assets/hero-bill-payment.jpg";
 import heroBillPayment2 from "@/assets/hero-bill-payment-2.jpg";
 import appMockup from "@/assets/app-mockup.png";
+import mtnLogo from "@/assets/mtn-logo.png";
+import airtelLogo from "@/assets/airtel-logo.png";
+import gloLogo from "@/assets/glo-logo.png";
+import nineMobileLogo from "@/assets/9mobile-logo.png";
+import dstvLogo from "@/assets/dstv-logo.png";
+import gotvLogo from "@/assets/gotv-logo.png";
+import startimesLogo from "@/assets/startimes-logo.png";
 import {
   Zap, Shield, Clock, Star, Smartphone, Tv, GraduationCap,
   MessageSquare, Users, ArrowRight, Phone, Gift, HelpCircle, CheckCircle,
