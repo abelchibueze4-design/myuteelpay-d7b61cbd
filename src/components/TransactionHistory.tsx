@@ -338,22 +338,22 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
         </div>
 
         {/* Transaction Feed */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
-              <FileText className="w-5 h-5 text-primary" /> Transaction Stream
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm font-black tracking-tight flex items-center gap-1.5">
+              <FileText className="w-4 h-4 text-primary" /> Transactions
             </h2>
             {hasActiveFilters && (
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-secondary px-3 py-1 rounded-full">{filtered.length} Found</p>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-secondary px-2 py-0.5 rounded-full">{filtered.length} Found</p>
             )}
           </div>
 
-          <div className="bg-card rounded-3xl border border-border/50 overflow-hidden shadow-sm divide-y divide-border/30">
+          <div className="bg-card rounded-2xl border border-border/50 overflow-hidden shadow-sm divide-y divide-border/30">
             {isLoading ? (
               Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between p-6">
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="w-12 h-12 rounded-2xl" />
+                <div key={i} className="flex items-center justify-between p-3">
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton className="w-8 h-8 rounded-xl" />
                     <div className="space-y-2"><Skeleton className="h-4 w-40" /><Skeleton className="h-3 w-24" /></div>
                   </div>
                   <div className="text-right space-y-2"><Skeleton className="h-4 w-20 ml-auto" /><Skeleton className="h-3 w-16 ml-auto" /></div>
