@@ -403,14 +403,14 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 );
               })
             ) : (
-              <div className="p-24 text-center space-y-4">
-                <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 border border-border/50">
-                  <RotateCcw className="w-8 h-8 text-muted-foreground/30" />
+              <div className="p-12 text-center space-y-3">
+                <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center mx-auto mb-2 border border-border/50">
+                  <RotateCcw className="w-6 h-6 text-muted-foreground/30" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-foreground tracking-tight">Empty feed detected</h3>
-                  <p className="text-sm text-muted-foreground max-w-xs mx-auto italic mt-1">
-                    {hasActiveFilters ? "We couldn't find any transactions matching your specific filters." : "You haven't made any transactions yet."}
+                  <h3 className="text-sm font-bold text-foreground">No transactions found</h3>
+                  <p className="text-xs text-muted-foreground max-w-xs mx-auto mt-1">
+                    {hasActiveFilters ? "No matches for your filters." : "No transactions yet."}
                   </p>
                 </div>
                 {hasActiveFilters && (
