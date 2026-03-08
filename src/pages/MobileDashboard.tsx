@@ -14,7 +14,7 @@ const DashboardHeader = ({ userName = "User" }) => (
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs text-gray-500 mb-1">Good morning</p>
-          <h1 className="text-xl font-bold text-gray-900">👋 {userName}</h1>
+          <h1 className="text-xl font-bold text-gray-900">Hi, {userName}</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="tap-target">

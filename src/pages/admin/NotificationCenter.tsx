@@ -131,7 +131,7 @@ const BroadcastForm = () => {
                     <div>
                         <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Notification Title</label>
                         <Input
-                            placeholder="e.g. 🎁 Exclusive Offer Unlocked"
+                            placeholder="e.g. Exclusive Offer Unlocked"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             maxLength={80}

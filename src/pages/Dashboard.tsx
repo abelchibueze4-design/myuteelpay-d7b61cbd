@@ -375,7 +375,6 @@ const Dashboard = () => {
             ) : (
               <EmptyState
                 icon={Activity}
-                emoji="📭"
                 title="No activity yet"
                 description="Fund your wallet and start using services — your transactions will show up here."
                 actionLabel="Fund Wallet"

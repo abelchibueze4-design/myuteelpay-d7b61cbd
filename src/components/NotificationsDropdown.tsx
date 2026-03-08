@@ -13,16 +13,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 
-const getNotificationIcon = (type: string) => {
-  switch (type) {
-    case "transaction": return "💳";
-    case "wallet": return "💰";
-    case "promo": return "🎁";
-    case "security": return "🔒";
-    case "referral": return "👥";
-    case "system": return "⚙️";
-    default: return "🔔";
-  }
+const NotificationIcon = ({ type }: { type: string }) => {
+  const iconMap: Record<string, React.ElementType> = {
+    transaction: CreditCard,
+    wallet: Wallet,
+    promo: Gift,
+    security: Lock,
+    referral: Users,
+    system: SettingsIcon,
+  };
+  const Icon = iconMap[type] || BellRing;
+  return <Icon className="w-4 h-4 text-primary" />;
 };
 
 export const NotificationsDropdown = () => {

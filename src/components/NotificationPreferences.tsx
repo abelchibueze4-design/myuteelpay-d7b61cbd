@@ -250,7 +250,7 @@ export const NotificationPreferences = () => {
 
       {/* Info Box */}
       <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg text-xs text-muted-foreground space-y-1">
-        <p className="font-medium text-foreground">💡 Tip:</p>
+        <p className="font-medium text-foreground flex items-center gap-1"><Lightbulb className="w-3.5 h-3.5 text-blue-500" /> Tip:</p>
         <p>
           We recommend enabling transaction updates and service reminders to
           stay informed about your account activities.

@@ -802,10 +802,10 @@ const Reconciliation = () => {
 
                             {/* Timeline */}
                             <div className="text-xs text-muted-foreground space-y-1 border-l-2 border-primary/30 pl-3">
-                                <p>🔍 Detected: {format(new Date(selectedCase.created_at), "PPpp")}</p>
-                                <p>🔄 Updated: {format(new Date(selectedCase.updated_at), "PPpp")}</p>
+                                <p>Detected: {format(new Date(selectedCase.created_at), "PPpp")}</p>
+                                <p>Updated: {format(new Date(selectedCase.updated_at), "PPpp")}</p>
                                 {selectedCase.admin_notes && (
-                                    <p>📝 Last Note: {selectedCase.admin_notes}</p>
+                                    <p>Last Note: {selectedCase.admin_notes}</p>
                                 )}
                             </div>
 
