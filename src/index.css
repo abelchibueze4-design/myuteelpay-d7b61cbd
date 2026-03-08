@@ -113,8 +113,7 @@
 
   /* Premium fintech card styling */
   .fintech-card {
-    @apply bg-white rounded-2xl shadow-soft border border-white/80;
-    background: var(--gradient-card);
+    @apply bg-card rounded-2xl shadow-soft border border-border/80;
   }
 
   /* Royal gold button */
@@ -211,7 +210,7 @@
 
   /* Bottom navigation */
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-white/80;
+    @apply fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border;
     z-index: 50;
   }
 

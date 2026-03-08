@@ -1,10 +1,12 @@
-import { Bell } from "lucide-react";
+import { Bell, Moon, Sun } from "lucide-react";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { AccountSettings } from "@/components/AccountSettings";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "next-themes";
 
 export const DashboardTopBar = () => {
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
   const avatarUrl = user?.user_metadata?.avatar_url;
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
   const initials = displayName[0]?.toUpperCase();
@@ -14,6 +16,19 @@ export const DashboardTopBar = () => {
       <div className="flex-1" />
       
       <div className="flex items-center gap-4 sm:gap-6">
+        {/* Theme Toggle */}
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="p-2 rounded-lg hover:bg-muted transition-colors"
+          title="Toggle theme"
+        >
+          {theme === "dark" ? (
+            <Sun className="w-5 h-5 text-foreground" />
+          ) : (
+            <Moon className="w-5 h-5 text-foreground" />
+          )}
+        </button>
+
         {/* Notifications */}
         <NotificationsDropdown />
 

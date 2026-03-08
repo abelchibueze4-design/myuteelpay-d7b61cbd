@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  User, Shield, Bell, HeadphonesIcon, ChevronRight, ArrowLeft, LogOut,
+  User, Shield, Bell, HeadphonesIcon, ChevronRight, ArrowLeft, LogOut, Palette,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { DashboardTopBar } from "@/components/DashboardTopBar";
 import { SecuritySettings } from "@/components/SecuritySettings";
 import { NotificationPreferences } from "@/components/NotificationPreferences";
@@ -19,6 +20,7 @@ const menuItems = [
   { key: "profile", label: "Edit Profile", description: "Update your personal information", icon: User },
   { key: "security", label: "Security", description: "Password & transaction PIN", icon: Shield },
   { key: "notifications", label: "Notifications", description: "Manage alert preferences", icon: Bell },
+  { key: "appearance", label: "Appearance", description: "Dark mode & theme settings", icon: Palette },
   { key: "support", label: "Help & Support", description: "Get help from our team", icon: HeadphonesIcon },
 ];
 
@@ -118,6 +120,7 @@ const SettingsPage = () => {
             {activeSection === "profile" && <ProfileForm />}
             {activeSection === "security" && <SecuritySettings />}
             {activeSection === "notifications" && <NotificationPreferences />}
+            {activeSection === "appearance" && <AppearanceSettings />}
             {activeSection === "support" && <SupportSection />}
           </div>
         )}
@@ -205,6 +208,41 @@ const ProfileForm = () => {
         {isLoading ? "Saving..." : "Save Changes"}
       </Button>
     </form>
+  );
+};
+
+/* Appearance Settings */
+const AppearanceSettings = () => {
+  const { theme, setTheme } = useTheme();
+
+  const themes = [
+    { key: "light", label: "Light", icon: "☀️" },
+    { key: "dark", label: "Dark", icon: "🌙" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-sm font-bold text-foreground mb-1">Theme</h3>
+        <p className="text-xs text-muted-foreground mb-4">Choose your preferred appearance</p>
+        <div className="grid grid-cols-2 gap-3">
+          {themes.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTheme(t.key)}
+              className={`p-4 rounded-2xl border-2 transition-all text-center ${
+                theme === t.key
+                  ? "border-primary bg-primary/5 shadow-md"
+                  : "border-border hover:border-primary/30"
+              }`}
+            >
+              <span className="text-2xl block mb-2">{t.icon}</span>
+              <span className="text-sm font-bold text-foreground">{t.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
