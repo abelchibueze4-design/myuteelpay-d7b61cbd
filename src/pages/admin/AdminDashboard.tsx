@@ -1,3 +1,4 @@
+import ApiHealthMonitor from "@/components/admin/ApiHealthMonitor";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
 import { useUsers } from "@/hooks/useUsers";
 import { StatCard } from "@/components/admin/StatCard";
@@ -276,6 +277,9 @@ const AdminDashboard = () => {
                     </div>
                 </div>
             </div>
+
+            {/* API Health Monitor */}
+            <ApiHealthMonitor />
 
             {/* Recent Transactions */}
             <div className="bg-card border border-border rounded-2xl">
