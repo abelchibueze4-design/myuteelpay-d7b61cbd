@@ -552,6 +552,7 @@ const Landing = () => (
     <ScrollReveal><AboutSection /></ScrollReveal>
     <ScrollReveal><HowItWorks /></ScrollReveal>
     <ScrollReveal><TestimonialsSection /></ScrollReveal>
+    <ScrollReveal><ServicesGrid /></ScrollReveal>
     <ScrollReveal><ReferralBanner /></ScrollReveal>
     <ScrollReveal><PricingSection /></ScrollReveal>
     <ScrollReveal><DownloadAppSection /></ScrollReveal>
