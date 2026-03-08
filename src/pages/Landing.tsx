@@ -349,7 +349,7 @@ const TestimonialsSection = () => (
 /* ---------------- Referral Banner ---------------- */
 const ReferralBanner = () => (
   <section className="py-6 lg:py-16 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-4xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="fintech-card p-5 lg:p-12 bg-accent/5 border-accent/20 text-center">
         <Gift className="w-8 h-8 lg:w-12 lg:h-12 text-accent mx-auto mb-2 lg:mb-4" />
         <h3 className="text-base lg:text-2xl font-extrabold text-foreground mb-1 lg:mb-2">Refer & Earn</h3>
