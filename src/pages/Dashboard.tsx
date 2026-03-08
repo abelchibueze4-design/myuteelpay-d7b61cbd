@@ -263,21 +263,16 @@ const Dashboard = () => {
         </div>
 
         {/* Service status banner */}
-        {(() => {
+        {platformSettings.service_status_visible && (() => {
           const statusStyles = {
             operational: "bg-emerald-50 border-emerald-200 text-emerald-700",
             degraded: "bg-amber-50 border-amber-200 text-amber-700",
             outage: "bg-red-50 border-red-200 text-red-700",
           };
-          const statusIcons = {
-            operational: <Activity className="h-4 w-4 shrink-0" />,
-            degraded: <Activity className="h-4 w-4 shrink-0" />,
-            outage: <Activity className="h-4 w-4 shrink-0" />,
-          };
           const st = platformSettings.service_status || "operational";
           return (
             <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border ${statusStyles[st]}`}>
-              {statusIcons[st]}
+              <Activity className="h-4 w-4 shrink-0" />
               <span className="text-xs font-semibold">{platformSettings.service_status_message || "All services are running smoothly"}</span>
             </div>
           );
