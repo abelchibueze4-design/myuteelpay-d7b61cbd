@@ -174,7 +174,7 @@ const Dashboard = () => {
           </div>
           <div className="container mx-auto relative z-10">
             <p className="text-white/70 text-sm font-medium uppercase tracking-wide">Overview Dashboard</p>
-            <h1 className="text-3xl font-extrabold text-white mt-1">Hey, {displayName} <span className="animate-wave inline-block">👋</span></h1>
+            <h1 className="text-3xl font-extrabold text-white mt-1">Welcome, {displayName} <span className="animate-wave inline-block">👋</span></h1>
             <p className="text-white/60 text-sm mt-2">Ready to pay your bills today?</p>
           </div>
         </div>
