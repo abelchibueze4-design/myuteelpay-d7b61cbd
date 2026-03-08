@@ -29,7 +29,7 @@ const Airtime = () => {
     const { guardTransaction } = useTransactionGuard();
     const { favorites, addFavorite, removeFavorite, isFavorited } = useFavorites("airtime");
 
-    const { data: networks } = useQuery({
+    const { data: networks, isLoading: networksLoading } = useQuery({
         queryKey: ["networks"],
         queryFn: async () => {
             const { data, error } = await supabase.from("networks").select("*");
@@ -37,6 +37,17 @@ const Airtime = () => {
             return data;
         }
     });
+
+    const smartDefault = useSmartNetworkDefault(networks ?? undefined, "airtime");
+
+    // Auto-select smart default on first load
+    useEffect(() => {
+        if (!network && smartDefault) {
+            setNetwork(smartDefault);
+        }
+    }, [smartDefault]);
+
+    if (networksLoading) return <ServicePageSkeleton />;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
