@@ -201,8 +201,8 @@ const Dashboard = () => {
             <div className="flex gap-2.5">
               <Dialog open={fundOpen} onOpenChange={setFundOpen}>
                 <DialogTrigger asChild>
-                  <Button className="flex-1 gradient-primary text-primary-foreground font-bold h-11 rounded-2xl text-sm gap-1.5 tap-target">
-                    <Plus className="w-4 h-4" /> Add Money
+                   <Button className="flex-1 bg-white text-primary font-bold h-11 rounded-2xl text-sm gap-1.5 tap-target hover:bg-white/90">
+                     <Plus className="w-4 h-4" /> Add Money
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="rounded-3xl border-none shadow-2xl max-w-[380px] mx-auto">
