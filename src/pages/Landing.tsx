@@ -74,45 +74,51 @@ const services = [
 ];
 
 const HeroSection = () => (
-  <section id="services" className="pt-[72px] lg:pt-[100px] pb-8 lg:pb-16 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-6xl mx-auto">
-      <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
-        <div className="text-center lg:text-left">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] lg:text-xs font-bold mb-4 animate-fade-in">
-            <Star className="w-3 h-3 text-accent" />
-            Nigeria's Trusted Platform
-          </div>
-          <h1 className="text-2xl lg:text-5xl xl:text-6xl font-extrabold leading-tight mb-3 lg:mb-5 text-foreground animate-slide-up">
-            Fast Utility <span className="text-gradient">Payments</span>
-          </h1>
-          <p className="text-sm lg:text-lg text-muted-foreground mb-5 lg:mb-8 max-w-xs lg:max-w-md mx-auto lg:mx-0 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-            Instant Airtime, Data, Electricity & more — zero hidden fees. Trusted by thousands of Nigerians.
-          </p>
-          <div className="flex gap-3 mb-6 lg:mb-0 max-w-xs lg:max-w-sm mx-auto lg:mx-0 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-            <Link to="/signup" className="flex-1">
-              <Button className="w-full gradient-primary text-primary-foreground font-bold h-12 lg:h-14 rounded-2xl text-sm lg:text-base hover-lift">
-                Get Started <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
-            <Link to="/login" className="flex-1">
-              <Button variant="outline" className="w-full h-12 lg:h-14 rounded-2xl text-sm lg:text-base font-semibold border-2 border-primary/20 text-primary hover:bg-primary/5 hover-lift">
-                Login
-              </Button>
-            </Link>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 max-w-xs lg:max-w-none mx-auto">
-          {services.map((service, i) => (
-            <Link key={i} to={service.path}>
-              <div className="fintech-card p-4 lg:p-6 tap-target hover:scale-[1.03] transition-all animate-scale-in" style={{ animationDelay: `${i * 0.08}s` }}>
-                <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl ${service.color} flex items-center justify-center mb-2 mx-auto`}>
-                  <service.icon className="w-5 h-5 lg:w-6 lg:h-6" />
-                </div>
-                <p className="text-xs lg:text-sm font-bold text-foreground text-center">{service.label}</p>
+  <section className="pt-[72px] lg:pt-[100px] pb-8 lg:pb-16 px-4 lg:px-8">
+    <div className="max-w-[420px] lg:max-w-6xl mx-auto text-center lg:text-left">
+      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] lg:text-xs font-bold mb-4 animate-fade-in">
+        <Star className="w-3 h-3 text-accent" />
+        Nigeria's Trusted Platform
+      </div>
+      <h1 className="text-2xl lg:text-5xl xl:text-6xl font-extrabold leading-tight mb-3 lg:mb-5 text-foreground animate-slide-up">
+        Fast Utility <span className="text-gradient">Payments</span>
+      </h1>
+      <p className="text-sm lg:text-lg text-muted-foreground mb-5 lg:mb-8 max-w-xs lg:max-w-md mx-auto lg:mx-0 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+        Instant Airtime, Data, Electricity & more — zero hidden fees. Trusted by thousands of Nigerians.
+      </p>
+      <div className="flex gap-3 max-w-xs lg:max-w-sm mx-auto lg:mx-0 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+        <Link to="/signup" className="flex-1">
+          <Button className="w-full gradient-primary text-primary-foreground font-bold h-12 lg:h-14 rounded-2xl text-sm lg:text-base hover-lift">
+            Get Started <ArrowRight className="w-4 h-4 ml-1" />
+          </Button>
+        </Link>
+        <Link to="/login" className="flex-1">
+          <Button variant="outline" className="w-full h-12 lg:h-14 rounded-2xl text-sm lg:text-base font-semibold border-2 border-primary/20 text-primary hover:bg-primary/5 hover-lift">
+            Login
+          </Button>
+        </Link>
+      </div>
+    </div>
+  </section>
+);
+
+/* ---------------- Services Grid ---------------- */
+const ServicesGrid = () => (
+  <section id="services" className="py-8 lg:py-16 px-4 lg:px-8">
+    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+      <h2 className="text-lg lg:text-3xl font-extrabold text-center mb-2 lg:mb-3 text-foreground">Our Services</h2>
+      <p className="text-xs lg:text-base text-muted-foreground text-center mb-5 lg:mb-10">Everything you need to stay connected and powered</p>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-5 max-w-xs lg:max-w-none mx-auto">
+        {services.map((service, i) => (
+          <Link key={i} to={service.path}>
+            <div className="fintech-card p-4 lg:p-6 tap-target hover:scale-[1.03] transition-all">
+              <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl ${service.color} flex items-center justify-center mb-2 mx-auto`}>
+                <service.icon className="w-5 h-5 lg:w-6 lg:h-6" />
               </div>
-            </Link>
-          ))}
-        </div>
+              <p className="text-xs lg:text-sm font-bold text-foreground text-center">{service.label}</p>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   </section>
