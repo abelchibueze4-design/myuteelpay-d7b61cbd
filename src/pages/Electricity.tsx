@@ -56,6 +56,8 @@ const Electricity = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!disco || !meter || !amount) return;
+    const { allowed } = guardTransaction(Number(amount));
+    if (!allowed) return;
     setPinOpen(true);
   };
 

@@ -39,6 +39,8 @@ const DataCard = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!network || !planId) return;
+        const { allowed } = guardTransaction(selectedPlan?.amount || 0);
+        if (!allowed) return;
         setPinOpen(true);
     };
 

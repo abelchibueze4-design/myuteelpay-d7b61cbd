@@ -32,6 +32,8 @@ const BulkSMS = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!sender || !recipients || !message) return;
+    const { allowed } = guardTransaction(totalCost);
+    if (!allowed) return;
     setPinOpen(true);
   };
 

@@ -54,6 +54,8 @@ const Data = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!network || !phone || !planId) return;
+        const { allowed } = guardTransaction(selectedPlan?.price || 0);
+        if (!allowed) return;
         setPinOpen(true);
     };
 

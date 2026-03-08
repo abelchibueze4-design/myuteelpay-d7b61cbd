@@ -54,6 +54,8 @@ const CableTV = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlan || !smartcard) return;
+    const { allowed } = guardTransaction(selectedPlan?.price || 0);
+    if (!allowed) return;
     setPinOpen(true);
   };
 

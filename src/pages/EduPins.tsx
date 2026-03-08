@@ -31,6 +31,8 @@ const EduPins = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedExam) return;
+    const { allowed } = guardTransaction(total);
+    if (!allowed) return;
     setPinOpen(true);
   };
 
