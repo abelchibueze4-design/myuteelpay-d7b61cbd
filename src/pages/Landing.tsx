@@ -375,14 +375,14 @@ const Landing = () => (
   <div className="min-h-screen bg-background">
     <Navbar />
     <HeroSection />
-    <FeaturesSection />
-    <AboutSection />
-    <HowItWorks />
-    <ReferralBanner />
-    <PricingSection />
-    <FAQSection />
-    <TrustBar />
-    <Footer />
+    <ScrollReveal><FeaturesSection /></ScrollReveal>
+    <ScrollReveal><AboutSection /></ScrollReveal>
+    <ScrollReveal><HowItWorks /></ScrollReveal>
+    <ScrollReveal><ReferralBanner /></ScrollReveal>
+    <ScrollReveal><PricingSection /></ScrollReveal>
+    <ScrollReveal><FAQSection /></ScrollReveal>
+    <ScrollReveal><TrustBar /></ScrollReveal>
+    <ScrollReveal><Footer /></ScrollReveal>
     <WhatsAppButton />
   </div>
 );
