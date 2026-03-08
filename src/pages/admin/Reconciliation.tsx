@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatCard } from "@/components/admin/StatCard";
+import { DateRangeExport } from "@/components/admin/DateRangeExport";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -38,7 +39,7 @@ import {
     useMarkTransactionFailed,
     ReconciliationCase,
 } from "@/hooks/useReconciliation";
-import { format, parseISO, formatDistanceToNow } from "date-fns";
+import { format, parseISO, formatDistanceToNow, isBefore, isAfter, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -171,10 +172,31 @@ const Reconciliation = () => {
                 badge={openCases > 0 ? `${openCases} open` : "Clean"}
                 badgeVariant={openCases > 0 ? "destructive" : "secondary"}
                 actions={
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                         <Button variant="outline" size="sm" onClick={() => refetchCases()}>
                             <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
                         </Button>
+                        <DateRangeExport
+                            reportTitle="Reconciliation Cases Report"
+                            headers={["ID", "Issue Type", "Severity", "Status", "Description", "Created"]}
+                            getFilteredData={(from, to) => {
+                                const rows = (cases ?? []).filter((c) => {
+                                    const d = new Date(c.created_at);
+                                    const mf = !from || !isBefore(d, startOfDay(from));
+                                    const mt = !to || !isAfter(d, endOfDay(to));
+                                    return mf && mt;
+                                });
+                                return rows.map((c) => [
+                                    c.id.slice(0, 8),
+                                    c.issue_type,
+                                    c.severity,
+                                    c.status,
+                                    c.description,
+                                    format(new Date(c.created_at), "yyyy-MM-dd HH:mm"),
+                                ]);
+                            }}
+                            compact
+                        />
                         <Button
                             size="sm"
                             onClick={handleRunReconciliation}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatCard } from "@/components/admin/StatCard";
+import { DateRangeExport } from "@/components/admin/DateRangeExport";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
 import { useUsers } from "@/hooks/useUsers";
-import { format } from "date-fns";
+import { format, isBefore, isAfter, startOfDay, endOfDay } from "date-fns";
 import { exportToCSV, printPDF } from "@/utils/exportUtils";
 import {
     DropdownMenu,
@@ -69,6 +70,32 @@ const WalletFinance = () => {
             toast.success("Service breakdown exported to CSV");
         } else {
             printPDF("Service Volume Report", headers, data);
+            toast.success("PDF report generated");
+        }
+    };
+
+    const handleLedgerExport = (type: "csv" | "pdf", from?: Date, to?: Date) => {
+        const rows = allTx.filter((t) => {
+            const d = new Date(t.created_at);
+            const mf = !from || !isBefore(d, startOfDay(from));
+            const mt = !to || !isAfter(d, endOfDay(to));
+            return mf && mt;
+        });
+        const headers = ["Type", "User", "Debit", "Credit", "Status", "Date"];
+        const data = rows.map((t) => [
+            (t.type || "tx").replace(/_/g, " "),
+            t.user_name,
+            t.amount < 0 ? `₦${Math.abs(t.amount).toLocaleString()}` : "—",
+            t.amount >= 0 ? `₦${t.amount.toLocaleString()}` : "—",
+            t.status,
+            format(new Date(t.created_at), "yyyy-MM-dd HH:mm"),
+        ]);
+
+        if (type === "csv") {
+            exportToCSV(headers, data, "internal_ledger");
+            toast.success("Ledger exported to CSV");
+        } else {
+            printPDF("Internal Ledger Report", headers, data);
             toast.success("PDF report generated");
         }
     };
@@ -145,11 +172,32 @@ const WalletFinance = () => {
 
             {/* Internal Ledger */}
             <div className="bg-card border border-border rounded-2xl">
-                <div className="flex items-center justify-between p-6 border-b border-border">
+                <div className="flex items-center justify-between p-6 border-b border-border flex-wrap gap-3">
                     <div>
                         <h3 className="font-bold text-base">Internal Ledger</h3>
                         <p className="text-xs text-muted-foreground">Recent financial movements</p>
                     </div>
+                    <DateRangeExport
+                        reportTitle="Internal Ledger"
+                        headers={["Type", "User", "Debit", "Credit", "Status", "Date"]}
+                        getFilteredData={(from, to) => {
+                            const rows = allTx.filter((t) => {
+                                const d = new Date(t.created_at);
+                                const mf = !from || !isBefore(d, startOfDay(from));
+                                const mt = !to || !isAfter(d, endOfDay(to));
+                                return mf && mt;
+                            });
+                            return rows.map((t) => [
+                                (t.type || "tx").replace(/_/g, " "),
+                                t.user_name,
+                                t.amount < 0 ? `₦${Math.abs(t.amount).toLocaleString()}` : "—",
+                                t.amount >= 0 ? `₦${t.amount.toLocaleString()}` : "—",
+                                t.status,
+                                format(new Date(t.created_at), "yyyy-MM-dd HH:mm"),
+                            ]);
+                        }}
+                        compact
+                    />
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">

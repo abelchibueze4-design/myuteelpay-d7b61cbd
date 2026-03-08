@@ -2,11 +2,11 @@ import { useState, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import {
   Search, Filter, ArrowDownLeft, ArrowUpRight, X,
   Calendar, RotateCcw, FileText, Download, ChevronRight,
-  Receipt, MessageCircle, Printer
+  Receipt, MessageCircle, Printer, CalendarIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -67,6 +73,8 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState(defaultType);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
   const [selectedTx, setSelectedTx] = useState<any>(null);
   const receiptRef = useRef<HTMLDivElement>(null);
 
@@ -105,16 +113,23 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       const matchesType = typeFilter === "all" || t.type === typeFilter;
       const matchesStatus = statusFilter === "all" || t.status === statusFilter;
 
-      return matchesSearch && matchesType && matchesStatus;
-    });
-  }, [transactions, search, typeFilter, statusFilter, filter]);
+      // Date range filtering
+      const txDate = parseISO(t.created_at);
+      const matchesDateFrom = !dateFrom || !isBefore(txDate, startOfDay(dateFrom));
+      const matchesDateTo = !dateTo || !isAfter(txDate, endOfDay(dateTo));
 
-  const hasActiveFilters = search || typeFilter !== "all" || statusFilter !== "all";
+      return matchesSearch && matchesType && matchesStatus && matchesDateFrom && matchesDateTo;
+    });
+  }, [transactions, search, typeFilter, statusFilter, filter, dateFrom, dateTo]);
+
+  const hasActiveFilters = search || typeFilter !== "all" || statusFilter !== "all" || dateFrom || dateTo;
 
   const clearFilters = () => {
     setSearch("");
     setTypeFilter("all");
     setStatusFilter("all");
+    setDateFrom(undefined);
+    setDateTo(undefined);
   };
 
   const formatAmount = (amount: number, type: string) => {
@@ -294,6 +309,31 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                   <SelectItem value="failed" className="font-medium text-red-500">Failed</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            {/* Date Range */}
+            <div className="flex gap-2 w-full lg:w-auto">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4 gap-2 text-xs", !dateFrom && "text-muted-foreground")}>
+                    <CalendarIcon className="w-3.5 h-3.5" />
+                    {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent mode="single" selected={dateFrom} onSelect={setDateFrom} disabled={(date) => (dateTo ? date > dateTo : date > new Date())} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4 gap-2 text-xs", !dateTo && "text-muted-foreground")}>
+                    <CalendarIcon className="w-3.5 h-3.5" />
+                    {dateTo ? format(dateTo, "MMM d, yyyy") : "To"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent mode="single" selected={dateTo} onSelect={setDateTo} disabled={(date) => (dateFrom ? date < dateFrom : false) || date > new Date()} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
             </div>
             {hasActiveFilters && (
               <Button variant="ghost" onClick={clearFilters} className="h-12 px-4 rounded-2xl text-red-500 font-bold hover:bg-red-50 transition-all gap-2">
