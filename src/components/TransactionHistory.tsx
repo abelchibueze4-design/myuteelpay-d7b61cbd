@@ -69,8 +69,19 @@ interface TransactionHistoryProps {
   filter?: "all" | "services" | "wallet";
 }
 
+const SERVICE_ROUTES: Record<string, string> = {
+  airtime: "/services/airtime",
+  data: "/services/data",
+  cable_tv: "/services/cable",
+  electricity: "/services/electricity",
+  bulk_sms: "/services/sms",
+  edu_pin: "/services/edu",
+  data_card: "/services/data-card",
+};
+
 const TransactionHistory = ({ defaultType = "all", filter = "all" }: TransactionHistoryProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState(defaultType);
   const [statusFilter, setStatusFilter] = useState("all");
