@@ -429,7 +429,7 @@ const Dashboard = () => {
           </a>
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 
