@@ -16,6 +16,8 @@ export interface PlatformSettings {
   max_daily_transaction: number;
   max_single_transaction: number;
   min_wallet_fund: number;
+  service_status: "operational" | "degraded" | "outage";
+  service_status_message: string;
 }
 
 const defaults: PlatformSettings = {
@@ -33,6 +35,8 @@ const defaults: PlatformSettings = {
   max_daily_transaction: 100000,
   max_single_transaction: 50000,
   min_wallet_fund: 100,
+  service_status: "operational",
+  service_status_message: "All services are running smoothly",
 };
 
 export function usePlatformSettings() {
