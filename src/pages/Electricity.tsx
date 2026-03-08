@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Zap, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DiscoIcon } from "@/components/DiscoIcon";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
