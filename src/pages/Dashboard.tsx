@@ -125,7 +125,6 @@ const Dashboard = () => {
   if (activeTab === "wallet") return <TransactionHistory filter="wallet" />;
   if (activeTab === "settings") return <SettingsPage />;
 
-  const { settings: platformSettings } = usePlatformSettings();
 
   const handleFund = () => {
     const val = Number(amount);
