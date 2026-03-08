@@ -85,15 +85,20 @@ const Reconciliation = () => {
     const [selectedCase, setSelectedCase] = useState<ReconciliationCase | null>(null);
     const [adminNote, setAdminNote] = useState("");
     const [newStatus, setNewStatus] = useState("");
+    const [confirmAction, setConfirmAction] = useState<{ type: "resolve" | "refund" | "fail"; tx: any } | null>(null);
 
     const { data: cases, isLoading: loadingCases, refetch: refetchCases } = useReconciliationCases(statusFilter === "all" ? undefined : statusFilter);
     const { data: reports, isLoading: loadingReports } = useReconciliationReports(14);
     const { data: todayReport, isLoading: loadingToday } = useTodayReport();
     const { data: dailySummary } = useDailySummary(14);
+    const { data: pendingFailedTxns, isLoading: loadingPF, refetch: refetchPF } = usePendingFailedTransactions();
 
     const updateCase = useUpdateCase();
     const triggerCron = useTriggerReconciliation();
     const logAction = useLogAdminAction();
+    const forceResolve = useForceResolveTransaction();
+    const refundTx = useRefundFailedTransaction();
+    const markFailed = useMarkTransactionFailed();
 
     const filteredCases = (cases ?? []).filter((c) =>
         (severityFilter === "all" || c.severity === severityFilter)
@@ -101,6 +106,8 @@ const Reconciliation = () => {
 
     const openCases = (cases ?? []).filter((c) => c.status === "open").length;
     const criticalCases = (cases ?? []).filter((c) => c.severity === "critical").length;
+    const pendingCount = (pendingFailedTxns ?? []).filter((t: any) => t.status === "pending").length;
+    const failedCount = (pendingFailedTxns ?? []).filter((t: any) => t.status === "failed").length;
 
     // Chart data from daily summary
     const chartData = ((dailySummary ?? []) as any[])
