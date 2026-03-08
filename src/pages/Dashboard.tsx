@@ -181,7 +181,7 @@ const Dashboard = () => {
             <Menu className="w-5 h-5 text-foreground" />
           </button>
           <div className="text-center flex-1">
-            <h1 className="text-base font-extrabold text-foreground">Welcome, {displayName} 👋</h1>
+            <h1 className="text-base font-extrabold text-foreground">Welcome, {displayName}</h1>
           </div>
           <NotificationsDropdown />
         </div>
