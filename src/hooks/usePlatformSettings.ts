@@ -18,6 +18,7 @@ export interface PlatformSettings {
   min_wallet_fund: number;
   service_status: "operational" | "degraded" | "outage";
   service_status_message: string;
+  service_status_visible: boolean;
 }
 
 const defaults: PlatformSettings = {
