@@ -49,6 +49,7 @@ const Dashboard = () => {
   const { data: transactions } = useTransactions(5);
   const { initializePayment, verifyPayment, isInitializing } = useFundWallet();
   const { settings, isSettingsLoading } = useSecuritySettings();
+  const { settings: platformSettings } = usePlatformSettings();
   const [searchParams, setSearchParams] = useSearchParams();
   const [fundOpen, setFundOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
