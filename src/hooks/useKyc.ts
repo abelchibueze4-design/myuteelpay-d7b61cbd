@@ -33,7 +33,7 @@ export function useKycStatus() {
         .eq("user_id", user!.id)
         .maybeSingle();
       if (error) throw error;
-      return data as KycSubmission | null;
+      return data as unknown as KycSubmission | null;
     },
     enabled: !!user,
   });
