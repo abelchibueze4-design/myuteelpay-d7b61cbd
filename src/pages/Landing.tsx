@@ -374,7 +374,7 @@ const pricingData = [
 
 const PricingSection = () => (
   <section id="pricing" className="py-8 lg:py-20 px-4 lg:px-8 bg-secondary/50">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <h2 className="text-lg lg:text-3xl font-extrabold text-center mb-1 lg:mb-2 text-foreground">Affordable Pricing</h2>
       <p className="text-xs lg:text-base text-muted-foreground text-center mb-5 lg:mb-10">No hidden charges. Best rates guaranteed.</p>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-5">
