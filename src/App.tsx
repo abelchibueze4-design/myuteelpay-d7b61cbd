@@ -27,6 +27,7 @@ import Referral from "./pages/Referral";
 import DataCard from "./pages/DataCard";
 import FAQs from "./pages/FAQs";
 import DebugKVData from "./pages/DebugKVData";
+import KycVerification from "./pages/KycVerification";
 
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
