@@ -6,7 +6,7 @@ const navItems = [
   { icon: Receipt, label: "Transactions", path: "/dashboard?tab=transactions", key: "transactions" },
   { icon: Wallet, label: "Wallet", path: "/dashboard?tab=wallet", key: "wallet" },
   { icon: Gift, label: "Referrals", path: "/services/referral", key: "referrals" },
-  { icon: User, label: "Profile", path: "/dashboard?tab=settings", key: "profile" },
+  { icon: User, label: "Profile", path: "/settings", key: "profile" },
 ];
 
 const BottomNavigation = () => {
