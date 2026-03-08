@@ -393,7 +393,7 @@ const PricingSection = () => (
 /* ---------------- Download App CTA ---------------- */
 const DownloadAppSection = () => (
   <section className="py-8 lg:py-20 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="fintech-card p-5 lg:p-0 lg:overflow-hidden lg:grid lg:grid-cols-2 lg:items-center bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/10">
         {/* Text side */}
         <div className="lg:p-12 text-center lg:text-left">
