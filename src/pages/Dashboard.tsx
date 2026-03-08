@@ -124,9 +124,12 @@ const Dashboard = () => {
   if (activeTab === "wallet") return <TransactionHistory filter="wallet" />;
   if (activeTab === "settings") return <SettingsPage />;
 
+  const { settings: platformSettings } = usePlatformSettings();
+
   const handleFund = () => {
     const val = Number(amount);
-    if (!val || val < 100) { toast.error("Minimum amount is ₦100"); return; }
+    const minFund = platformSettings.min_wallet_fund || 100;
+    if (!val || val < minFund) { toast.error(`Minimum amount is ₦${minFund.toLocaleString()}`); return; }
     if (!isKycVerified) {
       const currentBalance = wallet?.balance ?? 0;
       if (currentBalance + val > BALANCE_LIMIT_UNVERIFIED) {
