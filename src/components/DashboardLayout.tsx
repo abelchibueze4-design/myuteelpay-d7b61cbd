@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "@/components/NavLink";
-import { AccountSettings } from "@/components/AccountSettings";
+
 import BottomNavigation from "@/components/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -47,6 +47,7 @@ const serviceItems = [
 ];
 
 const otherItems = [
+  { title: "Account Settings", url: "/dashboard?tab=settings", icon: Settings },
   { title: "FAQs", url: "/faqs", icon: HelpCircle },
 ];
 
@@ -56,7 +57,7 @@ function AppSidebar() {
   const { signOut, user } = useAuth();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  
 
   const handleLogout = async () => {
     if (isMobile) setOpenMobile(false);
@@ -64,15 +65,8 @@ function AppSidebar() {
     navigate("/");
   };
 
-  const handleItemClick = (item?: any) => {
-    if (item?.isSettings) {
-      setSettingsOpen(true);
-      if (isMobile) setOpenMobile(false);
-      return;
-    }
-    if (isMobile) {
-      setOpenMobile(false);
-    }
+  const handleItemClick = () => {
+    if (isMobile) setOpenMobile(false);
   };
 
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
@@ -91,7 +85,7 @@ function AppSidebar() {
             <SidebarMenu>
               {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild onClick={() => handleItemClick(item)}>
+                  <SidebarMenuButton asChild onClick={() => handleItemClick()}>
                     <NavLink to={item.url} end className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
@@ -137,7 +131,7 @@ function AppSidebar() {
             <SidebarMenu>
               {otherItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild onClick={() => handleItemClick(item)}>
+                  <SidebarMenuButton asChild onClick={() => handleItemClick()}>
                     <NavLink to={item.url} className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
@@ -149,7 +143,7 @@ function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <AccountSettings open={settingsOpen} onOpenChange={setSettingsOpen} />
+        
 
         <div className="mt-auto p-4 border-t border-sidebar-border">
           {!collapsed && (
