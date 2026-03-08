@@ -236,7 +236,7 @@ const Dashboard = () => {
 
               <Link to="/services/referral?tab=bonus" className="flex-1">
                 <Button variant="outline" className="w-full h-11 rounded-2xl text-xs font-bold border-2 border-white/30 text-white hover:bg-white/10 gap-1.5 tap-target">
-                  <Gift className="w-4 h-4 text-accent" />
+                  <Gift className="w-4 h-4 text-white/80" />
                   <span>Bonus ₦{(bonusBalance || 0).toLocaleString()}</span>
                 </Button>
               </Link>
