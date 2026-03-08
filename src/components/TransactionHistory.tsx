@@ -310,6 +310,31 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 </SelectContent>
               </Select>
             </div>
+            {/* Date Range */}
+            <div className="flex gap-2 w-full lg:w-auto">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4 gap-2 text-xs", !dateFrom && "text-muted-foreground")}>
+                    <CalendarIcon className="w-3.5 h-3.5" />
+                    {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent mode="single" selected={dateFrom} onSelect={setDateFrom} disabled={(date) => (dateTo ? date > dateTo : date > new Date())} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4 gap-2 text-xs", !dateTo && "text-muted-foreground")}>
+                    <CalendarIcon className="w-3.5 h-3.5" />
+                    {dateTo ? format(dateTo, "MMM d, yyyy") : "To"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent mode="single" selected={dateTo} onSelect={setDateTo} disabled={(date) => (dateFrom ? date < dateFrom : false) || date > new Date()} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+            </div>
             {hasActiveFilters && (
               <Button variant="ghost" onClick={clearFilters} className="h-12 px-4 rounded-2xl text-red-500 font-bold hover:bg-red-50 transition-all gap-2">
                 <RotateCcw className="w-4 h-4" /> Reset
