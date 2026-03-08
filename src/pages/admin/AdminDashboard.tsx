@@ -27,8 +27,8 @@ import { exportToCSV, printPDF } from "@/utils/exportUtils";
 const CHART_COLORS = ["#7C3AED", "#D4AF37", "#10b981", "#3b82f6", "#ef4444"];
 
 const AdminDashboard = () => {
-    const { data: users, isLoading: loadingUsers } = useUsers();
-    const { data: transactions, isLoading: loadingTx } = useAdminTransactions();
+    const { data: users, isLoading: loadingUsers, refetch: refetchUsers } = useUsers();
+    const { data: transactions, isLoading: loadingTx, refetch: refetchTx } = useAdminTransactions();
 
     const totalUsers = users?.length ?? 0;
     const activeUsers = users?.filter((u) => u.status === "active").length ?? 0;
