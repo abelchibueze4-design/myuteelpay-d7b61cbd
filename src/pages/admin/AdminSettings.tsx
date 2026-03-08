@@ -319,6 +319,13 @@ const AdminSettings = () => {
                         <CardDescription>Control the status message shown to all users on their dashboard</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <Label>Show Banner on Dashboard</Label>
+                                <p className="text-xs text-muted-foreground">Toggle visibility of the status banner for all users</p>
+                            </div>
+                            <Switch checked={serviceStatusVisible} onCheckedChange={setServiceStatusVisible} />
+                        </div>
                         <div className="space-y-2">
                             <Label>Status</Label>
                             <Select value={serviceStatus} onValueChange={(v) => setServiceStatus(v as any)}>
