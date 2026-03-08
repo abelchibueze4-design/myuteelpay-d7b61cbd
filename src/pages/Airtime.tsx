@@ -24,6 +24,7 @@ const Airtime = () => {
     const kvdata = useKvdata();
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
     const { guardTransaction } = useTransactionGuard();
+    const { favorites, addFavorite, removeFavorite, isFavorited } = useFavorites("airtime");
 
     const { data: networks } = useQuery({
         queryKey: ["networks"],
