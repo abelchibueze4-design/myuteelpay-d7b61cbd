@@ -27,6 +27,7 @@ import Referral from "./pages/Referral";
 import DataCard from "./pages/DataCard";
 import FAQs from "./pages/FAQs";
 import DebugKVData from "./pages/DebugKVData";
+import KycVerification from "./pages/KycVerification";
 
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -43,6 +44,7 @@ import SecurityMonitoring from "./pages/admin/SecurityMonitoring";
 import Reports from "./pages/admin/Reports";
 import Reconciliation from "./pages/admin/Reconciliation";
 import NotificationCenter from "./pages/admin/NotificationCenter";
+import AdminKycReview from "./pages/admin/AdminKycReview";
 
 import NotFound from "./pages/NotFound";
 
@@ -156,13 +158,21 @@ function App() {
                   </ProtectedWithLayout>
                 }
               />
+              <Route
+                path="/kyc"
+                element={
+                  <ProtectedWithLayout>
+                    <KycVerification />
+                  </ProtectedWithLayout>
+                }
+              />
               <Route path="/faqs" element={<FAQs />} />
 
               {/* Admin Protected Routes */}
               <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
-              <Route path="/admin/users/kyc" element={<AdminLayout><UserManagement /></AdminLayout>} />
+              <Route path="/admin/users/kyc" element={<AdminLayout><AdminKycReview /></AdminLayout>} />
               <Route path="/admin/transactions" element={<AdminLayout><TransactionMonitoring /></AdminLayout>} />
               <Route path="/admin/finance" element={<AdminLayout><WalletFinance /></AdminLayout>} />
               <Route path="/admin/finance/refunds" element={<AdminLayout><WalletFinance /></AdminLayout>} />

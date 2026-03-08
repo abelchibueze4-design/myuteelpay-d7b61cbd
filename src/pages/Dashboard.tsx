@@ -5,7 +5,7 @@ import {
   Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap,
   Gift, ArrowRight, Mail, MessageCircle, Users, Eye, EyeOff,
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
-  ArrowUpRight, Activity, HelpCircle, Menu, Bell,
+  ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
 } from "lucide-react";
 import TransactionHistory from "@/components/TransactionHistory";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useKycVerified, BALANCE_LIMIT_UNVERIFIED } from "@/hooks/useKyc";
 
 const quickActions = [
   { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "text-primary bg-primary/10", border: "border-primary/20" },
@@ -42,6 +43,7 @@ const quickActions = [
 const Dashboard = () => {
   const { setOpenMobile } = useSidebar();
   const { user } = useAuth();
+  const { data: isKycVerified } = useKycVerified();
   const { data: wallet } = useWallet();
   const { data: transactions } = useTransactions(5);
   const { initializePayment, verifyPayment, isInitializing } = useFundWallet();
@@ -124,6 +126,13 @@ const Dashboard = () => {
   const handleFund = () => {
     const val = Number(amount);
     if (!val || val < 100) { toast.error("Minimum amount is ₦100"); return; }
+    if (!isKycVerified) {
+      const currentBalance = wallet?.balance ?? 0;
+      if (currentBalance + val > BALANCE_LIMIT_UNVERIFIED) {
+        toast.error(`Without KYC, your balance cannot exceed ₦${BALANCE_LIMIT_UNVERIFIED.toLocaleString()}. Complete KYC to remove this limit.`);
+        return;
+      }
+    }
     setFundOpen(false);
     initializePayment(val);
   };
@@ -248,7 +257,32 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Quick Action Grid */}
+        {/* KYC Banner */}
+        {!isKycVerified && (
+          <Link to="/kyc">
+            <div className="fintech-card p-4 border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 hover:shadow-md transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5 text-amber-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-extrabold text-foreground">Complete KYC Verification</p>
+                  <p className="text-[10px] text-muted-foreground">Your balance limit is ₦{BALANCE_LIMIT_UNVERIFIED.toLocaleString()}. Verify to unlock premium services.</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-amber-600 shrink-0" />
+              </div>
+            </div>
+          </Link>
+        )}
+        {isKycVerified && (
+          <div className="fintech-card p-3 border border-emerald-200 bg-emerald-50/50">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span className="text-[11px] font-bold text-emerald-700">KYC Verified — Premium Account</span>
+            </div>
+          </div>
+        )}
+
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-extrabold text-foreground">Quick Actions</h2>
