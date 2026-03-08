@@ -143,11 +143,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Floating status banner */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/90 text-primary-foreground shadow-lg backdrop-blur-sm border border-primary/20 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <Activity className="h-4 w-4 shrink-0" />
-        <span className="text-sm font-medium whitespace-nowrap">All services are running smoothly</span>
-      </div>
       <div className="hidden">
         <AccountSettings 
           open={settingsOpen} 
