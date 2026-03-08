@@ -548,9 +548,9 @@ const Landing = () => (
     {/* Decorative background gradients */}
     <div className="fixed inset-0 -z-10 pointer-events-none">
       <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
-      <div className="absolute top-[40%] right-0 w-[500px] h-[500px] rounded-full bg-[hsl(43,76%,53%)]/5 blur-[100px]" />
-      <div className="absolute bottom-[20%] left-0 w-[400px] h-[400px] rounded-full bg-primary/4 blur-[100px]" />
-      <div className="absolute top-[70%] right-1/4 w-[350px] h-[350px] rounded-full bg-[hsl(43,76%,53%)]/4 blur-[80px]" />
+      <div className="absolute top-[40%] right-0 w-[500px] h-[500px] rounded-full bg-[hsl(43_76%_53%)]/5 blur-[100px]" />
+      <div className="absolute bottom-[20%] left-0 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px]" />
+      <div className="absolute top-[70%] right-1/4 w-[350px] h-[350px] rounded-full bg-[hsl(43_76%_53%)]/5 blur-[80px]" />
     </div>
     <Navbar />
     <HeroSection />
