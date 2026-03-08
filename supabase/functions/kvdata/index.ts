@@ -218,9 +218,11 @@ Deno.serve(async (req) => {
       .update({ balance: newBalance })
       .eq("id", user.id);
 
-    // Record transaction
-    const initialStatus = (kvResult?.status === "Successful" || kvResult?.Status === "Successful") ? "success" : "pending";
-    const kvReference = kvResult?.request_id || kvResult?.id || kvResult?.reference;
+    // Record transaction — detect success from various KVData response shapes
+    const kvStatus = (kvResult?.status || kvResult?.Status || "").toString().toLowerCase();
+    const initialStatus = (kvStatus === "successful" || kvStatus === "success" || kvStatus === "delivered" || kvStatus === "completed") ? "success" : "pending";
+    const kvReference = kvResult?.request_id || kvResult?.ident || kvResult?.id || kvResult?.reference;
+    console.log("KVData response status:", kvResult?.status, kvResult?.Status, "=> mapped to:", initialStatus);
 
     const { data: tx, error: txErr } = await supabaseAdmin
       .from("transactions")
