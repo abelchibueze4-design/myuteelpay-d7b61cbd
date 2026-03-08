@@ -244,79 +244,71 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       <DashboardTopBar />
 
       {/* Header Section */}
-      <div className="relative overflow-hidden bg-primary px-4 pt-10 pb-20 sm:pt-12 lg:px-8">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden bg-primary px-3 pt-7 pb-14 sm:pt-8 lg:px-6">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
         <div className="container mx-auto relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <h1 className="text-3xl font-black text-white tracking-tight">
-                {filter === "wallet" ? "Wallet Summary" : filter === "services" ? "Service History" : "Financial Records"}
+              <h1 className="text-xl font-black text-white tracking-tight">
+                {filter === "wallet" ? "Wallet Summary" : filter === "services" ? "Service History" : "Transactions"}
               </h1>
-              <p className="text-white/60 text-sm mt-1 font-medium italic">
-                {filter === "wallet" ? "All credits, debits, and bonuses" : filter === "services" ? "Track your utility and service payments" : `${transactions?.length ?? 0} total entries documented`}
+              <p className="text-white/60 text-[11px] mt-0.5 font-medium">
+                {filter === "wallet" ? "Credits, debits & bonuses" : filter === "services" ? "Utility & service payments" : `${transactions?.length ?? 0} entries`}
               </p>
             </div>
-            <div className="flex gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl gap-2 h-10 px-4 font-bold">
-                    <Download className="w-4 h-4" /> Export Data
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-2xl border-none shadow-2xl min-w-[180px]">
-                  <DropdownMenuItem onClick={() => handleExport("csv")} className="font-bold py-3 cursor-pointer">Export as CSV</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleExport("pdf")} className="font-bold py-3 cursor-pointer">Export as PDF/Print</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-lg gap-1.5 h-8 px-3 text-xs font-bold">
+                  <Download className="w-3.5 h-3.5" /> Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="rounded-xl border-none shadow-2xl min-w-[150px]">
+                <DropdownMenuItem onClick={() => handleExport("csv")} className="font-bold py-2 text-xs cursor-pointer">Export CSV</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport("pdf")} className="font-bold py-2 text-xs cursor-pointer">Export PDF</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 -mt-10 relative z-20 pb-12">
+      <div className="container mx-auto px-3 -mt-8 relative z-20 pb-8">
         {/* Filters */}
-        <div className="bg-card rounded-3xl p-6 shadow-xl shadow-primary/5 border border-border/50 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-end">
+        <div className="bg-card rounded-2xl p-3 shadow-lg shadow-primary/5 border border-border/50 mb-4">
+          <div className="flex flex-col lg:flex-row gap-2 items-end">
             <div className="relative flex-1 w-full">
-              <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Search Records</label>
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input placeholder="Reference, service, or description..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-11 h-12 rounded-2xl border-border/60 focus-visible:ring-primary/20 bg-secondary/30 font-medium" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9 rounded-xl border-border/60 focus-visible:ring-primary/20 bg-secondary/30 text-xs font-medium" />
               </div>
             </div>
-            <div className="w-full lg:w-48">
-              <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Service Type</label>
+            <div className="flex gap-2 w-full lg:w-auto">
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4">
-                  <div className="flex items-center gap-2"><Filter className="w-3.5 h-3.5 text-primary" /><SelectValue placeholder="All types" /></div>
+                <SelectTrigger className="h-9 rounded-xl border-border/60 bg-secondary/30 font-bold px-3 text-xs w-full lg:w-36">
+                  <div className="flex items-center gap-1.5"><Filter className="w-3 h-3 text-primary" /><SelectValue placeholder="Type" /></div>
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-none shadow-2xl">
-                  <SelectItem value="all" className="font-bold">All Services</SelectItem>
+                <SelectContent className="rounded-xl border-none shadow-2xl">
+                  <SelectItem value="all" className="font-bold text-xs">All</SelectItem>
                   {Object.entries(TYPE_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key} className="font-medium">{label}</SelectItem>
+                    <SelectItem key={key} value={key} className="font-medium text-xs">{label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="w-full lg:w-40">
-              <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Status</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4"><SelectValue placeholder="Status" /></SelectTrigger>
-                <SelectContent className="rounded-2xl border-none shadow-2xl">
-                  <SelectItem value="all" className="font-bold">Every Status</SelectItem>
-                  <SelectItem value="success" className="font-medium text-emerald-600">Success Only</SelectItem>
-                  <SelectItem value="pending" className="font-medium text-amber-500">Pending</SelectItem>
-                  <SelectItem value="failed" className="font-medium text-red-500">Failed</SelectItem>
+                <SelectTrigger className="h-9 rounded-xl border-border/60 bg-secondary/30 font-bold px-3 text-xs w-full lg:w-32"><SelectValue placeholder="Status" /></SelectTrigger>
+                <SelectContent className="rounded-xl border-none shadow-2xl">
+                  <SelectItem value="all" className="font-bold text-xs">All</SelectItem>
+                  <SelectItem value="success" className="font-medium text-xs text-emerald-600">Success</SelectItem>
+                  <SelectItem value="pending" className="font-medium text-xs text-amber-500">Pending</SelectItem>
+                  <SelectItem value="failed" className="font-medium text-xs text-red-500">Failed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            {/* Date Range */}
-            <div className="flex gap-2 w-full lg:w-auto">
+            <div className="flex gap-1.5 w-full lg:w-auto">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4 gap-2 text-xs", !dateFrom && "text-muted-foreground")}>
-                    <CalendarIcon className="w-3.5 h-3.5" />
-                    {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From"}
+                  <Button variant="outline" className={cn("h-9 rounded-xl border-border/60 bg-secondary/30 font-bold px-3 gap-1.5 text-[11px]", !dateFrom && "text-muted-foreground")}>
+                    <CalendarIcon className="w-3 h-3" />
+                    {dateFrom ? format(dateFrom, "MMM d") : "From"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -325,104 +317,102 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
               </Popover>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4 gap-2 text-xs", !dateTo && "text-muted-foreground")}>
-                    <CalendarIcon className="w-3.5 h-3.5" />
-                    {dateTo ? format(dateTo, "MMM d, yyyy") : "To"}
+                  <Button variant="outline" className={cn("h-9 rounded-xl border-border/60 bg-secondary/30 font-bold px-3 gap-1.5 text-[11px]", !dateTo && "text-muted-foreground")}>
+                    <CalendarIcon className="w-3 h-3" />
+                    {dateTo ? format(dateTo, "MMM d") : "To"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <CalendarComponent mode="single" selected={dateTo} onSelect={setDateTo} disabled={(date) => (dateFrom ? date < dateFrom : false) || date > new Date()} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
+              {hasActiveFilters && (
+                <Button variant="ghost" onClick={clearFilters} size="sm" className="h-9 px-2 rounded-xl text-red-500 font-bold hover:bg-red-50 text-xs">
+                  <RotateCcw className="w-3 h-3" />
+                </Button>
+              )}
             </div>
-            {hasActiveFilters && (
-              <Button variant="ghost" onClick={clearFilters} className="h-12 px-4 rounded-2xl text-red-500 font-bold hover:bg-red-50 transition-all gap-2">
-                <RotateCcw className="w-4 h-4" /> Reset
-              </Button>
-            )}
           </div>
         </div>
 
         {/* Transaction Feed */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
-              <FileText className="w-5 h-5 text-primary" /> Transaction Stream
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm font-black tracking-tight flex items-center gap-1.5">
+              <FileText className="w-4 h-4 text-primary" /> Transactions
             </h2>
             {hasActiveFilters && (
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-secondary px-3 py-1 rounded-full">{filtered.length} Found</p>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-secondary px-2 py-0.5 rounded-full">{filtered.length} Found</p>
             )}
           </div>
 
-          <div className="bg-card rounded-3xl border border-border/50 overflow-hidden shadow-sm divide-y divide-border/30">
+          <div className="bg-card rounded-2xl border border-border/50 overflow-hidden shadow-sm divide-y divide-border/30">
             {isLoading ? (
               Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between p-6">
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="w-12 h-12 rounded-2xl" />
-                    <div className="space-y-2"><Skeleton className="h-4 w-40" /><Skeleton className="h-3 w-24" /></div>
+                <div key={i} className="flex items-center justify-between p-3">
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton className="w-8 h-8 rounded-lg" />
+                    <div className="space-y-1.5"><Skeleton className="h-3 w-32" /><Skeleton className="h-2.5 w-20" /></div>
                   </div>
-                  <div className="text-right space-y-2"><Skeleton className="h-4 w-20 ml-auto" /><Skeleton className="h-3 w-16 ml-auto" /></div>
+                  <Skeleton className="h-3 w-16" />
                 </div>
               ))
             ) : filtered.length > 0 ? (
               filtered.map((t) => {
                 const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
                 return (
-                  <div key={t.id} className="group p-3 sm:p-4 flex items-center justify-between hover:bg-accent/5 transition-all cursor-pointer" onClick={() => setSelectedTx(t)}>
-                    <div className="flex items-center gap-3 min-w-0">
+                  <div key={t.id} className="group px-3 py-2.5 flex items-center justify-between hover:bg-accent/5 transition-all cursor-pointer" onClick={() => setSelectedTx(t)}>
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div className={cn(
-                        "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 shadow-sm",
+                        "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border",
                         isCredit ? "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/30" : "bg-primary/5 text-primary border-primary/10"
                       )}>
-                        {isCredit ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
+                        {isCredit ? <ArrowDownLeft className="w-3.5 h-3.5" /> : <ArrowUpRight className="w-3.5 h-3.5" />}
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold text-foreground text-xs tracking-tight truncate group-hover:text-primary transition-colors">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-bold text-foreground text-[11px] truncate">
                             {t.description || TYPE_LABELS[t.type] || t.type}
                           </p>
-                          <Badge variant="outline" className={cn("text-[7px] font-black uppercase tracking-wider h-4 px-1.5 shrink-0 border-none", STATUS_COLORS[t.status])}>
+                          <Badge variant="outline" className={cn("text-[6px] font-black uppercase h-3.5 px-1 shrink-0 border-none leading-none", STATUS_COLORS[t.status])}>
                             {t.status}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                          <span className="text-[9px] font-semibold text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded">
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <span className="text-[8px] font-semibold text-primary/70 bg-primary/5 px-1 py-px rounded">
                             {TYPE_LABELS[t.type] || t.type}
                           </span>
-                          <span className="text-[9px] font-medium text-muted-foreground truncate max-w-[120px]">
-                            Ref: {t.reference?.slice(0, 8)}...
+                          <span className="text-[8px] text-muted-foreground truncate max-w-[90px]">
+                            {t.reference?.slice(0, 8)}
                           </span>
-                          <span className="w-0.5 h-0.5 rounded-full bg-border hidden sm:block" />
-                          <span className="hidden sm:flex items-center gap-0.5 text-[9px] text-muted-foreground">
-                            <Calendar className="w-2.5 h-2.5" />
-                            {format(parseISO(t.created_at), "MMM d · HH:mm")}
+                          <span className="text-[8px] text-muted-foreground hidden sm:inline">
+                            · {format(parseISO(t.created_at), "MMM d, HH:mm")}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                      <p className={cn("text-sm font-black tracking-tighter", isCredit ? "text-emerald-600" : "text-foreground")}>
+                    <div className="flex items-center gap-1 shrink-0 ml-2">
+                      <p className={cn("text-xs font-black tracking-tight", isCredit ? "text-emerald-600" : "text-foreground")}>
                         {formatAmount(t.amount, t.type)}
                       </p>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all" />
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100" />
                     </div>
                   </div>
                 );
               })
             ) : (
-              <div className="p-24 text-center space-y-4">
-                <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 border border-border/50">
-                  <RotateCcw className="w-8 h-8 text-muted-foreground/30" />
+              <div className="p-12 text-center space-y-3">
+                <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center mx-auto border border-border/50">
+                  <RotateCcw className="w-6 h-6 text-muted-foreground/30" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-foreground tracking-tight">Empty feed detected</h3>
-                  <p className="text-sm text-muted-foreground max-w-xs mx-auto italic mt-1">
-                    {hasActiveFilters ? "We couldn't find any transactions matching your specific filters." : "You haven't made any transactions yet."}
+                  <h3 className="text-sm font-bold text-foreground">No transactions found</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {hasActiveFilters ? "No matches for your filters." : "No transactions yet."}
                   </p>
                 </div>
                 {hasActiveFilters && (
-                  <Button variant="outline" onClick={clearFilters} className="rounded-xl font-bold border-2">Clear all filters</Button>
+                  <Button variant="outline" size="sm" onClick={clearFilters} className="rounded-lg font-bold text-xs">Clear filters</Button>
                 )}
               </div>
             )}
