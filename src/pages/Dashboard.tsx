@@ -116,6 +116,7 @@ const Dashboard = () => {
 
   if (activeTab === "history" || activeTab === "transactions") return <TransactionHistory filter="all" />;
   if (activeTab === "wallet") return <TransactionHistory filter="wallet" />;
+  if (activeTab === "settings") return <SettingsPage />;
 
   const handleFund = () => {
     const val = Number(amount);
