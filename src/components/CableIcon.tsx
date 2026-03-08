@@ -21,15 +21,15 @@ export const CableIcon = ({ cableName, className }: CableIconProps) => {
 
   if (logo) {
     return (
-      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden", logo.bg, className)}>
-        <img src={logo.src} alt={cableName} className="w-6 h-6 object-contain" />
+      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden", logo.bg, className)}>
+        <img src={logo.src} alt={cableName} className="w-10 h-10 object-contain" />
       </div>
     );
   }
 
   return (
-    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center bg-purple-100 text-purple-700", className)}>
-      <Tv className="w-4 h-4" />
+    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center bg-purple-100 text-purple-700", className)}>
+      <Tv className="w-5 h-5" />
     </div>
   );
 };
