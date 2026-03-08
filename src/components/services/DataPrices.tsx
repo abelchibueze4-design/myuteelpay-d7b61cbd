@@ -66,7 +66,7 @@ export const DataPrices = ({ networkName, category, onSelect, selectedPlanId }: 
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 gap-2.5">
       {filteredPlans.map((plan: any) => (
         <PriceCard
           key={plan.plan_id}
