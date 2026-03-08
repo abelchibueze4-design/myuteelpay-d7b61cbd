@@ -348,6 +348,86 @@ const UserManagement = () => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* View Profile Dialog */}
+            <Dialog open={profileDialog.open} onOpenChange={(o) => setProfileDialog({ open: o, user: profileDialog.user })}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Eye className="w-5 h-5 text-primary" /> User Profile
+                        </DialogTitle>
+                    </DialogHeader>
+                    {profileDialog.user && (
+                        <div className="space-y-3 pt-2 text-sm">
+                            {[
+                                ["Full Name", profileDialog.user.full_name],
+                                ["Username", profileDialog.user.username || "—"],
+                                ["Email", profileDialog.user.email || "—"],
+                                ["Phone", profileDialog.user.phone_number || "—"],
+                                ["Address", profileDialog.user.address || "—"],
+                                ["Role", profileDialog.user.role || "user"],
+                                ["Wallet Balance", `₦${(profileDialog.user.wallet_balance ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`],
+                                ["Transaction PIN", profileDialog.user.transaction_pin_enabled ? "Enabled" : "Not set"],
+                                ["Status", profileDialog.user.status],
+                                ["Joined", format(new Date(profileDialog.user.created_at), "PPpp")],
+                            ].map(([k, v]) => (
+                                <div key={k} className="flex justify-between border-b border-border/50 pb-2">
+                                    <p className="text-muted-foreground text-xs">{k}</p>
+                                    <p className="font-medium text-xs text-right max-w-[55%] capitalize">{v}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Assign Role Dialog */}
+            <Dialog open={roleDialog.open} onOpenChange={(o) => setRoleDialog({ open: o, user: roleDialog.user })}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Shield className="w-5 h-5 text-primary" /> Assign Role
+                        </DialogTitle>
+                    </DialogHeader>
+                    {roleDialog.user && (
+                        <div className="space-y-4 pt-2">
+                            <div className="p-3 bg-accent/50 rounded-xl text-sm">
+                                <p className="font-semibold">{roleDialog.user.full_name}</p>
+                                <p className="text-muted-foreground text-xs">Current role: <span className="font-bold capitalize">{roleDialog.user.role || "user"}</span></p>
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">New Role</label>
+                                <Select value={newRole} onValueChange={setNewRole}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="user">User</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setRoleDialog({ open: false, user: null })}>Cancel</Button>
+                        <Button onClick={async () => {
+                            if (!roleDialog.user) return;
+                            const { error } = await supabase
+                                .from("profiles")
+                                .update({ role: newRole } as any)
+                                .eq("id", roleDialog.user.id);
+                            if (error) {
+                                toast.error("Failed to assign role: " + error.message);
+                            } else {
+                                toast.success(`Role updated to "${newRole}" for ${roleDialog.user.full_name}`);
+                                setRoleDialog({ open: false, user: null });
+                                refetch();
+                            }
+                        }}>
+                            Confirm Role
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
