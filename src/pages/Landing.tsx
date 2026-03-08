@@ -1,9 +1,38 @@
 import { Link } from "react-router-dom";
+import { useEffect, useRef, ReactNode } from "react";
 import {
   Zap, Shield, Clock, Star, Smartphone, Tv, GraduationCap,
   MessageSquare, Users, ArrowRight, Phone, Gift, HelpCircle, CheckCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+/* ---------------- Scroll Reveal Wrapper ---------------- */
+const ScrollReveal = ({ children, className = "" }: { children: ReactNode; className?: string }) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("opacity-100", "translate-y-0");
+          el.classList.remove("opacity-0", "translate-y-8");
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className={`opacity-0 translate-y-8 transition-all duration-700 ease-out ${className}`}>
+      {children}
+    </div>
+  );
+};
 
 /* ---------------- Responsive Navbar ---------------- */
 const Navbar = () => (
@@ -346,14 +375,14 @@ const Landing = () => (
   <div className="min-h-screen bg-background">
     <Navbar />
     <HeroSection />
-    <FeaturesSection />
-    <AboutSection />
-    <HowItWorks />
-    <ReferralBanner />
-    <PricingSection />
-    <FAQSection />
-    <TrustBar />
-    <Footer />
+    <ScrollReveal><FeaturesSection /></ScrollReveal>
+    <ScrollReveal><AboutSection /></ScrollReveal>
+    <ScrollReveal><HowItWorks /></ScrollReveal>
+    <ScrollReveal><ReferralBanner /></ScrollReveal>
+    <ScrollReveal><PricingSection /></ScrollReveal>
+    <ScrollReveal><FAQSection /></ScrollReveal>
+    <ScrollReveal><TrustBar /></ScrollReveal>
+    <ScrollReveal><Footer /></ScrollReveal>
     <WhatsAppButton />
   </div>
 );
