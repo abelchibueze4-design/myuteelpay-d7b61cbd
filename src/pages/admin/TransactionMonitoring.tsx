@@ -34,7 +34,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 const TransactionMonitoring = () => {
-    const { data: transactions, isLoading, error, refetch } = useAdminTransactions();
+    const { data: transactions, isLoading, error, refetch, updateStatus, isUpdating } = useAdminTransactions();
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [typeFilter, setTypeFilter] = useState("all");
