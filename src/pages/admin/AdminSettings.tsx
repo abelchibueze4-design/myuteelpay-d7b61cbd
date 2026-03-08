@@ -87,6 +87,8 @@ const AdminSettings = () => {
             setMaxDailyTransaction(String(d.max_daily_transaction ?? "100000"));
             setMaxSingleTransaction(String(d.max_single_transaction ?? "50000"));
             setMinWalletFund(String(d.min_wallet_fund ?? "100"));
+            setServiceStatus((d.service_status as "operational" | "degraded" | "outage") ?? "operational");
+            setServiceStatusMessage(d.service_status_message as string ?? "All services are running smoothly");
         }
     }, [config]);
 
