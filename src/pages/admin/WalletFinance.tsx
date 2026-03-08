@@ -219,7 +219,36 @@ const WalletFinance = () => {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setRefundDialog(false)}>Cancel</Button>
-                        <Button onClick={() => { toast.success("Refund processed successfully"); setRefundDialog(false); }}>
+                        <Button onClick={async () => {
+                            if (!refundRef.trim()) return toast.error("Enter a transaction reference");
+                            // Find the transaction
+                            const tx = allTx.find(t => t.reference === refundRef.trim() || t.id.startsWith(refundRef.trim()));
+                            if (!tx) return toast.error("Transaction not found");
+                            if (tx.status !== "success") return toast.error("Only successful transactions can be refunded");
+                            if (tx.amount >= 0) return toast.error("Cannot refund a credit transaction");
+                            
+                            // Credit wallet
+                            const { error: walletErr } = await supabase
+                                .from("wallets")
+                                .update({ balance: (users ?? []).find(u => u.id === tx.user_id)?.wallet_balance + Math.abs(tx.amount) } as any)
+                                .eq("id", tx.user_id);
+                            if (walletErr) return toast.error("Wallet update failed: " + walletErr.message);
+                            
+                            // Log refund transaction
+                            await supabase.from("transactions").insert({
+                                user_id: tx.user_id,
+                                type: "refund" as any,
+                                amount: Math.abs(tx.amount),
+                                status: "success" as any,
+                                description: refundNote || `Refund for ${tx.reference}`,
+                                reference: `REFUND-${Date.now()}`,
+                            });
+                            
+                            toast.success(`Refund of ₦${Math.abs(tx.amount).toLocaleString()} processed`);
+                            setRefundDialog(false);
+                            setRefundRef("");
+                            setRefundNote("");
+                        }}>
                             Confirm Refund
                         </Button>
                     </DialogFooter>
