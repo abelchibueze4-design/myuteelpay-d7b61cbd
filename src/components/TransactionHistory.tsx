@@ -354,9 +354,9 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 <div key={i} className="flex items-center justify-between p-3">
                   <div className="flex items-center gap-2.5">
                     <Skeleton className="w-8 h-8 rounded-xl" />
-                    <div className="space-y-2"><Skeleton className="h-4 w-40" /><Skeleton className="h-3 w-24" /></div>
+                    <div className="space-y-1.5"><Skeleton className="h-3 w-32" /><Skeleton className="h-2.5 w-20" /></div>
                   </div>
-                  <div className="text-right space-y-2"><Skeleton className="h-4 w-20 ml-auto" /><Skeleton className="h-3 w-16 ml-auto" /></div>
+                  <div className="text-right space-y-1.5"><Skeleton className="h-3 w-16 ml-auto" /><Skeleton className="h-2.5 w-12 ml-auto" /></div>
                 </div>
               ))
             ) : filtered.length > 0 ? (
