@@ -217,7 +217,7 @@ const BillPaymentShowcase = () => (
 /* ---------------- About Section ---------------- */
 const AboutSection = () => (
   <section id="about" className="py-8 lg:py-20 px-4 lg:px-8 bg-secondary/50">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-[11px] lg:text-xs font-bold mb-3 lg:mb-4">
