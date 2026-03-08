@@ -1,4 +1,5 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import {
