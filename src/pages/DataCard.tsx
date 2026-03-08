@@ -12,6 +12,7 @@ import { DataCardPrices } from "@/components/services/DataCardPrices";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 
 const DataCard = () => {
     const navigate = useNavigate();

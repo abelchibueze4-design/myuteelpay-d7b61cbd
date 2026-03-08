@@ -9,6 +9,7 @@ import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { toast } from "sonner";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 
 const BulkSMS = () => {
   const navigate = useNavigate();

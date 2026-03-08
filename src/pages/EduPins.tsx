@@ -8,6 +8,7 @@ import { useKvdata, useKvdataQuery } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { EduPinsPrices } from "@/components/services/EduPinsPrices";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 
 const EduPins = () => {
   const navigate = useNavigate();
