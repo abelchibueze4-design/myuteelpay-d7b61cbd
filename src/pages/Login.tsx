@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import logo from "@/assets/logo.png";
 
 const Login = () => {
   const [username, setUsername] = useState("");
