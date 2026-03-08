@@ -62,7 +62,7 @@ export const CableTVPrices = ({ cableId, onSelect, selectedPlanId }: CableTVPric
   }
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 gap-3">
       {filteredPlans.map((plan: any) => (
         <PriceCard
           key={plan.plan_id}
