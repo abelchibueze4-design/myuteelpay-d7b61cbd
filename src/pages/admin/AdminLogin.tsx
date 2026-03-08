@@ -4,6 +4,7 @@ import { AtSign, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const AdminLogin = () => {
@@ -19,17 +20,23 @@ const AdminLogin = () => {
     setLoading(true);
 
     const { error, user: authUser } = await adminSignIn(email, password);
-    setLoading(false);
-
+    
     if (error) {
+      setLoading(false);
       toast.error(error.message);
       return;
     }
 
-    const role = authUser?.user_metadata?.role;
-    const isAdmin = !!role || authUser?.email?.endsWith("@uteelpay.com") || authUser?.email === "Josephine@gmail.com";
+    // Check role from profiles table
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", authUser!.id)
+      .single();
 
-    if (!isAdmin) {
+    setLoading(false);
+
+    if (profile?.role !== "admin" && profile?.role !== "super_admin") {
       toast.error("You do not have admin access");
       return;
     }
