@@ -44,6 +44,7 @@ import SecurityMonitoring from "./pages/admin/SecurityMonitoring";
 import Reports from "./pages/admin/Reports";
 import Reconciliation from "./pages/admin/Reconciliation";
 import NotificationCenter from "./pages/admin/NotificationCenter";
+import AdminKycReview from "./pages/admin/AdminKycReview";
 
 import NotFound from "./pages/NotFound";
 
