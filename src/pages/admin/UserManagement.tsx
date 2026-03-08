@@ -60,24 +60,59 @@ const UserManagement = () => {
     const handleWalletAdjust = async () => {
         const amt = parseFloat(walletAmount);
         if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+        if (!walletDialog.user) return;
         setProcessingWallet(true);
-        // Log to admin_wallet_adjustments table (must exist in DB)
-        const { error } = await supabase.from("transactions" as any).insert({
-            user_id: walletDialog.user?.id,
-            type: walletAction === "credit" ? "admin_credit" : "admin_debit",
-            amount: walletAction === "credit" ? amt : -amt,
-            status: "success",
-            description: walletNote || `Admin ${walletAction}`,
-            reference: `ADM-${Date.now()}`,
-        });
-        setProcessingWallet(false);
-        if (error) toast.error("Adjustment failed: " + error.message);
-        else {
+
+        try {
+            if (walletAction === "credit") {
+                // Credit: update wallet balance and log transaction
+                const { error: walletError } = await supabase
+                    .from("wallets")
+                    .update({ balance: (walletDialog.user.wallet_balance ?? 0) + amt } as any)
+                    .eq("id", walletDialog.user.id);
+                if (walletError) throw walletError;
+
+                const { error: txError } = await supabase.from("transactions").insert({
+                    user_id: walletDialog.user.id,
+                    type: "wallet_fund" as any,
+                    amount: amt,
+                    status: "success" as any,
+                    description: walletNote || "Admin wallet credit",
+                    reference: `ADM-CR-${Date.now()}`,
+                });
+                if (txError) throw txError;
+            } else {
+                // Debit: check sufficient balance
+                if ((walletDialog.user.wallet_balance ?? 0) < amt) {
+                    setProcessingWallet(false);
+                    return toast.error("Insufficient wallet balance for debit");
+                }
+                const { error: walletError } = await supabase
+                    .from("wallets")
+                    .update({ balance: (walletDialog.user.wallet_balance ?? 0) - amt } as any)
+                    .eq("id", walletDialog.user.id);
+                if (walletError) throw walletError;
+
+                const { error: txError } = await supabase.from("transactions").insert({
+                    user_id: walletDialog.user.id,
+                    type: "refund" as any,
+                    amount: -amt,
+                    status: "success" as any,
+                    description: walletNote || "Admin wallet debit",
+                    reference: `ADM-DB-${Date.now()}`,
+                });
+                if (txError) throw txError;
+            }
+
             toast.success(`Wallet ${walletAction} of ₦${amt.toLocaleString()} successful`);
             setWalletDialog({ open: false, user: null });
             setWalletAmount("");
             setWalletNote("");
             refetch();
+        } catch (err: any) {
+            toast.error("Adjustment failed: " + err.message);
+        } finally {
+            setProcessingWallet(false);
         }
     };
 
