@@ -323,6 +323,50 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Service History */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-extrabold text-foreground">Service History</h2>
+            <Link to="/dashboard?tab=transactions" onClick={() => setSearchParams({ tab: "transactions" })} className="text-[11px] font-bold text-primary">
+              See All
+            </Link>
+          </div>
+
+          <div className="fintech-card divide-y divide-border/30 overflow-hidden">
+            {transactions && transactions.filter(t => t.type !== "wallet_fund" && t.type !== "referral_bonus").length > 0 ? (
+              transactions.filter(t => t.type !== "wallet_fund" && t.type !== "referral_bonus").slice(0, 5).map((t) => {
+                const isSuccess = t.status === "success";
+                return (
+                  <div key={t.id} className="flex items-center justify-between p-3 hover:bg-secondary/30 transition-colors">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-primary/5 text-primary flex items-center justify-center">
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-bold text-foreground truncate">{t.description || formatType(t.type)}</p>
+                        <p className="text-[9px] text-muted-foreground">{format(new Date(t.created_at), "MMM d, h:mm a")}</p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[11px] font-extrabold text-foreground">-{formatAmount(t.amount)}</p>
+                      <p className={cn("text-[8px] font-bold uppercase tracking-wider", isSuccess ? "text-emerald-500" : t.status === "failed" ? "text-red-500" : "text-amber-500")}>
+                        {t.status}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-8 text-center">
+                <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center mx-auto mb-2 opacity-40">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <p className="text-[10px] text-muted-foreground">Your service payments will appear here</p>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Recent Activity */}
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -335,24 +379,24 @@ const Dashboard = () => {
           <div className="fintech-card divide-y divide-border/30 overflow-hidden">
             {transactions && transactions.length > 0 ? (
               transactions.map((t) => {
-                const isCredit = t.type === "wallet_fund";
+                const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
                 const isSuccess = t.status === "success";
                 return (
-                  <div key={t.id} className="flex items-center justify-between p-3.5 hover:bg-secondary/30 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center", isCredit ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600")}>
-                        {isCredit ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
+                  <div key={t.id} className="flex items-center justify-between p-3 hover:bg-secondary/30 transition-colors">
+                    <div className="flex items-center gap-2.5">
+                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", isCredit ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600")}>
+                        {isCredit ? <ArrowDownLeft className="w-3.5 h-3.5" /> : <ArrowUpRight className="w-3.5 h-3.5" />}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-foreground truncate">{t.description || formatType(t.type)}</p>
-                        <p className="text-[10px] text-muted-foreground">{format(new Date(t.created_at), "MMM d, h:mm a")}</p>
+                        <p className="text-[11px] font-bold text-foreground truncate">{t.description || formatType(t.type)}</p>
+                        <p className="text-[9px] text-muted-foreground">{format(new Date(t.created_at), "MMM d, h:mm a")}</p>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className={cn("text-xs font-extrabold", isCredit ? "text-emerald-600" : "text-foreground")}>
+                      <p className={cn("text-[11px] font-extrabold", isCredit ? "text-emerald-600" : "text-foreground")}>
                         {isCredit ? "+" : "-"}{formatAmount(t.amount)}
                       </p>
-                      <p className={cn("text-[9px] font-bold uppercase tracking-wider", isSuccess ? "text-emerald-500" : t.status === "failed" ? "text-red-500" : "text-amber-500")}>
+                      <p className={cn("text-[8px] font-bold uppercase tracking-wider", isSuccess ? "text-emerald-500" : t.status === "failed" ? "text-red-500" : "text-amber-500")}>
                         {t.status}
                       </p>
                     </div>
@@ -360,11 +404,11 @@ const Dashboard = () => {
                 );
               })
             ) : (
-              <div className="p-10 text-center">
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center mx-auto mb-2 opacity-40">
-                  <Activity className="w-5 h-5" />
+              <div className="p-8 text-center">
+                <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center mx-auto mb-2 opacity-40">
+                  <Activity className="w-4 h-4" />
                 </div>
-                <p className="text-xs text-muted-foreground">Your recent payments will appear here</p>
+                <p className="text-[10px] text-muted-foreground">Your recent payments will appear here</p>
               </div>
             )}
           </div>
