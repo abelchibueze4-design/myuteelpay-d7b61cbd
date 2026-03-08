@@ -109,6 +109,8 @@ const AdminSettings = () => {
                 max_daily_transaction: parseInt(maxDailyTransaction),
                 max_single_transaction: parseInt(maxSingleTransaction),
                 min_wallet_fund: parseInt(minWalletFund),
+                service_status: serviceStatus,
+                service_status_message: serviceStatusMessage,
             };
 
             if (config?.id) {
