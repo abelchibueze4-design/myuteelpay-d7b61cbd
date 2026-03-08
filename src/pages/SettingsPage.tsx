@@ -93,6 +93,24 @@ const SettingsPage = () => {
                 </button>
               ))}
             </div>
+
+            {/* Logout */}
+            <div className="p-4 border-t border-border/30">
+              <button
+                onClick={async () => {
+                  await signOut();
+                }}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-destructive/5 transition-all group text-left"
+              >
+                <div className="w-11 h-11 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center shrink-0">
+                  <LogOut className="w-5 h-5 text-destructive" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-destructive text-sm tracking-tight">Log Out</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Sign out of your account</p>
+                </div>
+              </button>
+            </div>
           </div>
         ) : (
           /* Section Content */
