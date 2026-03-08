@@ -50,6 +50,48 @@ export type Database = {
         }
         Relationships: []
       }
+      data_plans: {
+        Row: {
+          amount: number | null
+          network_name: string | null
+          plan_id: number
+          plan_type: string | null
+          size: string | null
+          validity: string | null
+        }
+        Insert: {
+          amount?: number | null
+          network_name?: string | null
+          plan_id: number
+          plan_type?: string | null
+          size?: string | null
+          validity?: string | null
+        }
+        Update: {
+          amount?: number | null
+          network_name?: string | null
+          plan_id?: number
+          plan_type?: string | null
+          size?: string | null
+          validity?: string | null
+        }
+        Relationships: []
+      }
+      networks: {
+        Row: {
+          network_id: number
+          network_name: string
+        }
+        Insert: {
+          network_id: number
+          network_name: string
+        }
+        Update: {
+          network_id?: number
+          network_name?: string
+        }
+        Relationships: []
+      }
       notification_logs: {
         Row: {
           broadcast_id: string | null
@@ -257,6 +299,7 @@ export type Database = {
           id: string
           phone_number: string | null
           role: string | null
+          transaction_pin: string | null
           transaction_pin_enabled: boolean
           transaction_pin_hash: string | null
           updated_at: string
@@ -271,6 +314,7 @@ export type Database = {
           id: string
           phone_number?: string | null
           role?: string | null
+          transaction_pin?: string | null
           transaction_pin_enabled?: boolean
           transaction_pin_hash?: string | null
           updated_at?: string
@@ -285,6 +329,7 @@ export type Database = {
           id?: string
           phone_number?: string | null
           role?: string | null
+          transaction_pin?: string | null
           transaction_pin_enabled?: boolean
           transaction_pin_hash?: string | null
           updated_at?: string
