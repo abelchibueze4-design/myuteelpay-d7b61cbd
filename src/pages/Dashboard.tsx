@@ -121,7 +121,8 @@ const Dashboard = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  if (activeTab === "history" || activeTab === "transactions") return <TransactionHistory filter="all" />;
+  if (activeTab === "transactions") return <TransactionHistory filter="services" />;
+  if (activeTab === "history") return <TransactionHistory filter="all" />;
   if (activeTab === "wallet") return <TransactionHistory filter="wallet" />;
   if (activeTab === "settings") return <SettingsPage />;
 
