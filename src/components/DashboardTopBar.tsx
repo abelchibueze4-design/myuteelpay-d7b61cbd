@@ -16,6 +16,19 @@ export const DashboardTopBar = () => {
       <div className="flex-1" />
       
       <div className="flex items-center gap-4 sm:gap-6">
+        {/* Theme Toggle */}
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="p-2 rounded-lg hover:bg-muted transition-colors"
+          title="Toggle theme"
+        >
+          {theme === "dark" ? (
+            <Sun className="w-5 h-5 text-foreground" />
+          ) : (
+            <Moon className="w-5 h-5 text-foreground" />
+          )}
+        </button>
+
         {/* Notifications */}
         <NotificationsDropdown />
 

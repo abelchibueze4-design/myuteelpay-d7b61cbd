@@ -120,6 +120,7 @@ const SettingsPage = () => {
             {activeSection === "profile" && <ProfileForm />}
             {activeSection === "security" && <SecuritySettings />}
             {activeSection === "notifications" && <NotificationPreferences />}
+            {activeSection === "appearance" && <AppearanceSettings />}
             {activeSection === "support" && <SupportSection />}
           </div>
         )}
