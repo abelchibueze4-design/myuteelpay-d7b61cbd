@@ -38,6 +38,8 @@ const TransactionMonitoring = () => {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [typeFilter, setTypeFilter] = useState("all");
+    const [dateFrom, setDateFrom] = useState<Date | undefined>();
+    const [dateTo, setDateTo] = useState<Date | undefined>();
     const [selectedTx, setSelectedTx] = useState<any>(null);
     const [flagged, setFlagged] = useState<Set<string>>(new Set());
 
@@ -51,7 +53,10 @@ const TransactionMonitoring = () => {
             || t.description?.toLowerCase().includes(s);
         const matchStatus = statusFilter === "all" || t.status === statusFilter;
         const matchType = typeFilter === "all" || t.type === typeFilter;
-        return matchSearch && matchStatus && matchType;
+        const txDate = new Date(t.created_at);
+        const matchDateFrom = !dateFrom || !isBefore(txDate, startOfDay(dateFrom));
+        const matchDateTo = !dateTo || !isAfter(txDate, endOfDay(dateTo));
+        return matchSearch && matchStatus && matchType && matchDateFrom && matchDateTo;
     });
 
     const handleExport = (type: "csv" | "pdf") => {
