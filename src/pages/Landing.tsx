@@ -263,7 +263,7 @@ const steps = [
 
 const HowItWorks = () => (
   <section id="how-it-works" className="py-8 lg:py-20 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <h2 className="text-lg lg:text-3xl font-extrabold text-center mb-2 lg:mb-3 text-foreground">How It Works</h2>
       <p className="text-xs lg:text-base text-muted-foreground text-center mb-5 lg:mb-10 hidden lg:block">Get started in three simple steps</p>
       <div className="grid grid-cols-3 gap-2 lg:gap-8">
