@@ -311,7 +311,7 @@ const testimonials = [
 
 const TestimonialsSection = () => (
   <section id="testimonials" className="py-8 lg:py-20 px-4 lg:px-8 bg-secondary/50">
-    <div className="max-w-[420px] lg:max-w-6xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="text-center mb-5 lg:mb-12">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] lg:text-xs font-bold mb-3">
           <Users className="w-3 h-3" /> What Our Users Say
