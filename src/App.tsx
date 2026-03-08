@@ -53,7 +53,9 @@ const queryClient = new QueryClient();
 
 const ProtectedWithLayout = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute>
-    <DashboardLayout>{children}</DashboardLayout>
+    <DashboardWrapper>
+      <DashboardLayout>{children}</DashboardLayout>
+    </DashboardWrapper>
   </ProtectedRoute>
 );
 
