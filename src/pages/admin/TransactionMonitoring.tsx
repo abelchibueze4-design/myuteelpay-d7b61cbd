@@ -233,14 +233,38 @@ const TransactionMonitoring = () => {
                                                 <MoreVertical className="w-4 h-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-44">
+                                        <DropdownMenuContent align="end" className="w-48">
                                             <DropdownMenuItem onClick={() => setSelectedTx(t)}>
                                                 <Eye className="w-4 h-4 mr-2" /> View Details
                                             </DropdownMenuItem>
+                                            {t.status === "pending" && (
+                                                <>
+                                                    <DropdownMenuItem
+                                                        disabled={isUpdating}
+                                                        onClick={() => updateStatus({ id: t.id, status: "success" })}
+                                                    >
+                                                        <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Mark as Success
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        disabled={isUpdating}
+                                                        onClick={() => updateStatus({ id: t.id, status: "failed" })}
+                                                    >
+                                                        <XCircle className="w-4 h-4 mr-2 text-destructive" /> Mark as Failed
+                                                    </DropdownMenuItem>
+                                                </>
+                                            )}
                                             {t.status === "failed" && (
-                                                <DropdownMenuItem onClick={() => toast.info("Retrying transaction...")}>
-                                                    <RefreshCw className="w-4 h-4 mr-2" /> Retry
-                                                </DropdownMenuItem>
+                                                <>
+                                                    <DropdownMenuItem
+                                                        disabled={isUpdating}
+                                                        onClick={() => updateStatus({ id: t.id, status: "success" })}
+                                                    >
+                                                        <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Mark as Success
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => toast.info("Retrying transaction...")}>
+                                                        <RefreshCw className="w-4 h-4 mr-2" /> Retry
+                                                    </DropdownMenuItem>
+                                                </>
                                             )}
                                             {t.status === "success" && (
                                                 <DropdownMenuItem onClick={() => toast.info("Reversal request submitted")}>
