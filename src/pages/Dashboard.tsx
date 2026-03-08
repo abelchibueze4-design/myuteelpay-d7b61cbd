@@ -5,6 +5,7 @@ import {
   Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap,
   Gift, ArrowRight, Mail, MessageCircle, Users, Eye, EyeOff,
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
+  ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
   ArrowUpRight, Activity, HelpCircle, Menu, Bell,
 } from "lucide-react";
 import TransactionHistory from "@/components/TransactionHistory";
