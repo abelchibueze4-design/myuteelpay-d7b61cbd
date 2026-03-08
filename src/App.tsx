@@ -62,11 +62,12 @@ const ProtectedWithLayout = ({ children }: { children: React.ReactNode }) => (
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="uteelpay-theme">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <AuthProvider>
             <Routes>
               {/* Public Routes */}
