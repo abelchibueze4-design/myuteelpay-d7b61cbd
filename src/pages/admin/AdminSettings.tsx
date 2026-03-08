@@ -18,6 +18,12 @@ import {
     Globe,
     Save,
     Loader2,
+    Lock,
+    AlertTriangle,
+    UserX,
+    Ban,
+    Eye,
+    DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -29,6 +35,20 @@ const AdminSettings = () => {
     const [newSignupsEnabled, setNewSignupsEnabled] = useState(true);
     const [platformName, setPlatformName] = useState("UteelPay");
     const [sessionTimeout, setSessionTimeout] = useState("30m");
+
+    // Security settings
+    const [forceTransactionPin, setForceTransactionPin] = useState(false);
+    const [maxLoginAttempts, setMaxLoginAttempts] = useState("5");
+    const [minPasswordLength, setMinPasswordLength] = useState("8");
+    const [requireKycForTransactions, setRequireKycForTransactions] = useState(false);
+    const [disableSuspiciousAccounts, setDisableSuspiciousAccounts] = useState(true);
+    const [ipWhitelistEnabled, setIpWhitelistEnabled] = useState(false);
+    const [ipWhitelist, setIpWhitelist] = useState("");
+
+    // Transaction limits
+    const [maxDailyTransaction, setMaxDailyTransaction] = useState("100000");
+    const [maxSingleTransaction, setMaxSingleTransaction] = useState("50000");
+    const [minWalletFund, setMinWalletFund] = useState("100");
 
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
@@ -51,6 +71,16 @@ const AdminSettings = () => {
             setNewSignupsEnabled(d.new_signups_enabled as boolean ?? true);
             setPlatformName(d.platform_name as string ?? "UteelPay");
             setSessionTimeout(d.session_timeout as string ?? "30m");
+            setForceTransactionPin(d.force_transaction_pin as boolean ?? false);
+            setMaxLoginAttempts(String(d.max_login_attempts ?? "5"));
+            setMinPasswordLength(String(d.min_password_length ?? "8"));
+            setRequireKycForTransactions(d.require_kyc_for_transactions as boolean ?? false);
+            setDisableSuspiciousAccounts(d.disable_suspicious_accounts as boolean ?? true);
+            setIpWhitelistEnabled(d.ip_whitelist_enabled as boolean ?? false);
+            setIpWhitelist(d.ip_whitelist as string ?? "");
+            setMaxDailyTransaction(String(d.max_daily_transaction ?? "100000"));
+            setMaxSingleTransaction(String(d.max_single_transaction ?? "50000"));
+            setMinWalletFund(String(d.min_wallet_fund ?? "100"));
         }
     }, [config]);
 
@@ -61,6 +91,16 @@ const AdminSettings = () => {
                 new_signups_enabled: newSignupsEnabled,
                 platform_name: platformName,
                 session_timeout: sessionTimeout,
+                force_transaction_pin: forceTransactionPin,
+                max_login_attempts: parseInt(maxLoginAttempts),
+                min_password_length: parseInt(minPasswordLength),
+                require_kyc_for_transactions: requireKycForTransactions,
+                disable_suspicious_accounts: disableSuspiciousAccounts,
+                ip_whitelist_enabled: ipWhitelistEnabled,
+                ip_whitelist: ipWhitelist,
+                max_daily_transaction: parseInt(maxDailyTransaction),
+                max_single_transaction: parseInt(maxSingleTransaction),
+                min_wallet_fund: parseInt(minWalletFund),
             };
 
             if (config?.id) {
@@ -132,14 +172,14 @@ const AdminSettings = () => {
                     </CardContent>
                 </Card>
 
-                {/* Security Settings */}
+                {/* Security & Authentication */}
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Shield className="w-5 h-5 text-emerald-500" />
                             Security & Authentication
                         </CardTitle>
-                        <CardDescription>RBAC and access control policies</CardDescription>
+                        <CardDescription>Access control, session, and login policies</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="flex items-center justify-between">
@@ -158,6 +198,140 @@ const AdminSettings = () => {
                                     <SelectItem value="2h">2h</SelectItem>
                                 </SelectContent>
                             </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label className="flex items-center gap-1.5">
+                                    <Lock className="w-3.5 h-3.5" />
+                                    Force Transaction PIN
+                                </Label>
+                                <p className="text-xs text-muted-foreground">Require all users to set a transaction PIN before making purchases</p>
+                            </div>
+                            <Switch checked={forceTransactionPin} onCheckedChange={setForceTransactionPin} />
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label className="flex items-center gap-1.5">
+                                    <Eye className="w-3.5 h-3.5" />
+                                    Require KYC for Transactions
+                                </Label>
+                                <p className="text-xs text-muted-foreground">Users must complete KYC verification before transacting</p>
+                            </div>
+                            <Switch checked={requireKycForTransactions} onCheckedChange={setRequireKycForTransactions} />
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label className="flex items-center gap-1.5">
+                                    <UserX className="w-3.5 h-3.5" />
+                                    Auto-Disable Suspicious Accounts
+                                </Label>
+                                <p className="text-xs text-muted-foreground">Automatically deactivate accounts with suspicious activity</p>
+                            </div>
+                            <Switch checked={disableSuspiciousAccounts} onCheckedChange={setDisableSuspiciousAccounts} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-1.5">
+                                <AlertTriangle className="w-3.5 h-3.5" />
+                                Max Login Attempts
+                            </Label>
+                            <p className="text-xs text-muted-foreground">Lock account after this many failed login attempts</p>
+                            <Select value={maxLoginAttempts} onValueChange={setMaxLoginAttempts}>
+                                <SelectTrigger className="w-24 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="3">3</SelectItem>
+                                    <SelectItem value="5">5</SelectItem>
+                                    <SelectItem value="10">10</SelectItem>
+                                    <SelectItem value="15">15</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Minimum Password Length</Label>
+                            <p className="text-xs text-muted-foreground">Enforce minimum password complexity for all users</p>
+                            <Select value={minPasswordLength} onValueChange={setMinPasswordLength}>
+                                <SelectTrigger className="w-24 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="6">6</SelectItem>
+                                    <SelectItem value="8">8</SelectItem>
+                                    <SelectItem value="10">10</SelectItem>
+                                    <SelectItem value="12">12</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* IP Whitelist */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Ban className="w-5 h-5 text-orange-500" />
+                            IP Access Control
+                        </CardTitle>
+                        <CardDescription>Restrict admin panel access to specific IP addresses</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label>Enable IP Whitelist</Label>
+                                <p className="text-xs text-muted-foreground">Only allow admin access from whitelisted IPs</p>
+                            </div>
+                            <Switch checked={ipWhitelistEnabled} onCheckedChange={setIpWhitelistEnabled} />
+                        </div>
+                        {ipWhitelistEnabled && (
+                            <div className="space-y-2">
+                                <Label>Whitelisted IPs</Label>
+                                <Input
+                                    value={ipWhitelist}
+                                    onChange={(e) => setIpWhitelist(e.target.value)}
+                                    placeholder="e.g. 192.168.1.1, 10.0.0.1"
+                                />
+                                <p className="text-xs text-muted-foreground">Comma-separated list of allowed IP addresses</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Transaction Limits */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <DollarSign className="w-5 h-5 text-primary" />
+                            Transaction Limits
+                        </CardTitle>
+                        <CardDescription>Set spending caps and minimum funding amounts</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Max Daily Transaction (₦)</Label>
+                            <p className="text-xs text-muted-foreground">Maximum total amount a user can spend per day</p>
+                            <Input
+                                type="number"
+                                value={maxDailyTransaction}
+                                onChange={(e) => setMaxDailyTransaction(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Max Single Transaction (₦)</Label>
+                            <p className="text-xs text-muted-foreground">Maximum amount for a single transaction</p>
+                            <Input
+                                type="number"
+                                value={maxSingleTransaction}
+                                onChange={(e) => setMaxSingleTransaction(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Minimum Wallet Fund (₦)</Label>
+                            <p className="text-xs text-muted-foreground">Minimum amount users can deposit into their wallet</p>
+                            <Input
+                                type="number"
+                                value={minWalletFund}
+                                onChange={(e) => setMinWalletFund(e.target.value)}
+                            />
                         </div>
                     </CardContent>
                 </Card>
