@@ -25,6 +25,7 @@ const Data = () => {
     
     const kvdata = useKvdata();
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+    const { guardTransaction } = useTransactionGuard();
 
     const { data: networks } = useQuery({
         queryKey: ["networks"],

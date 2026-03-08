@@ -25,6 +25,7 @@ const CableTV = () => {
   
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+  const { guardTransaction } = useTransactionGuard();
 
   const { data: providers } = useQuery({
     queryKey: ["cables"],

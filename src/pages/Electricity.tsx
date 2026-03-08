@@ -25,6 +25,7 @@ const Electricity = () => {
   
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+  const { guardTransaction } = useTransactionGuard();
 
   const { data: discos, isLoading: isLoadingDiscos } = useQuery({
     queryKey: ["electricity_companies"],

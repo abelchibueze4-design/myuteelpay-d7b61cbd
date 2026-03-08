@@ -21,6 +21,7 @@ const EduPins = () => {
   
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+  const { guardTransaction } = useTransactionGuard();
 
   const total = useMemo(() => 
     selectedExam ? selectedExam.price * parseInt(quantity) : 0,
