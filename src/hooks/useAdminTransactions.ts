@@ -1,12 +1,12 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 export const useAdminTransactions = () => {
     const queryClient = useQueryClient();
 
     useEffect(() => {
-        // Real-time synchronization for admin dashboard transactions
         const channel = supabase
             .channel("admin-transactions-realtime")
             .on(
@@ -27,7 +27,7 @@ export const useAdminTransactions = () => {
         };
     }, [queryClient]);
 
-    return useQuery({
+    const query = useQuery({
         queryKey: ["admin_transactions"],
         queryFn: async () => {
             const { data, error } = await supabase
@@ -53,4 +53,23 @@ export const useAdminTransactions = () => {
             }));
         },
     });
+
+    const updateStatusMutation = useMutation({
+        mutationFn: async ({ id, status }: { id: string; status: "pending" | "success" | "failed" }) => {
+            const { error } = await supabase
+                .from("transactions")
+                .update({ status })
+                .eq("id", id);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["admin_transactions"] });
+            toast.success("Transaction status updated");
+        },
+        onError: (err: Error) => {
+            toast.error("Failed to update status: " + err.message);
+        },
+    });
+
+    return { ...query, updateStatus: updateStatusMutation.mutateAsync, isUpdating: updateStatusMutation.isPending };
 };
