@@ -93,7 +93,6 @@ const DataCard = () => {
                                     )}
                                 >
                                     <NetworkIcon networkName={n.network_name} />
-                                    </div>
                                     <span className="text-[10px] font-bold uppercase">{n.network_name}</span>
                                 </button>
                             ))}
