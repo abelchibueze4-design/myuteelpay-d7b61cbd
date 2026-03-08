@@ -46,41 +46,12 @@ async function kvdataRequest(path: string, method: "GET" | "POST", body?: unknow
   return data;
 }
 
-// Network name -> KVData network ID
-const NETWORK_IDS: Record<string, number> = {
-  MTN: 1,
-  Glo: 2,
-  Airtel: 3,
-  "9mobile": 4,
-};
-
-// Disco name -> KVData disco ID mapping
-const DISCO_IDS: Record<string, number> = {
-  IKEDC: 1,
-  EKEDC: 2,
-  KEDCO: 3,
-  PHEDC: 4,
-  JEDC: 5,
-  IBEDC: 6,
-  KAEDCO: 7,
-  AEDC: 8,
-  BEDC: 9,
-};
-
-// Cable name -> KVData cable ID
-const CABLE_IDS: Record<string, number> = {
-  DSTV: 1,
-  GOTV: 2,
-  StarTimes: 3,
-};
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) return json({ error: "Unauthorized" }, 401);
 
@@ -105,27 +76,30 @@ Deno.serve(async (req) => {
     // === VALIDATE IUC ===
     if (action === "validate_iuc") {
       const { smart_card_number, cablename } = params;
-      const cableId = CABLE_IDS[cablename];
-      if (!cableId) return json({ error: "Invalid cable provider" }, 400);
+      if (!cablename) return json({ error: "Invalid cable provider" }, 400);
       const data = await kvdataRequest(
-        `/validateiuc?smart_card_number=${smart_card_number}&cablename=${cableId}`,
+        `/validateiuc?smart_card_number=${smart_card_number}&cablename=${cablename}`,
         "GET"
       );
       return json(data);
     }
 
-    // === GET DATA PLANS ===
+    // === VALIDATE METER ===
+    if (action === "validate_meter") {
+      const { meter_number, disco_id, meter_type } = params;
+      if (!disco_id) return json({ error: "Invalid disco" }, 400);
+      const mtype = meter_type === "prepaid" ? 1 : 2;
+      const data = await kvdataRequest(
+        `/validatemeter?meternumber=${meter_number}&disconame=${disco_id}&mtype=${mtype}`,
+        "GET"
+      );
+      return json(data);
+    }
+
+    // === GET DATA PLANS (from real API) ===
     if (action === "get_data_plans") {
-      // Return hardcoded mock data for now since KVData endpoint is failing/changing
-      return json([
-        { id: 1, network: "MTN", plan: "1GB", amount: 300, plan_id: "1" },
-        { id: 2, network: "MTN", plan: "2GB", amount: 600, plan_id: "2" },
-        { id: 3, network: "Glo", plan: "1GB", amount: 250, plan_id: "3" },
-        { id: 4, network: "Airtel", plan: "1GB", amount: 300, plan_id: "4" },
-        { id: 5, network: "9mobile", plan: "1GB", amount: 300, plan_id: "5" },
-      ]);
-      // const data = await kvdataRequest("/data/", "GET");
-      // return json(data);
+      const data = await kvdataRequest("/data/", "GET");
+      return json(data);
     }
 
     // === GET CABLE PLANS ===
@@ -146,28 +120,9 @@ Deno.serve(async (req) => {
       return json(data);
     }
 
-    // === GET ELECTRICITY DISCOS ===
-    if (action === "get_electricity_discos") {
-      const discoList = Object.keys(DISCO_IDS).map((name) => ({ name, id: DISCO_IDS[name] }));
-      return json(discoList);
-    }
-
-    // === VALIDATE METER ===
-    if (action === "validate_meter") {
-      const { meter_number, disco_name, meter_type } = params;
-      const discoId = DISCO_IDS[disco_name];
-      if (!discoId) return json({ error: "Invalid disco" }, 400);
-      const mtype = meter_type === "prepaid" ? 1 : 2;
-      const data = await kvdataRequest(
-        `/validatemeter?meternumber=${meter_number}&disconame=${discoId}&mtype=${mtype}`,
-        "GET"
-      );
-      return json(data);
-    }
-
     // === PURCHASE ACTIONS (require wallet deduction) ===
-    const { amount } = params;
-    if (!amount || amount <= 0) return json({ error: "Invalid amount" }, 400);
+    const numericAmount = Number(params.amount);
+    if (!numericAmount || numericAmount <= 0) return json({ error: "Invalid amount" }, 400);
 
     // Check wallet balance
     const { data: wallet, error: walletErr } = await supabaseAdmin
@@ -176,7 +131,7 @@ Deno.serve(async (req) => {
       .eq("id", user.id)
       .single();
     if (walletErr || !wallet) return json({ error: "Wallet not found" }, 404);
-    if (wallet.balance < amount) return json({ error: "Insufficient balance" }, 400);
+    if (wallet.balance < numericAmount) return json({ error: "Insufficient balance" }, 400);
 
     let kvResult: any;
     let txType: string;
@@ -184,28 +139,21 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case "buy_airtime": {
-        // Allow network to be ID or name (fallback to map)
-        const networkId = typeof params.network === 'number' ? params.network : NETWORK_IDS[params.network];
-        if (!networkId) return json({ error: "Invalid network" }, 400);
-
         kvResult = await kvdataRequest("/topup/", "POST", {
-          network: networkId,
-          amount: params.amount,
+          network: params.network_id,
+          amount: numericAmount,
           mobile_number: params.phone,
           Ported_number: true,
           airtime_type: "VTU",
         });
         txType = "airtime";
-        description = `${params.network_name || "Airtime"} ₦${amount} - ${params.phone}`;
+        description = `${params.network_name || "Airtime"} ₦${numericAmount} - ${params.phone}`;
         break;
       }
 
       case "buy_data": {
-        const networkId = typeof params.network === 'number' ? params.network : NETWORK_IDS[params.network];
-        if (!networkId) return json({ error: "Invalid network" }, 400);
-        
         kvResult = await kvdataRequest("/data/", "POST", {
-          network: networkId,
+          network: params.network_id,
           mobile_number: params.phone,
           plan: params.plan_id,
           Ported_number: true,
@@ -216,11 +164,8 @@ Deno.serve(async (req) => {
       }
 
       case "buy_cable": {
-        const cableId = typeof params.cablename === 'number' ? params.cablename : CABLE_IDS[params.cablename];
-        if (!cableId) return json({ error: "Invalid cable provider" }, 400);
-
         kvResult = await kvdataRequest("/cablesub/", "POST", {
-          cablename: cableId,
+          cablename: params.cable_id,
           cableplan: params.cableplan_id,
           smart_card_number: params.smart_card_number,
         });
@@ -230,12 +175,9 @@ Deno.serve(async (req) => {
       }
 
       case "buy_electricity": {
-        const discoId = typeof params.disco_name === 'number' ? params.disco_name : DISCO_IDS[params.disco_name];
-        if (!discoId) return json({ error: "Invalid disco" }, 400);
-
         kvResult = await kvdataRequest("/billpayment/", "POST", {
-          disco_name: discoId,
-          amount: params.amount,
+          disco_name: params.disco_id,
+          amount: numericAmount,
           meter_number: params.meter_number,
           MeterType: params.meter_type === "prepaid" ? 1 : 2,
         });
@@ -251,6 +193,17 @@ Deno.serve(async (req) => {
         });
         txType = "edu_pin";
         description = `${params.exam_name} Pin x${params.quantity || 1}`;
+        break;
+      }
+
+      case "buy_data_card": {
+        kvResult = await kvdataRequest("/data_pin/", "POST", {
+          network: params.network_id,
+          plan: params.plan_id,
+          quantity: String(params.quantity || 1),
+        });
+        txType = "data_card";
+        description = `Data Card ${params.plan_label || "PIN"} x${params.quantity || 1}`;
         break;
       }
 

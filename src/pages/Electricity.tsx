@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Zap, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,9 +26,9 @@ const Electricity = () => {
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
   const { data: discos, isLoading: isLoadingDiscos } = useQuery({
-    queryKey: ["electricity_discos"],
+    queryKey: ["electricity_companies"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("electricity_discos").select("*").eq("is_active", true).order("name");
+      const { data, error } = await supabase.from("electricity_companies").select("*");
       if (error) throw error;
       return data;
     }
@@ -37,13 +37,13 @@ const Electricity = () => {
   const handleValidateMeter = async () => {
     if (!meter || !disco) return;
     try {
-      const selectedDisco = discos?.find(d => String(d.provider_id) === disco);
+      const selectedDisco = discos?.find(d => String(d.disco_id) === disco);
       const res = await kvdata.mutateAsync({
         action: "validate_meter",
         meter_number: meter,
-        disco_name: Number(disco), // Pass ID
+        disco_id: Number(disco),
         meter_type: type,
-        disco_label: selectedDisco?.name
+        disco_label: selectedDisco?.disco_name
       });
       setCustomerName(res?.Customer_Name || res?.name || "Validated");
     } catch {
@@ -62,14 +62,14 @@ const Electricity = () => {
     if (!isValid) return false;
 
     try {
-      const selectedDisco = discos?.find(d => String(d.provider_id) === disco);
+      const selectedDisco = discos?.find(d => String(d.disco_id) === disco);
       const res = await kvdata.mutateAsync({
         action: "buy_electricity",
-        disco_name: Number(disco),
+        disco_id: Number(disco),
         meter_number: meter,
         meter_type: type,
         amount: Number(amount),
-        disco_label: selectedDisco?.name
+        disco_label: selectedDisco?.disco_name
       });
       setToken(res?.kvdata?.token || res?.kvdata?.Token || "");
       setShowSuccess(true);
@@ -105,7 +105,7 @@ const Electricity = () => {
               </SelectTrigger>
               <SelectContent>
                 {discos?.map((d) => (
-                    <SelectItem key={d.id} value={String(d.provider_id)}>{d.name}</SelectItem>
+                    <SelectItem key={d.disco_id} value={String(d.disco_id)}>{d.disco_name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Smartphone, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
@@ -14,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Airtime = () => {
     const navigate = useNavigate();
-    const [network, setNetwork] = useState<any>(null);
+    const [network, setNetwork] = useState<{ network_id: number; network_name: string } | null>(null);
     const [phone, setPhone] = useState("");
     const [amount, setAmount] = useState("");
     const [showSuccess, setShowSuccess] = useState(false);
@@ -25,7 +24,7 @@ const Airtime = () => {
     const { data: networks } = useQuery({
         queryKey: ["networks"],
         queryFn: async () => {
-            const { data, error } = await supabase.from("networks").select("*").eq("is_active", true).order("name");
+            const { data, error } = await supabase.from("networks").select("*");
             if (error) throw error;
             return data;
         }
@@ -44,8 +43,8 @@ const Airtime = () => {
         try {
             await kvdata.mutateAsync({
                 action: "buy_airtime",
-                network: network.provider_id, // Pass the ID directly
-                network_name: network.name,
+                network_id: network!.network_id,
+                network_name: network!.network_name,
                 phone,
                 amount: Number(amount),
             });
@@ -71,23 +70,23 @@ const Airtime = () => {
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {networks?.map((n) => (
                                 <button
-                                    key={n.id}
+                                    key={n.network_id}
                                     type="button"
                                     onClick={() => setNetwork(n)}
                                     className={`py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
-                                        network?.id === n.id 
+                                        network?.network_id === n.network_id 
                                         ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
                                         : "border-border/50 hover:border-primary/30"
                                     }`}
                                 >
                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black ${
-                                        n.name === "MTN" ? "bg-yellow-100 text-yellow-700" :
-                                        n.name === "GLO" ? "bg-green-100 text-green-700" :
-                                        n.name === "AIRTEL" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
+                                        n.network_name === "MTN" ? "bg-yellow-100 text-yellow-700" :
+                                        n.network_name === "GLO" ? "bg-green-100 text-green-700" :
+                                        n.network_name === "AIRTEL" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
                                     }`}>
-                                        {n.name[0]}
+                                        {n.network_name[0]}
                                     </div>
-                                    <span className="text-[10px] font-bold uppercase">{n.name}</span>
+                                    <span className="text-[10px] font-bold uppercase">{n.network_name}</span>
                                 </button>
                             ))}
                         </div>

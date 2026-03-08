@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Tv, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
@@ -12,15 +11,9 @@ import { CableTVPrices } from "@/components/services/CableTVPrices";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-type CableProvider = {
-  id: string;
-  name: string;
-  provider_id: number;
-};
-
 const CableTV = () => {
   const navigate = useNavigate();
-  const [provider, setProvider] = useState<CableProvider | null>(null);
+  const [provider, setProvider] = useState<{ cable_id: number; cable_name: string } | null>(null);
   const [planId, setPlanId] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [smartcard, setSmartcard] = useState("");
@@ -32,12 +25,11 @@ const CableTV = () => {
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
   const { data: providers } = useQuery({
-    queryKey: ["cable_providers"],
+    queryKey: ["cables"],
     queryFn: async () => {
-      const db = supabase as any;
-      const { data, error } = await db.from("cable_providers").select("*").eq("is_active", true).order("name");
+      const { data, error } = await supabase.from("cables").select("*");
       if (error) throw error;
-      return (data || []) as CableProvider[];
+      return data;
     }
   });
   
@@ -47,8 +39,8 @@ const CableTV = () => {
       const res = await kvdata.mutateAsync({
         action: "validate_iuc",
         smart_card_number: smartcard,
-        cablename: provider.provider_id, // Pass ID
-        cable_name: provider.name
+        cablename: provider.cable_id,
+        cable_name: provider.cable_name
       });
       setCustomerName(res?.Customer_Name || res?.name || "Validated");
     } catch {
@@ -65,16 +57,15 @@ const CableTV = () => {
   const handleConfirmPurchase = async (pin: string) => {
     const isValid = await verifyPin(pin);
     if (!isValid) return false;
-
-    if (!selectedPlan) return false;
+    if (!selectedPlan || !provider) return false;
 
     try {
       await kvdata.mutateAsync({
         action: "buy_cable",
-        cablename: provider.provider_id,
-        cable_name: provider.name,
+        cable_id: provider.cable_id,
+        cable_name: provider.cable_name,
         cableplan_id: selectedPlan.plan_id,
-        plan_label: `${provider.name} ${selectedPlan.label}`,
+        plan_label: `${provider.cable_name} ${selectedPlan.label}`,
         smart_card_number: smartcard,
         amount: selectedPlan.price,
       });
@@ -101,17 +92,17 @@ const CableTV = () => {
             <div className="grid grid-cols-3 gap-3">
                 {providers?.map((p) => (
                     <button
-                        key={p.id}
+                        key={p.cable_id}
                         type="button"
                         onClick={() => { setProvider(p); setPlanId(""); setSelectedPlan(null); setCustomerName(""); }}
                         className={`py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
-                            provider?.id === p.id 
+                            provider?.cable_id === p.cable_id 
                             ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
                             : "border-border/50 hover:border-primary/30"
                         }`}
                     >
-                        <Tv className={`w-8 h-8 ${provider?.id === p.id ? "text-primary" : "text-muted-foreground"}`} />
-                        <span className="text-[10px] font-bold uppercase">{p.name}</span>
+                        <Tv className={`w-8 h-8 ${provider?.cable_id === p.cable_id ? "text-primary" : "text-muted-foreground"}`} />
+                        <span className="text-[10px] font-bold uppercase">{p.cable_name}</span>
                     </button>
                 ))}
             </div>
@@ -139,7 +130,7 @@ const CableTV = () => {
             <div className="space-y-3">
               <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Choose Package</label>
               <CableTVPrices 
-                providerId={provider.provider_id} 
+                cableId={provider.cable_id} 
                 selectedPlanId={planId}
                 onSelect={(plan) => {
                     setPlanId(plan.plan_id);

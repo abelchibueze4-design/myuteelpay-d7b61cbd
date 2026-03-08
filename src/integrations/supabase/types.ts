@@ -50,6 +50,107 @@ export type Database = {
         }
         Relationships: []
       }
+      cable_plans: {
+        Row: {
+          cable_id: number | null
+          cableplan_amount: number
+          cableplan_id: number
+          cableplan_name: string
+        }
+        Insert: {
+          cable_id?: number | null
+          cableplan_amount: number
+          cableplan_id: number
+          cableplan_name: string
+        }
+        Update: {
+          cable_id?: number | null
+          cableplan_amount?: number
+          cableplan_id?: number
+          cableplan_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cable_plans_cable_id_fkey"
+            columns: ["cable_id"]
+            isOneToOne: false
+            referencedRelation: "cables"
+            referencedColumns: ["cable_id"]
+          },
+        ]
+      }
+      cables: {
+        Row: {
+          cable_id: number
+          cable_name: string
+        }
+        Insert: {
+          cable_id: number
+          cable_name: string
+        }
+        Update: {
+          cable_id?: number
+          cable_name?: string
+        }
+        Relationships: []
+      }
+      data_plans: {
+        Row: {
+          amount: number | null
+          network_name: string | null
+          plan_id: number
+          plan_type: string | null
+          size: string | null
+          validity: string | null
+        }
+        Insert: {
+          amount?: number | null
+          network_name?: string | null
+          plan_id: number
+          plan_type?: string | null
+          size?: string | null
+          validity?: string | null
+        }
+        Update: {
+          amount?: number | null
+          network_name?: string | null
+          plan_id?: number
+          plan_type?: string | null
+          size?: string | null
+          validity?: string | null
+        }
+        Relationships: []
+      }
+      electricity_companies: {
+        Row: {
+          disco_id: number
+          disco_name: string
+        }
+        Insert: {
+          disco_id: number
+          disco_name: string
+        }
+        Update: {
+          disco_id?: number
+          disco_name?: string
+        }
+        Relationships: []
+      }
+      networks: {
+        Row: {
+          network_id: number
+          network_name: string
+        }
+        Insert: {
+          network_id: number
+          network_name: string
+        }
+        Update: {
+          network_id?: number
+          network_name?: string
+        }
+        Relationships: []
+      }
       notification_logs: {
         Row: {
           broadcast_id: string | null
@@ -257,6 +358,7 @@ export type Database = {
           id: string
           phone_number: string | null
           role: string | null
+          transaction_pin: string | null
           transaction_pin_enabled: boolean
           transaction_pin_hash: string | null
           updated_at: string
@@ -271,6 +373,7 @@ export type Database = {
           id: string
           phone_number?: string | null
           role?: string | null
+          transaction_pin?: string | null
           transaction_pin_enabled?: boolean
           transaction_pin_hash?: string | null
           updated_at?: string
@@ -285,6 +388,7 @@ export type Database = {
           id?: string
           phone_number?: string | null
           role?: string | null
+          transaction_pin?: string | null
           transaction_pin_enabled?: boolean
           transaction_pin_hash?: string | null
           updated_at?: string
