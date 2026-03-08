@@ -495,12 +495,16 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
           {selectedTx && (() => {
             const t = selectedTx;
             const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
+            const qrData = JSON.stringify({ ref: t.reference || t.id, amount: t.amount, status: t.status });
             return (
               <div ref={receiptRef}>
-                {/* Receipt header */}
-                <div className="bg-primary px-6 pt-8 pb-6 text-center">
-                  <h2 className="text-xl font-black text-white">UteelPay</h2>
-                  <p className="text-white/50 text-xs mt-1">Transaction Receipt</p>
+                {/* Receipt header with logo */}
+                <div className="bg-primary px-6 pt-7 pb-5 text-center">
+                  <div className="flex items-center justify-center gap-2.5 mb-2">
+                    <img src={logo} alt="UteelPay" className="w-9 h-9 rounded-lg object-contain" />
+                    <h2 className="text-xl font-black text-white">UteelPay</h2>
+                  </div>
+                  <p className="text-white/50 text-xs">Transaction Receipt</p>
                   <Badge variant="outline" className={cn("mt-3 text-[10px] font-black uppercase tracking-[0.15em] border-none", STATUS_COLORS[t.status])}>
                     {t.status}
                   </Badge>
@@ -515,18 +519,32 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 </div>
 
                 {/* Details */}
-                <div className="px-6 py-5 space-y-3">
+                <div className="px-6 py-4 space-y-0">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-3">Transaction Details</p>
                   {[
                     ["Service", TYPE_LABELS[t.type] || t.type],
                     ["Description", t.description || "N/A"],
                     ["Reference", t.reference || t.id],
-                    ["Date", format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")],
+                    ["Transaction ID", t.id],
+                    ["Date & Time", format(parseISO(t.created_at), "MMM d, yyyy · HH:mm:ss")],
+                    ["Payment Method", "Wallet Balance"],
                   ].map(([label, value]) => (
-                    <div key={label} className="flex justify-between items-start gap-4">
+                    <div key={label} className="flex justify-between items-start gap-4 py-2 border-b border-border/30 last:border-0">
                       <span className="text-xs text-muted-foreground font-medium shrink-0">{label}</span>
-                      <span className="text-xs font-bold text-foreground text-right break-all">{value}</span>
+                      <span className="text-xs font-bold text-foreground text-right break-all max-w-[60%]">{value}</span>
                     </div>
                   ))}
+                </div>
+
+                {/* QR Code */}
+                <div className="flex flex-col items-center py-4 border-t border-dashed border-border/50">
+                  <QRCodeSVG
+                    value={qrData}
+                    size={80}
+                    level="M"
+                    className="rounded"
+                  />
+                  <p className="text-[9px] text-muted-foreground mt-2">Scan to verify this transaction</p>
                 </div>
 
                 {/* Actions */}
@@ -536,14 +554,30 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                       onClick={() => handleDownloadReceipt(t)}
                       className="flex-1 rounded-2xl h-12 font-bold gap-2 bg-primary hover:bg-primary/90"
                     >
-                      <Printer className="w-4 h-4" /> Receipt
+                      <Printer className="w-4 h-4" /> Print
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleShareReceipt(t)}
+                      className="flex-1 rounded-2xl h-12 font-bold gap-2 border-2"
+                    >
+                      <Share2 className="w-4 h-4" /> Share
+                    </Button>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleCopyRef(t.reference || t.id)}
+                      className="flex-1 rounded-2xl h-11 font-bold gap-2 border-2 text-xs"
+                    >
+                      <Copy className="w-3.5 h-3.5" /> Copy Ref
                     </Button>
                     <Button
                       variant="outline"
                       onClick={() => handleReportTransaction(t)}
-                      className="flex-1 rounded-2xl h-12 font-bold gap-2 border-2 border-green-500 text-green-600 hover:bg-green-50"
+                      className="flex-1 rounded-2xl h-11 font-bold gap-2 border-2 border-green-500 text-green-600 hover:bg-green-50 text-xs"
                     >
-                      <MessageCircle className="w-4 h-4" /> Report
+                      <MessageCircle className="w-3.5 h-3.5" /> Report
                     </Button>
                   </div>
                   {SERVICE_ROUTES[t.type] && (
