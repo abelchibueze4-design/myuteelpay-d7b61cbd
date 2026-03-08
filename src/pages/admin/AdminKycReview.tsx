@@ -56,7 +56,7 @@ const AdminKycReview = () => {
       <PageHeader
         title="KYC Verification"
         description={`${pendingCount} pending review${pendingCount !== 1 ? "s" : ""}`}
-        icon={<ShieldCheck className="w-6 h-6" />}
+        icon={ShieldCheck}
       />
 
       {/* Filters */}

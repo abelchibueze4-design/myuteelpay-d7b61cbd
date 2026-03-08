@@ -98,7 +98,7 @@ export function useAllKycSubmissions() {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data || []) as KycSubmission[];
+      return (data || []) as unknown as KycSubmission[];
     },
   });
 }
