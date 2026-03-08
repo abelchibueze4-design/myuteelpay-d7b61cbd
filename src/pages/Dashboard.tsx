@@ -266,9 +266,9 @@ const Dashboard = () => {
         {/* Service status banner */}
         {platformSettings.service_status_visible && (() => {
           const statusStyles = {
-            operational: "bg-emerald-50 border-emerald-200 text-emerald-700",
-            degraded: "bg-amber-50 border-amber-200 text-amber-700",
-            outage: "bg-red-50 border-red-200 text-red-700",
+            operational: "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400",
+            degraded: "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400",
+            outage: "bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400",
           };
           const st = platformSettings.service_status || "operational";
           return (
