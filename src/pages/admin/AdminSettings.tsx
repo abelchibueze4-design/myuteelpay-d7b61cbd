@@ -55,6 +55,7 @@ const AdminSettings = () => {
     // Service status banner
     const [serviceStatus, setServiceStatus] = useState<"operational" | "degraded" | "outage">("operational");
     const [serviceStatusMessage, setServiceStatusMessage] = useState("All services are running smoothly");
+    const [serviceStatusVisible, setServiceStatusVisible] = useState(false);
 
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
