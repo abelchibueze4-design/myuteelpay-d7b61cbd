@@ -164,7 +164,7 @@ const Dashboard = () => {
         isRequired={false}
       />
       {/* Mobile Header */}
-      <div className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-border/30">
+      <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/30">
         <div className="max-w-[420px] mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => setOpenMobile(true)}
