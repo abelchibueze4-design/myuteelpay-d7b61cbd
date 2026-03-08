@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatCard } from "@/components/admin/StatCard";
+import { DateRangeExport } from "@/components/admin/DateRangeExport";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -7,7 +8,7 @@ import {
 } from "lucide-react";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
 import { useUsers } from "@/hooks/useUsers";
-import { format, startOfMonth, isAfter } from "date-fns";
+import { format, startOfMonth, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
 import { exportToCSV, printPDF } from "@/utils/exportUtils";
 
