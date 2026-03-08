@@ -168,6 +168,7 @@ function AppSidebar() {
 }
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
+  useSessionTimeout();
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
