@@ -48,9 +48,7 @@ export const useUsers = () => {
             return data.map((profile: any) => ({
                 ...profile,
                 wallet_balance: profile.wallets?.balance ?? 0,
-                // Since email is in auth.users (not public), we use username/full_name
-                // In a real app, you'd have a trigger to sync email to profiles
-                email: profile.username ? `${profile.username}@example.com` : "no-email@example.com",
+                email: profile.email || profile.username || "—",
                 status: profile.deactivated_at ? "inactive" : "active",
             }));
         },
