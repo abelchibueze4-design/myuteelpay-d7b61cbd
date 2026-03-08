@@ -11,6 +11,7 @@ import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { AirtimePrices } from "@/components/services/AirtimePrices";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 
 const Airtime = () => {
     const navigate = useNavigate();
