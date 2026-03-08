@@ -482,7 +482,7 @@ const TrustBar = () => (
 /* ---------------- Footer ---------------- */
 const Footer = () => (
   <footer className="py-6 lg:py-12 px-4 lg:px-8 border-t border-border/30 bg-card">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="hidden lg:grid lg:grid-cols-4 gap-8 mb-8">
         <div>
           <p className="font-extrabold text-gradient text-xl mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-10 w-auto" /> Uteelpay</p>
