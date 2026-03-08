@@ -23,16 +23,21 @@ const menuItems = [
 ];
 
 const SettingsPage = () => {
-  const [, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const handleBack = () => {
     if (activeSection) {
       setActiveSection(null);
     } else {
-      setSearchParams({}, { replace: true });
+      navigate("/dashboard");
     }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
   };
 
   return (

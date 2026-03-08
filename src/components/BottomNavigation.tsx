@@ -15,7 +15,7 @@ const BottomNavigation = () => {
 
   const getActiveKey = () => {
     if (path.includes("tab=wallet")) return "wallet";
-    if (path.includes("tab=settings")) return "profile";
+    if (path.includes("/settings")) return "profile";
     if (path.includes("tab=transactions")) return "transactions";
     if (path.includes("/referral")) return "referrals";
     if (path.includes("/dashboard")) return "home";
