@@ -253,20 +253,16 @@ const Data = () => {
                 isLoading={isVerifying || kvdata.isPending}
             />
 
-            <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
-                <DialogContent className="max-w-sm text-center">
-                    <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center mx-auto mb-4">
-                        <Check className="w-8 h-8 text-primary-foreground" />
-                    </div>
-                    <h2 className="text-xl font-bold">Transaction Successful!</h2>
-                    <p className="text-sm text-muted-foreground">Your data purchase was completed successfully.</p>
-                    <div className="flex gap-3 mt-4">
-                        <Button variant="outline" className="flex-1" onClick={() => setShowSuccess(false)}>New Purchase</Button>
-                        <Button variant="hero" className="flex-1" onClick={() => navigate("/dashboard")}>Done</Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
-        </div>
+            <TransactionResultScreen
+                open={showSuccess}
+                onOpenChange={setShowSuccess}
+                success={true}
+                title="Data Purchased!"
+                description="Your data bundle was activated successfully."
+                onNewPurchase={() => setShowSuccess(false)}
+                onDone={() => navigate("/dashboard")}
+            />
+        </PageTransition>
     );
 };
 
