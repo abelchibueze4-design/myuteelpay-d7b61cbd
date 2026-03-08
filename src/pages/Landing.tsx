@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, ReactNode } from "react";
+import logo from "@/assets/logo.png";
 import {
   Zap, Shield, Clock, Star, Smartphone, Tv, GraduationCap,
   MessageSquare, Users, ArrowRight, Phone, Gift, HelpCircle, CheckCircle
