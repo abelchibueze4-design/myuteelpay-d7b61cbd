@@ -93,8 +93,8 @@ export const NotificationsDropdown = () => {
               >
                 <div className="flex items-start justify-between w-full gap-2">
                   <div className="flex items-start gap-2 flex-1 min-w-0">
-                    <span className="text-base mt-0.5 shrink-0">
-                      {getNotificationIcon(notification.type)}
+                    <span className="mt-0.5 shrink-0">
+                      <NotificationIcon type={notification.type} />
                     </span>
                     <div className="min-w-0 flex-1">
                       <p

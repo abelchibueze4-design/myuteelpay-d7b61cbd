@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, Mail, MessageSquare, Smartphone } from "lucide-react";
+import { Bell, Mail, MessageSquare, Smartphone, Lightbulb } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
