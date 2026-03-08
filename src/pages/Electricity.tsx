@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Zap, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DiscoIcon } from "@/components/DiscoIcon";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
@@ -103,16 +103,29 @@ const Electricity = () => {
         <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Distribution Company</label>
-            <Select value={disco} onValueChange={(val) => { setDisco(val); setCustomerName(""); }} disabled={isLoadingDiscos}>
-              <SelectTrigger>
-                <SelectValue placeholder={isLoadingDiscos ? "Loading discos..." : "Select disco"} />
-              </SelectTrigger>
-              <SelectContent>
-                {discos?.map((d) => (
-                    <SelectItem key={d.disco_id} value={String(d.disco_id)}>{d.disco_name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-3 gap-2">
+              {isLoadingDiscos ? (
+                <div className="col-span-3 flex justify-center py-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                discos?.map((d) => (
+                  <button
+                    key={d.disco_id}
+                    type="button"
+                    onClick={() => { setDisco(String(d.disco_id)); setCustomerName(""); }}
+                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                      disco === String(d.disco_id)
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border bg-card hover:border-primary/30"
+                    }`}
+                  >
+                    <DiscoIcon discoName={d.disco_name} />
+                    <span className="text-[10px] font-medium text-center leading-tight line-clamp-2">{d.disco_name}</span>
+                  </button>
+                ))
+              )}
+            </div>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Meter Number</label>
