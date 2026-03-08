@@ -297,10 +297,10 @@ const Dashboard = () => {
           </Link>
         )}
         {isKycVerified && (
-          <div className="fintech-card p-3 border border-emerald-200 bg-emerald-50/50">
+          <div className="fintech-card p-3 border border-emerald-500/30 bg-emerald-500/10">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span className="text-[11px] font-bold text-emerald-700">KYC Verified — Premium Account</span>
+              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">KYC Verified — Premium Account</span>
             </div>
           </div>
         )}
