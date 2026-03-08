@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { DateRangeExport } from "@/components/admin/DateRangeExport";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { format, isBefore, isAfter, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const typeBadge: Record<string, JSX.Element> = {
@@ -39,6 +39,25 @@ const AuditLogs = () => {
     const [typeFilter, setTypeFilter] = useState("all");
     const [dateFrom, setDateFrom] = useState<Date | undefined>();
     const [dateTo, setDateTo] = useState<Date | undefined>();
+    const queryClient = useQueryClient();
+
+    // Real-time subscription
+    useEffect(() => {
+        const channel = supabase
+            .channel("audit-logs-realtime")
+            .on(
+                "postgres_changes",
+                { event: "INSERT", schema: "public", table: "audit_logs" },
+                () => {
+                    queryClient.invalidateQueries({ queryKey: ["admin_audit_logs"] });
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [queryClient]);
 
     const { data: logs, isLoading } = useQuery({
         queryKey: ["admin_audit_logs"],
