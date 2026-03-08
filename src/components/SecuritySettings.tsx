@@ -31,6 +31,7 @@ const PinInput = ({ id, value, onChange, error, placeholder }: {
   </div>
 );
 
+export const SecuritySettings = () => {
   const {
     settings,
     isLoading,
