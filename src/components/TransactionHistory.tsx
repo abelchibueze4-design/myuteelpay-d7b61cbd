@@ -369,38 +369,43 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
               filtered.map((t) => {
                 const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
                 return (
-                  <div key={t.id} className="group p-5 sm:p-6 flex items-center justify-between hover:bg-accent/5 transition-all cursor-pointer" onClick={() => setSelectedTx(t)}>
-                    <div className="flex items-center gap-5 min-w-0">
+                  <div key={t.id} className="group p-3 sm:p-4 flex items-center justify-between hover:bg-accent/5 transition-all cursor-pointer" onClick={() => setSelectedTx(t)}>
+                    <div className="flex items-center gap-3 min-w-0">
                       <div className={cn(
-                        "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 shadow-sm",
+                        "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 shadow-sm",
                         isCredit ? "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/30" : "bg-primary/5 text-primary border-primary/10"
                       )}>
-                        {isCredit ? <ArrowDownLeft className="w-6 h-6" /> : <ArrowUpRight className="w-6 h-6" />}
+                        {isCredit ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-foreground text-sm sm:text-base tracking-tight truncate group-hover:text-primary transition-colors">
-                          {t.description || TYPE_LABELS[t.type] || t.type}
-                        </p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-[10px] font-bold text-muted-foreground/70 uppercase">Ref: {t.reference?.slice(0, 10)}...</p>
-                          <span className="w-1 h-1 rounded-full bg-border" />
-                          <div className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-foreground text-xs tracking-tight truncate group-hover:text-primary transition-colors">
+                            {t.description || TYPE_LABELS[t.type] || t.type}
+                          </p>
+                          <Badge variant="outline" className={cn("text-[7px] font-black uppercase tracking-wider h-4 px-1.5 shrink-0 border-none", STATUS_COLORS[t.status])}>
+                            {t.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                          <span className="text-[9px] font-semibold text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded">
+                            {TYPE_LABELS[t.type] || t.type}
+                          </span>
+                          <span className="text-[9px] font-medium text-muted-foreground truncate max-w-[120px]">
+                            Ref: {t.reference?.slice(0, 8)}...
+                          </span>
+                          <span className="w-0.5 h-0.5 rounded-full bg-border hidden sm:block" />
+                          <span className="hidden sm:flex items-center gap-0.5 text-[9px] text-muted-foreground">
                             <Calendar className="w-2.5 h-2.5" />
-                            {format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")}
-                          </div>
+                            {format(parseISO(t.created_at), "MMM d · HH:mm")}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-6 shrink-0 ml-4">
-                      <div className="text-right hidden sm:block">
-                        <p className={cn("text-lg font-black tracking-tighter", isCredit ? "text-emerald-600" : "text-foreground")}>
-                          {formatAmount(t.amount, t.type)}
-                        </p>
-                        <Badge variant="outline" className={cn("text-[8px] font-black uppercase tracking-[0.2em] h-5 decoration-none border-none", STATUS_COLORS[t.status])}>
-                          {t.status}
-                        </Badge>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                      <p className={cn("text-sm font-black tracking-tighter", isCredit ? "text-emerald-600" : "text-foreground")}>
+                        {formatAmount(t.amount, t.type)}
+                      </p>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all" />
                     </div>
                   </div>
                 );
