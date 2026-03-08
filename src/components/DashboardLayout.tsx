@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import {
   Smartphone, Tv, Zap, MessageSquare, GraduationCap,
