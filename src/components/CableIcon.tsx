@@ -21,8 +21,8 @@ export const CableIcon = ({ cableName, className }: CableIconProps) => {
 
   if (logo) {
     return (
-      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden", logo.bg, className)}>
-        <img src={logo.src} alt={cableName} className="w-8 h-8 object-contain" />
+      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden", logo.bg, className)}>
+        <img src={logo.src} alt={cableName} className="w-6 h-6 object-contain" />
       </div>
     );
   }
