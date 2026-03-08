@@ -73,6 +73,8 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState(defaultType);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
   const [selectedTx, setSelectedTx] = useState<any>(null);
   const receiptRef = useRef<HTMLDivElement>(null);
 
@@ -111,16 +113,23 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       const matchesType = typeFilter === "all" || t.type === typeFilter;
       const matchesStatus = statusFilter === "all" || t.status === statusFilter;
 
-      return matchesSearch && matchesType && matchesStatus;
-    });
-  }, [transactions, search, typeFilter, statusFilter, filter]);
+      // Date range filtering
+      const txDate = parseISO(t.created_at);
+      const matchesDateFrom = !dateFrom || !isBefore(txDate, startOfDay(dateFrom));
+      const matchesDateTo = !dateTo || !isAfter(txDate, endOfDay(dateTo));
 
-  const hasActiveFilters = search || typeFilter !== "all" || statusFilter !== "all";
+      return matchesSearch && matchesType && matchesStatus && matchesDateFrom && matchesDateTo;
+    });
+  }, [transactions, search, typeFilter, statusFilter, filter, dateFrom, dateTo]);
+
+  const hasActiveFilters = search || typeFilter !== "all" || statusFilter !== "all" || dateFrom || dateTo;
 
   const clearFilters = () => {
     setSearch("");
     setTypeFilter("all");
     setStatusFilter("all");
+    setDateFrom(undefined);
+    setDateTo(undefined);
   };
 
   const formatAmount = (amount: number, type: string) => {
