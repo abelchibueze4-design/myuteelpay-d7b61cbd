@@ -335,10 +335,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
                     <div className="flex items-center gap-2">
                         {/* Live indicator */}
-                        <div className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-600 font-medium bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                        <div className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-full">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             System Online
                         </div>
+
+                        {/* Theme toggle */}
+                        <AdminThemeToggle />
 
                         {/* Alerts bell with total count */}
                         <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
