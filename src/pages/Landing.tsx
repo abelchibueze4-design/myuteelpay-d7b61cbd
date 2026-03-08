@@ -436,7 +436,7 @@ const faqs = [
 
 const FAQSection = () => (
   <section id="faqs" className="py-8 lg:py-20 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-3xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <h2 className="text-lg lg:text-3xl font-extrabold text-center mb-5 lg:mb-10 text-foreground">FAQs</h2>
       <div className="space-y-3 lg:space-y-4">
         {faqs.map((f, i) => (
