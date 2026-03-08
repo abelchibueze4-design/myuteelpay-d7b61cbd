@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Shield,
     Globe,
@@ -24,6 +25,7 @@ import {
     Ban,
     Eye,
     DollarSign,
+    Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -49,6 +51,10 @@ const AdminSettings = () => {
     const [maxDailyTransaction, setMaxDailyTransaction] = useState("100000");
     const [maxSingleTransaction, setMaxSingleTransaction] = useState("50000");
     const [minWalletFund, setMinWalletFund] = useState("100");
+
+    // Service status banner
+    const [serviceStatus, setServiceStatus] = useState<"operational" | "degraded" | "outage">("operational");
+    const [serviceStatusMessage, setServiceStatusMessage] = useState("All services are running smoothly");
 
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
@@ -81,6 +87,8 @@ const AdminSettings = () => {
             setMaxDailyTransaction(String(d.max_daily_transaction ?? "100000"));
             setMaxSingleTransaction(String(d.max_single_transaction ?? "50000"));
             setMinWalletFund(String(d.min_wallet_fund ?? "100"));
+            setServiceStatus((d.service_status as "operational" | "degraded" | "outage") ?? "operational");
+            setServiceStatusMessage(d.service_status_message as string ?? "All services are running smoothly");
         }
     }, [config]);
 
@@ -101,6 +109,8 @@ const AdminSettings = () => {
                 max_daily_transaction: parseInt(maxDailyTransaction),
                 max_single_transaction: parseInt(maxSingleTransaction),
                 min_wallet_fund: parseInt(minWalletFund),
+                service_status: serviceStatus,
+                service_status_message: serviceStatusMessage,
             };
 
             if (config?.id) {
@@ -293,6 +303,41 @@ const AdminSettings = () => {
                                 <p className="text-xs text-muted-foreground">Comma-separated list of allowed IP addresses</p>
                             </div>
                         )}
+                    </CardContent>
+                </Card>
+
+                {/* Service Status Banner */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Activity className="w-5 h-5 text-primary" />
+                            Service Status Banner
+                        </CardTitle>
+                        <CardDescription>Control the status message shown to all users on their dashboard</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Status</Label>
+                            <Select value={serviceStatus} onValueChange={(v) => setServiceStatus(v as any)}>
+                                <SelectTrigger className="w-48 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="operational">✅ Operational</SelectItem>
+                                    <SelectItem value="degraded">⚠️ Degraded</SelectItem>
+                                    <SelectItem value="outage">🔴 Outage</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Status Message</Label>
+                            <Textarea
+                                value={serviceStatusMessage}
+                                onChange={(e) => setServiceStatusMessage(e.target.value)}
+                                placeholder="All services are running smoothly"
+                                rows={2}
+                            />
+                        </div>
                     </CardContent>
                 </Card>
 
