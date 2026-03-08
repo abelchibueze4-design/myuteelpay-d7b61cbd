@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  User, Shield, Bell, HeadphonesIcon, ChevronRight, ArrowLeft, LogOut,
+  User, Shield, Bell, HeadphonesIcon, ChevronRight, ArrowLeft, LogOut, Palette,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { DashboardTopBar } from "@/components/DashboardTopBar";
 import { SecuritySettings } from "@/components/SecuritySettings";
 import { NotificationPreferences } from "@/components/NotificationPreferences";
