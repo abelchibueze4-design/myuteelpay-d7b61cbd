@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { format, isBefore, isAfter, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const typeBadge: Record<string, JSX.Element> = {
