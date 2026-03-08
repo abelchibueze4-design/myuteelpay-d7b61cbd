@@ -163,6 +163,44 @@ export type Database = {
         }
         Relationships: []
       }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          identifier: string
+          label: string
+          metadata: Json | null
+          service_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          identifier: string
+          label: string
+          metadata?: Json | null
+          service_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          identifier?: string
+          label?: string
+          metadata?: Json | null
+          service_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kyc_submissions: {
         Row: {
           address: string
