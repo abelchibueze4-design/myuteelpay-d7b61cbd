@@ -58,6 +58,27 @@ const AdminKycReview = () => {
         title="KYC Verification"
         description={`${pendingCount} pending review${pendingCount !== 1 ? "s" : ""}`}
         icon={ShieldCheck}
+        actions={
+          <DateRangeExport
+            reportTitle="KYC Submissions Report"
+            headers={["Name", "ID Type", "ID Number", "Status", "Submitted"]}
+            getFilteredData={(from, to) => {
+              const rows = submissions.filter((s) => {
+                const d = new Date(s.created_at);
+                const mf = !from || !isBefore(d, startOfDay(from));
+                const mt = !to || !isAfter(d, endOfDay(to));
+                return mf && mt;
+              });
+              return rows.map((s) => [
+                s.full_name,
+                s.id_type.toUpperCase(),
+                s.id_number,
+                s.status,
+                format(new Date(s.created_at), "yyyy-MM-dd"),
+              ]);
+            }}
+          />
+        }
       />
 
       {/* Filters */}
