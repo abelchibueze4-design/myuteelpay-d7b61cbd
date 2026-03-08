@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import SettingsPage from "@/pages/SettingsPage";
 import {
   Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap,
   Gift, ArrowRight, Mail, MessageCircle, Users, Eye, EyeOff,
@@ -89,11 +90,7 @@ const Dashboard = () => {
 
   const activeTab = searchParams.get("tab");
 
-  useEffect(() => {
-    if (activeTab === "settings") {
-      setSettingsOpen(true);
-    }
-  }, [activeTab]);
+  // No longer opening a dialog for settings
 
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
 
@@ -119,6 +116,7 @@ const Dashboard = () => {
 
   if (activeTab === "history" || activeTab === "transactions") return <TransactionHistory filter="all" />;
   if (activeTab === "wallet") return <TransactionHistory filter="wallet" />;
+  if (activeTab === "settings") return <SettingsPage />;
 
   const handleFund = () => {
     const val = Number(amount);
