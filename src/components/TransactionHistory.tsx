@@ -62,7 +62,7 @@ const STATUS_COLORS: Record<string, string> = {
   failed: "bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/30",
 };
 
-const WHATSAPP_NUMBER = "2349159024872";
+const WHATSAPP_NUMBER = "2349022334478";
 
 interface TransactionHistoryProps {
   defaultType?: string;

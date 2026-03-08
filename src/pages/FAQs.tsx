@@ -89,7 +89,7 @@ const FAQs = () => {
                             <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-white/10 rounded-full group-hover:scale-125 transition-transform" />
                             <h3 className="text-lg font-black mb-2 tracking-tight">Still stuck?</h3>
                             <p className="text-white/80 text-[10px] font-medium mb-6 leading-relaxed">Our support heroes are ready to help you 24/7.</p>
-                            <a href="https://wa.me/2347036006762" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full py-3 bg-white text-accent rounded-xl text-xs font-black shadow-lg hover:bg-white/90 transition-all gap-2">
+                            <a href="https://wa.me/2349022334478" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full py-3 bg-white text-accent rounded-xl text-xs font-black shadow-lg hover:bg-white/90 transition-all gap-2">
                                 Chat Support <MessageSquare className="w-4 h-4" />
                             </a>
                         </div>
