@@ -1,9 +1,13 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, ReactNode } from "react";
 import logo from "@/assets/logo.png";
+import heroBillPayment from "@/assets/hero-bill-payment.jpg";
+import heroBillPayment2 from "@/assets/hero-bill-payment-2.jpg";
+import appMockup from "@/assets/app-mockup.png";
 import {
   Zap, Shield, Clock, Star, Smartphone, Tv, GraduationCap,
-  MessageSquare, Users, ArrowRight, Phone, Gift, HelpCircle, CheckCircle
+  MessageSquare, Users, ArrowRight, Phone, Gift, HelpCircle, CheckCircle,
+  TrendingDown, Percent, BadgeDollarSign, Download, Quote
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -47,6 +51,7 @@ const Navbar = () => (
         <a href="#about" className="hover:text-foreground transition-colors">About</a>
         <a href="#services" className="hover:text-foreground transition-colors">Services</a>
         <a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a>
+        <a href="#testimonials" className="hover:text-foreground transition-colors">Reviews</a>
         <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
         <a href="#faqs" className="hover:text-foreground transition-colors">FAQs</a>
       </div>
@@ -71,9 +76,7 @@ const services = [
 const HeroSection = () => (
   <section id="services" className="pt-[72px] lg:pt-[100px] pb-8 lg:pb-16 px-4 lg:px-8">
     <div className="max-w-[420px] lg:max-w-6xl mx-auto">
-      {/* Desktop: side-by-side layout */}
       <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
-        {/* Left: Text content */}
         <div className="text-center lg:text-left">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] lg:text-xs font-bold mb-4 animate-fade-in">
             <Star className="w-3 h-3 text-accent" />
@@ -85,8 +88,6 @@ const HeroSection = () => (
           <p className="text-sm lg:text-lg text-muted-foreground mb-5 lg:mb-8 max-w-xs lg:max-w-md mx-auto lg:mx-0 animate-slide-up" style={{ animationDelay: "0.1s" }}>
             Instant Airtime, Data, Electricity & more — zero hidden fees. Trusted by thousands of Nigerians.
           </p>
-
-          {/* CTA Buttons */}
           <div className="flex gap-3 mb-6 lg:mb-0 max-w-xs lg:max-w-sm mx-auto lg:mx-0 animate-slide-up" style={{ animationDelay: "0.2s" }}>
             <Link to="/signup" className="flex-1">
               <Button className="w-full gradient-primary text-primary-foreground font-bold h-12 lg:h-14 rounded-2xl text-sm lg:text-base hover-lift">
@@ -100,8 +101,6 @@ const HeroSection = () => (
             </Link>
           </div>
         </div>
-
-        {/* Right: Service Grid (visible on both mobile and desktop) */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 max-w-xs lg:max-w-none mx-auto">
           {services.map((service, i) => (
             <Link key={i} to={service.path}>
@@ -145,9 +144,73 @@ const FeaturesSection = () => (
   </section>
 );
 
+/* ---------------- Bill Payment Showcase ---------------- */
+const BillPaymentShowcase = () => (
+  <section className="py-8 lg:py-20 px-4 lg:px-8">
+    <div className="max-w-[420px] lg:max-w-6xl mx-auto">
+      <div className="text-center mb-6 lg:mb-12">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent-foreground text-[11px] lg:text-xs font-bold mb-3">
+          <BadgeDollarSign className="w-3 h-3" /> Save More With Every Payment
+        </div>
+        <h2 className="text-xl lg:text-4xl font-extrabold text-foreground mb-2 lg:mb-3">
+          Pay Your Bills <span className="text-gradient">Effortlessly</span>
+        </h2>
+        <p className="text-xs lg:text-base text-muted-foreground max-w-md mx-auto">
+          From airtime to electricity, Uteelpay gives you the best rates with instant delivery — saving you money on every transaction.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+        {/* Image Card 1 */}
+        <div className="relative rounded-3xl overflow-hidden group">
+          <img src={heroBillPayment} alt="Woman paying bills on Uteelpay" className="w-full h-48 lg:h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-6">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/90 text-primary-foreground text-[10px] lg:text-xs font-bold mb-2">
+              <TrendingDown className="w-3 h-3" /> Up to 4% Discount
+            </div>
+            <h3 className="text-sm lg:text-xl font-extrabold text-white mb-0.5">Buy Airtime & Data</h3>
+            <p className="text-[10px] lg:text-sm text-white/70">All networks at the cheapest rates in Nigeria</p>
+          </div>
+        </div>
+
+        {/* Image Card 2 */}
+        <div className="relative rounded-3xl overflow-hidden group">
+          <img src={heroBillPayment2} alt="Man paying electricity bills" className="w-full h-48 lg:h-80 object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-6">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent/90 text-accent-foreground text-[10px] lg:text-xs font-bold mb-2">
+              <Zap className="w-3 h-3" /> Instant Token
+            </div>
+            <h3 className="text-sm lg:text-xl font-extrabold text-white mb-0.5">Electricity & Cable TV</h3>
+            <p className="text-[10px] lg:text-sm text-white/70">Pay your utility bills in seconds, 24/7</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Savings highlights */}
+      <div className="grid grid-cols-3 gap-2 lg:gap-6 mt-4 lg:mt-8">
+        {[
+          { icon: Percent, label: "Best Rates", value: "Cheapest prices" },
+          { icon: TrendingDown, label: "Zero Fees", value: "No hidden charges" },
+          { icon: BadgeDollarSign, label: "Save More", value: "Up to 4% off" },
+        ].map((item, i) => (
+          <div key={i} className="fintech-card p-3 lg:p-5 text-center">
+            <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-xl bg-accent/10 text-accent-foreground flex items-center justify-center mx-auto mb-1.5 lg:mb-3">
+              <item.icon className="w-4 h-4 lg:w-5 lg:h-5" />
+            </div>
+            <p className="text-[10px] lg:text-sm font-bold text-foreground">{item.label}</p>
+            <p className="text-[9px] lg:text-xs text-muted-foreground">{item.value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 /* ---------------- About Section ---------------- */
 const AboutSection = () => (
-  <section id="about" className="py-8 lg:py-20 px-4 lg:px-8">
+  <section id="about" className="py-8 lg:py-20 px-4 lg:px-8 bg-secondary/50">
     <div className="max-w-[420px] lg:max-w-5xl mx-auto">
       <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
         <div>
@@ -162,7 +225,6 @@ const AboutSection = () => (
             <p>From ensuring a student gets their WAEC pin at 2 AM, to keeping households powered across Nigeria — we deliver speed, security, and zero hidden charges.</p>
           </div>
         </div>
-        {/* Desktop-only trust indicators */}
         <div className="hidden lg:block">
           <div className="space-y-4">
             {[
@@ -194,7 +256,7 @@ const steps = [
 ];
 
 const HowItWorks = () => (
-  <section id="how-it-works" className="py-8 lg:py-20 px-4 lg:px-8 bg-secondary/50">
+  <section id="how-it-works" className="py-8 lg:py-20 px-4 lg:px-8">
     <div className="max-w-[420px] lg:max-w-5xl mx-auto">
       <h2 className="text-lg lg:text-3xl font-extrabold text-center mb-2 lg:mb-3 text-foreground">How It Works</h2>
       <p className="text-xs lg:text-base text-muted-foreground text-center mb-5 lg:mb-10 hidden lg:block">Get started in three simple steps</p>
@@ -206,6 +268,71 @@ const HowItWorks = () => (
             </div>
             <h3 className="text-xs lg:text-base font-bold text-foreground mb-1 lg:mb-2">{s.title}</h3>
             <p className="text-[10px] lg:text-sm text-muted-foreground">{s.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+/* ---------------- Testimonials ---------------- */
+const testimonials = [
+  {
+    name: "Chioma A.",
+    role: "Business Owner",
+    text: "I save over ₦3,000 monthly buying airtime and data on Uteelpay. The discounts are real and the delivery is instant!",
+    rating: 5,
+  },
+  {
+    name: "Emeka O.",
+    role: "Student",
+    text: "Bought my WAEC pin at 2 AM without stress. This app is a lifesaver for students. Super affordable too!",
+    rating: 5,
+  },
+  {
+    name: "Fatima M.",
+    role: "Freelancer",
+    text: "I've tried many VTU platforms but Uteelpay gives the best rates. The referral bonus is also amazing — I've earned over ₦5,000!",
+    rating: 5,
+  },
+  {
+    name: "David K.",
+    role: "Entrepreneur",
+    text: "Paying electricity and cable TV bills used to be a hassle. With Uteelpay, it's done in under 5 seconds. Incredible.",
+    rating: 5,
+  },
+];
+
+const TestimonialsSection = () => (
+  <section id="testimonials" className="py-8 lg:py-20 px-4 lg:px-8 bg-secondary/50">
+    <div className="max-w-[420px] lg:max-w-6xl mx-auto">
+      <div className="text-center mb-5 lg:mb-12">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] lg:text-xs font-bold mb-3">
+          <Users className="w-3 h-3" /> What Our Users Say
+        </div>
+        <h2 className="text-lg lg:text-3xl font-extrabold text-foreground mb-1 lg:mb-2">Loved by Thousands</h2>
+        <p className="text-xs lg:text-base text-muted-foreground">Real stories from real Nigerians saving money every day</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
+        {testimonials.map((t, i) => (
+          <div key={i} className="fintech-card p-4 lg:p-6 relative">
+            <Quote className="w-6 h-6 lg:w-8 lg:h-8 text-primary/10 absolute top-3 right-3 lg:top-5 lg:right-5" />
+            <div className="flex gap-0.5 mb-2 lg:mb-3">
+              {Array.from({ length: t.rating }).map((_, j) => (
+                <Star key={j} className="w-3 h-3 lg:w-4 lg:h-4 fill-accent text-accent" />
+              ))}
+            </div>
+            <p className="text-[11px] lg:text-sm text-muted-foreground leading-relaxed mb-3 lg:mb-4">{t.text}</p>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 lg:w-9 lg:h-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] lg:text-xs font-bold shrink-0">
+                {t.name[0]}
+              </div>
+              <div>
+                <p className="text-[11px] lg:text-sm font-bold text-foreground">{t.name}</p>
+                <p className="text-[9px] lg:text-xs text-muted-foreground">{t.role}</p>
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -252,6 +379,43 @@ const PricingSection = () => (
             <p className="text-[10px] lg:text-sm text-muted-foreground">{s.desc}</p>
           </div>
         ))}
+      </div>
+    </div>
+  </section>
+);
+
+/* ---------------- Download App CTA ---------------- */
+const DownloadAppSection = () => (
+  <section className="py-8 lg:py-20 px-4 lg:px-8">
+    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+      <div className="fintech-card p-5 lg:p-0 lg:overflow-hidden lg:grid lg:grid-cols-2 lg:items-center bg-gradient-to-br from-primary/5 via-background to-accent/5 border-primary/10">
+        {/* Text side */}
+        <div className="lg:p-12 text-center lg:text-left">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] lg:text-xs font-bold mb-3">
+            <Download className="w-3 h-3" /> Coming Soon
+          </div>
+          <h2 className="text-lg lg:text-3xl font-extrabold text-foreground mb-2 lg:mb-3">
+            Get the <span className="text-gradient">Uteelpay App</span>
+          </h2>
+          <p className="text-xs lg:text-base text-muted-foreground mb-4 lg:mb-6 max-w-sm mx-auto lg:mx-0">
+            Pay bills on the go. Download the Uteelpay mobile app for an even faster, smoother experience with exclusive app-only deals.
+          </p>
+          <div className="flex gap-3 justify-center lg:justify-start">
+            <Button className="gradient-primary text-primary-foreground font-bold h-11 lg:h-12 rounded-xl text-xs lg:text-sm px-5 lg:px-6 hover-lift gap-2">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M17.523 2.228a.667.667 0 00-.789.098L3.726 12l6.504 4.886 7.293-14.658zm-.828 18.545L5.426 13.576l-.89.668 10.78 8.107a.667.667 0 00.38.12.667.667 0 00.6-.372l.4-.803V20.773zm2.305-8.79l-2.87-1.643L12.87 17.5l3.26 2.45 2.87-5.767a.667.667 0 000-.6zM4.174 12L2.5 13.257v-2.514L4.174 12z"/></svg>
+              Google Play
+            </Button>
+            <Button variant="outline" className="font-bold h-11 lg:h-12 rounded-xl text-xs lg:text-sm px-5 lg:px-6 border-2 border-primary/20 text-primary hover:bg-primary/5 hover-lift gap-2">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+              App Store
+            </Button>
+          </div>
+        </div>
+
+        {/* App mockup side */}
+        <div className="mt-6 lg:mt-0 flex justify-center">
+          <img src={appMockup} alt="Uteelpay bill payment app" className="w-56 lg:w-80 drop-shadow-2xl" />
+        </div>
       </div>
     </div>
   </section>
@@ -313,7 +477,6 @@ const TrustBar = () => (
 const Footer = () => (
   <footer className="py-6 lg:py-12 px-4 lg:px-8 border-t border-border/30 bg-card">
     <div className="max-w-[420px] lg:max-w-5xl mx-auto">
-      {/* Desktop: multi-column footer */}
       <div className="hidden lg:grid lg:grid-cols-4 gap-8 mb-8">
         <div>
           <p className="font-extrabold text-gradient text-xl mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-10 w-auto" /> Uteelpay</p>
@@ -345,7 +508,6 @@ const Footer = () => (
         </div>
       </div>
 
-      {/* Mobile: compact footer */}
       <div className="lg:hidden text-center">
         <p className="font-extrabold text-gradient text-lg mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-9 w-auto" /> Uteelpay</p>
         <div className="flex flex-wrap justify-center gap-4 text-[11px] font-semibold text-muted-foreground mb-4">
@@ -380,10 +542,13 @@ const Landing = () => (
     <Navbar />
     <HeroSection />
     <ScrollReveal><FeaturesSection /></ScrollReveal>
+    <ScrollReveal><BillPaymentShowcase /></ScrollReveal>
     <ScrollReveal><AboutSection /></ScrollReveal>
     <ScrollReveal><HowItWorks /></ScrollReveal>
+    <ScrollReveal><TestimonialsSection /></ScrollReveal>
     <ScrollReveal><ReferralBanner /></ScrollReveal>
     <ScrollReveal><PricingSection /></ScrollReveal>
+    <ScrollReveal><DownloadAppSection /></ScrollReveal>
     <ScrollReveal><FAQSection /></ScrollReveal>
     <ScrollReveal><TrustBar /></ScrollReveal>
     <ScrollReveal><Footer /></ScrollReveal>
