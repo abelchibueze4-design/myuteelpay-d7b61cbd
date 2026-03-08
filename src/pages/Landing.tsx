@@ -72,9 +72,9 @@ const Navbar = () => (
 
 /* ---------------- Hero Section ---------------- */
 const services = [
-  { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "bg-primary/10 text-primary" },
-  { icon: Smartphone, label: "Data", path: "/services/data", color: "bg-blue-100 text-blue-600" },
-  { icon: Tv, label: "Cable TV", path: "/services/cable", color: "bg-orange-100 text-orange-600" },
+  { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "bg-primary/10 text-primary", logos: [mtnLogo, airtelLogo, gloLogo, nineMobileLogo] },
+  { icon: Smartphone, label: "Data", path: "/services/data", color: "bg-blue-100 text-blue-600", logos: [mtnLogo, airtelLogo, gloLogo, nineMobileLogo] },
+  { icon: Tv, label: "Cable TV", path: "/services/cable", color: "bg-orange-100 text-orange-600", logos: [dstvLogo, gotvLogo, startimesLogo] },
   { icon: Zap, label: "Electricity", path: "/services/electricity", color: "bg-accent/15 text-accent-foreground" },
   { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "bg-pink-100 text-pink-600" },
   { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "bg-emerald-100 text-emerald-600" },
