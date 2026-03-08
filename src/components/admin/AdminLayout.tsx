@@ -5,7 +5,7 @@ import {
     LayoutDashboard, Users, Receipt, Settings, ShieldCheck, Bell,
     LogOut, Package, BarChart3, Menu, X, Wallet, GitBranch,
     FileText, AlertTriangle, ChevronDown, ChevronRight, Shield,
-    TrendingUp, Zap, Scale,
+    TrendingUp, Zap, Scale, Moon, Sun, Monitor,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -15,6 +15,38 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import { useTheme } from "next-themes";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const AdminThemeToggle = () => {
+    const { resolvedTheme, setTheme } = useTheme();
+    const ThemeIcon = resolvedTheme === "dark" ? Sun : Moon;
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                    <ThemeIcon className="w-5 h-5" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setTheme("light")} className="gap-2">
+                    <Sun className="w-4 h-4" /> Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("dark")} className="gap-2">
+                    <Moon className="w-4 h-4" /> Dark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("system")} className="gap-2">
+                    <Monitor className="w-4 h-4" /> System
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};
 
 interface NavItem {
     title: string;
@@ -335,10 +367,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
                     <div className="flex items-center gap-2">
                         {/* Live indicator */}
-                        <div className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-600 font-medium bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                        <div className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-full">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             System Online
                         </div>
+
+                        {/* Theme toggle */}
+                        <AdminThemeToggle />
 
                         {/* Alerts bell with total count */}
                         <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">

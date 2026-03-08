@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  User, Shield, Bell, HeadphonesIcon, ChevronRight, ArrowLeft, LogOut, Palette,
+  User, Shield, Bell, HeadphonesIcon, ChevronRight, ArrowLeft, LogOut, Palette, Sun, Moon, Monitor,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { DashboardTopBar } from "@/components/DashboardTopBar";
@@ -216,8 +216,9 @@ const AppearanceSettings = () => {
   const { theme, setTheme } = useTheme();
 
   const themes = [
-    { key: "light", label: "Light", icon: "☀️" },
-    { key: "dark", label: "Dark", icon: "🌙" },
+    { key: "light", label: "Light", icon: Sun },
+    { key: "dark", label: "Dark", icon: Moon },
+    { key: "system", label: "System", icon: Monitor },
   ];
 
   return (
@@ -225,21 +226,24 @@ const AppearanceSettings = () => {
       <div>
         <h3 className="text-sm font-bold text-foreground mb-1">Theme</h3>
         <p className="text-xs text-muted-foreground mb-4">Choose your preferred appearance</p>
-        <div className="grid grid-cols-2 gap-3">
-          {themes.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTheme(t.key)}
-              className={`p-4 rounded-2xl border-2 transition-all text-center ${
-                theme === t.key
-                  ? "border-primary bg-primary/5 shadow-md"
-                  : "border-border hover:border-primary/30"
-              }`}
-            >
-              <span className="text-2xl block mb-2">{t.icon}</span>
-              <span className="text-sm font-bold text-foreground">{t.label}</span>
-            </button>
-          ))}
+        <div className="grid grid-cols-3 gap-3">
+          {themes.map((t) => {
+            const IconComp = t.icon;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setTheme(t.key)}
+                className={`p-4 rounded-2xl border-2 transition-all text-center ${
+                  theme === t.key
+                    ? "border-primary bg-primary/5 shadow-md"
+                    : "border-border hover:border-primary/30"
+                }`}
+              >
+                <IconComp className="w-6 h-6 mx-auto mb-2 text-foreground" />
+                <span className="text-sm font-bold text-foreground">{t.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

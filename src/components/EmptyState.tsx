@@ -9,7 +9,6 @@ interface EmptyStateProps {
   actionLabel?: string;
   actionPath?: string;
   onAction?: () => void;
-  emoji?: string;
 }
 
 export const EmptyState = ({
@@ -19,15 +18,10 @@ export const EmptyState = ({
   actionLabel,
   actionPath,
   onAction,
-  emoji,
 }: EmptyStateProps) => (
   <div className="py-10 px-6 text-center flex flex-col items-center gap-3">
     <div className="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto">
-      {emoji ? (
-        <span className="text-2xl">{emoji}</span>
-      ) : (
-        <Icon className="w-7 h-7 text-primary/40" />
-      )}
+      <Icon className="w-7 h-7 text-primary/40" />
     </div>
     <div>
       <h3 className="text-sm font-bold text-foreground">{title}</h3>

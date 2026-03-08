@@ -69,7 +69,7 @@ const KycVerification = () => {
 
             {kyc.status === "approved" && (
               <p className="text-sm text-muted-foreground">
-                🎉 Your identity is verified! You now enjoy unlimited balance and higher transaction limits.
+                Your identity is verified! You now enjoy unlimited balance and higher transaction limits.
               </p>
             )}
             {kyc.status === "pending" && (

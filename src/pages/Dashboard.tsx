@@ -181,7 +181,7 @@ const Dashboard = () => {
             <Menu className="w-5 h-5 text-foreground" />
           </button>
           <div className="text-center flex-1">
-            <h1 className="text-base font-extrabold text-foreground">Welcome, {displayName} 👋</h1>
+            <h1 className="text-base font-extrabold text-foreground">Welcome, {displayName}</h1>
           </div>
           <NotificationsDropdown />
         </div>
@@ -197,7 +197,7 @@ const Dashboard = () => {
           </div>
           <div className="container mx-auto relative z-10">
             <p className="text-white/70 text-sm font-medium uppercase tracking-wide">Overview Dashboard</p>
-            <h1 className="text-3xl font-extrabold text-white mt-1">Welcome, {displayName} <span className="animate-wave inline-block">👋</span></h1>
+            <h1 className="text-3xl font-extrabold text-white mt-1">Welcome, {displayName}</h1>
             <p className="text-white/60 text-sm mt-2">Ready to pay your bills today?</p>
           </div>
         </div>
@@ -375,7 +375,6 @@ const Dashboard = () => {
             ) : (
               <EmptyState
                 icon={Activity}
-                emoji="📭"
                 title="No activity yet"
                 description="Fund your wallet and start using services — your transactions will show up here."
                 actionLabel="Fund Wallet"

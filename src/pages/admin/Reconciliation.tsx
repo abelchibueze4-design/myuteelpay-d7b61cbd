@@ -427,7 +427,7 @@ const Reconciliation = () => {
                                 <TableRow>
                                     <TableCell colSpan={9} className="text-center text-muted-foreground py-16 italic">
                                         {statusFilter === "all"
-                                            ? "No reconciliation cases detected. System is clean ✅"
+                                            ? "No reconciliation cases detected. System is clean."
                                             : `No ${statusFilter} cases found.`}
                                     </TableCell>
                                 </TableRow>
@@ -551,7 +551,7 @@ const Reconciliation = () => {
                             ) : (pendingFailedTxns ?? []).length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={7} className="text-center text-muted-foreground py-12 italic">
-                                        No pending or failed transactions. All clear ✅
+                                        No pending or failed transactions. All clear.
                                     </TableCell>
                                 </TableRow>
                             ) : (pendingFailedTxns ?? []).map((tx: any) => (
@@ -802,10 +802,10 @@ const Reconciliation = () => {
 
                             {/* Timeline */}
                             <div className="text-xs text-muted-foreground space-y-1 border-l-2 border-primary/30 pl-3">
-                                <p>🔍 Detected: {format(new Date(selectedCase.created_at), "PPpp")}</p>
-                                <p>🔄 Updated: {format(new Date(selectedCase.updated_at), "PPpp")}</p>
+                                <p>Detected: {format(new Date(selectedCase.created_at), "PPpp")}</p>
+                                <p>Updated: {format(new Date(selectedCase.updated_at), "PPpp")}</p>
                                 {selectedCase.admin_notes && (
-                                    <p>📝 Last Note: {selectedCase.admin_notes}</p>
+                                    <p>Last Note: {selectedCase.admin_notes}</p>
                                 )}
                             </div>
 

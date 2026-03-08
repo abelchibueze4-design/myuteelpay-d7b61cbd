@@ -1,4 +1,4 @@
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, Check, CheckCheck, CreditCard, Wallet, Gift, Lock, Users, Settings as SettingsIcon, BellRing } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,16 +13,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 
-const getNotificationIcon = (type: string) => {
-  switch (type) {
-    case "transaction": return "💳";
-    case "wallet": return "💰";
-    case "promo": return "🎁";
-    case "security": return "🔒";
-    case "referral": return "👥";
-    case "system": return "⚙️";
-    default: return "🔔";
-  }
+const NotificationIcon = ({ type }: { type: string }) => {
+  const iconMap: Record<string, React.ElementType> = {
+    transaction: CreditCard,
+    wallet: Wallet,
+    promo: Gift,
+    security: Lock,
+    referral: Users,
+    system: SettingsIcon,
+  };
+  const Icon = iconMap[type] || BellRing;
+  return <Icon className="w-4 h-4 text-primary" />;
 };
 
 export const NotificationsDropdown = () => {
@@ -92,8 +93,8 @@ export const NotificationsDropdown = () => {
               >
                 <div className="flex items-start justify-between w-full gap-2">
                   <div className="flex items-start gap-2 flex-1 min-w-0">
-                    <span className="text-base mt-0.5 shrink-0">
-                      {getNotificationIcon(notification.type)}
+                    <span className="mt-0.5 shrink-0">
+                      <NotificationIcon type={notification.type} />
                     </span>
                     <div className="min-w-0 flex-1">
                       <p
