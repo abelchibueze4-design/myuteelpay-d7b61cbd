@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tv, Check, Loader2 } from "lucide-react";
+import { CableIcon } from "@/components/CableIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -101,7 +102,7 @@ const CableTV = () => {
                             : "border-border/50 hover:border-primary/30"
                         }`}
                     >
-                        <Tv className={`w-8 h-8 ${provider?.cable_id === p.cable_id ? "text-primary" : "text-muted-foreground"}`} />
+                        <CableIcon cableName={p.cable_name} />
                         <span className="text-[10px] font-bold uppercase">{p.cable_name}</span>
                     </button>
                 ))}
