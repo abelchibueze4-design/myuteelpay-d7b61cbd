@@ -250,9 +250,19 @@ const Referral = () => {
                     ))}
                   </>
                 ) : (
-                  <div className="p-10 text-center opacity-40 flex flex-col items-center gap-2">
-                    <Users className="w-8 h-8" />
-                    <p className="font-bold text-xs">No referrals yet. Start sharing!</p>
+                  <div className="py-10 px-6 text-center flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto">
+                      <span className="text-2xl">👥</span>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground">No referrals yet</h3>
+                      <p className="text-xs text-muted-foreground max-w-[240px] mx-auto mt-1 leading-relaxed">
+                        Share your referral link with friends and earn ₦10 for each person who signs up!
+                      </p>
+                    </div>
+                    <Button size="sm" onClick={copyLink} className="rounded-xl font-bold text-xs mt-1">
+                      <Copy className="w-3.5 h-3.5 mr-1.5" /> Copy Referral Link
+                    </Button>
                   </div>
                 )}
               </div>
