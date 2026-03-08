@@ -115,7 +115,7 @@ const Airtime = () => {
                     </div>
 
                     <div className="space-y-3">
-                        <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Custom Amount</label>
+                        <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Amount</label>
                         <Input 
                             value={amount} 
                             onChange={(e) => setAmount(e.target.value)} 
