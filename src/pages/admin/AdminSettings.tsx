@@ -90,6 +90,7 @@ const AdminSettings = () => {
             setMinWalletFund(String(d.min_wallet_fund ?? "100"));
             setServiceStatus((d.service_status as "operational" | "degraded" | "outage") ?? "operational");
             setServiceStatusMessage(d.service_status_message as string ?? "All services are running smoothly");
+            setServiceStatusVisible(d.service_status_visible as boolean ?? false);
         }
     }, [config]);
 
