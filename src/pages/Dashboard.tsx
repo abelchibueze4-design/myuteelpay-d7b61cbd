@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useKycVerified, BALANCE_LIMIT_UNVERIFIED } from "@/hooks/useKyc";
 
