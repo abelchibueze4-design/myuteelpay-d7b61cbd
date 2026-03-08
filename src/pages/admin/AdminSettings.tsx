@@ -52,6 +52,10 @@ const AdminSettings = () => {
     const [maxSingleTransaction, setMaxSingleTransaction] = useState("50000");
     const [minWalletFund, setMinWalletFund] = useState("100");
 
+    // Service status banner
+    const [serviceStatus, setServiceStatus] = useState<"operational" | "degraded" | "outage">("operational");
+    const [serviceStatusMessage, setServiceStatusMessage] = useState("All services are running smoothly");
+
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
         queryKey: ["admin_site_config"],
