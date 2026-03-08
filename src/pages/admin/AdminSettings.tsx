@@ -55,6 +55,7 @@ const AdminSettings = () => {
     // Service status banner
     const [serviceStatus, setServiceStatus] = useState<"operational" | "degraded" | "outage">("operational");
     const [serviceStatusMessage, setServiceStatusMessage] = useState("All services are running smoothly");
+    const [serviceStatusVisible, setServiceStatusVisible] = useState(false);
 
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
@@ -89,6 +90,7 @@ const AdminSettings = () => {
             setMinWalletFund(String(d.min_wallet_fund ?? "100"));
             setServiceStatus((d.service_status as "operational" | "degraded" | "outage") ?? "operational");
             setServiceStatusMessage(d.service_status_message as string ?? "All services are running smoothly");
+            setServiceStatusVisible(d.service_status_visible as boolean ?? false);
         }
     }, [config]);
 
@@ -111,6 +113,7 @@ const AdminSettings = () => {
                 min_wallet_fund: parseInt(minWalletFund),
                 service_status: serviceStatus,
                 service_status_message: serviceStatusMessage,
+                service_status_visible: serviceStatusVisible,
             };
 
             if (config?.id) {
@@ -316,6 +319,13 @@ const AdminSettings = () => {
                         <CardDescription>Control the status message shown to all users on their dashboard</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <Label>Show Banner on Dashboard</Label>
+                                <p className="text-xs text-muted-foreground">Toggle visibility of the status banner for all users</p>
+                            </div>
+                            <Switch checked={serviceStatusVisible} onCheckedChange={setServiceStatusVisible} />
+                        </div>
                         <div className="space-y-2">
                             <Label>Status</Label>
                             <Select value={serviceStatus} onValueChange={(v) => setServiceStatus(v as any)}>
