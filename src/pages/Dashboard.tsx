@@ -17,6 +17,7 @@ import {
 import { SetupTransactionPinModal } from "@/components/SetupTransactionPinModal";
 import { DashboardTopBar } from "@/components/DashboardTopBar";
 import { AccountSettings } from "@/components/AccountSettings";
+import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSecuritySettings } from "@/hooks/useSecuritySettings";
 import { useWallet } from "@/hooks/useWallet";
