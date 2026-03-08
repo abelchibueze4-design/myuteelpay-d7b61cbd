@@ -105,7 +105,7 @@ const HeroSection = () => (
 /* ---------------- Services Grid ---------------- */
 const ServicesGrid = () => (
   <section id="services" className="py-8 lg:py-16 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <h2 className="text-lg lg:text-3xl font-extrabold text-center mb-2 lg:mb-3 text-foreground">Our Services</h2>
       <p className="text-xs lg:text-base text-muted-foreground text-center mb-5 lg:mb-10">Everything you need to stay connected and powered</p>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-5 max-w-xs lg:max-w-none mx-auto">
