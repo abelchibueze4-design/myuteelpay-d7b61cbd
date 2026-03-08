@@ -133,7 +133,7 @@ const features = [
 
 const FeaturesSection = () => (
   <section className="py-6 lg:py-14 px-4 lg:px-8 bg-secondary/50">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="grid grid-cols-3 gap-2 lg:gap-8">
         {features.map((f, i) => (
           <div key={i} className="fintech-card p-3 lg:p-8 text-center">
