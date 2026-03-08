@@ -318,18 +318,22 @@ const Dashboard = () => {
             <h2 className="text-sm font-extrabold text-foreground">Quick Actions</h2>
             <Link to="/services/airtime" className="text-[11px] font-bold text-primary">View All</Link>
           </div>
-          <div className="grid grid-cols-3 gap-2.5">
+          <StaggerContainer className="grid grid-cols-3 gap-2.5">
             {quickActions.map((a) => (
-              <Link key={a.path} to={a.path}>
-                <div className="fintech-card p-3 tap-target hover:scale-[1.03] transition-all text-center group">
-                  <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-2 mx-auto border transition-transform group-hover:scale-110", a.color, a.border)}>
-                    <a.icon className="w-5 h-5" />
-                  </div>
-                  <p className="text-[11px] font-bold text-foreground">{a.label}</p>
-                </div>
-              </Link>
+              <StaggerItem key={a.path}>
+                <Link to={a.path}>
+                  <ScaleTap>
+                    <div className="fintech-card p-3 tap-target text-center group">
+                      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-2 mx-auto border transition-transform group-hover:scale-110", a.color, a.border)}>
+                        <a.icon className="w-5 h-5" />
+                      </div>
+                      <p className="text-[11px] font-bold text-foreground">{a.label}</p>
+                    </div>
+                  </ScaleTap>
+                </Link>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
 
         {/* Recent Activity */}
