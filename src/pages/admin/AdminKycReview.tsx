@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAllKycSubmissions, useReviewKyc, KycSubmission } from "@/hooks/useKyc";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { DateRangeExport } from "@/components/admin/DateRangeExport";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,7 @@ import {
 import {
   ShieldCheck, CheckCircle2, XCircle, Clock, Search, Eye,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, isBefore, isAfter, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 
 const statusBadge = (status: string) => {

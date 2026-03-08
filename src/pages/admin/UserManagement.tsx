@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useUsers } from "@/hooks/useUsers";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { DateRangeExport } from "@/components/admin/DateRangeExport";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -21,10 +22,9 @@ import {
     Users, Search, Filter, MoreVertical, UserCheck, UserX,
     Wallet, Shield, Eye, Download, Mail,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, isBefore, isAfter, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { exportToCSV, printPDF } from "@/utils/exportUtils";
 
 const UserManagement = () => {
     const { data: users, isLoading, error, refetch } = useUsers();
