@@ -32,7 +32,7 @@ const Data = () => {
     const { guardTransaction } = useTransactionGuard();
     const { favorites, addFavorite, removeFavorite, isFavorited } = useFavorites("data");
 
-    const { data: networks } = useQuery({
+    const { data: networks, isLoading: networksLoading } = useQuery({
         queryKey: ["networks"],
         queryFn: async () => {
             const { data, error } = await supabase.from("networks").select("*");
@@ -40,6 +40,14 @@ const Data = () => {
             return data;
         }
     });
+
+    const smartDefault = useSmartNetworkDefault(networks ?? undefined, "data");
+
+    useEffect(() => {
+        if (!network && smartDefault) {
+            setNetwork(smartDefault);
+        }
+    }, [smartDefault]);
 
     // Get unique categories for the selected network
     const { data: categories } = useQuery({
