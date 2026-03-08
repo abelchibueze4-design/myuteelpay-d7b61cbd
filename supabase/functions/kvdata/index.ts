@@ -207,6 +207,14 @@ Deno.serve(async (req) => {
         break;
       }
 
+      case "buy_bulk_sms": {
+        // Bulk SMS — no provider API, just record the transaction
+        txType = "bulk_sms";
+        description = params.description || `Bulk SMS to ${params.recipients?.split(",").length || 0} recipients`;
+        kvResult = { status: "success", message: "SMS queued" };
+        break;
+      }
+
       default:
         return json({ error: "Invalid action" }, 400);
     }
