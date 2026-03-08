@@ -40,7 +40,7 @@ const Navbar = () => (
   <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border/30">
     <div className="max-w-7xl mx-auto flex items-center justify-between h-14 lg:h-16 px-4 lg:px-8">
       <Link to="/" className="flex items-center gap-2">
-        <img src={logo} alt="Uteelpay" className="h-8 lg:h-9 w-auto" />
+        <img src={logo} alt="Uteelpay" className="h-10 lg:h-12 w-auto" />
         <span className="text-lg lg:text-xl font-extrabold text-gradient tracking-tight">Uteelpay</span>
       </Link>
       <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-muted-foreground">
@@ -316,7 +316,7 @@ const Footer = () => (
       {/* Desktop: multi-column footer */}
       <div className="hidden lg:grid lg:grid-cols-4 gap-8 mb-8">
         <div>
-          <p className="font-extrabold text-gradient text-xl mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-7 w-auto" /> Uteelpay</p>
+          <p className="font-extrabold text-gradient text-xl mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-10 w-auto" /> Uteelpay</p>
           <p className="text-sm text-muted-foreground leading-relaxed">Nigeria's trusted platform for fast utility payments with zero hidden fees.</p>
         </div>
         <div>
@@ -347,7 +347,7 @@ const Footer = () => (
 
       {/* Mobile: compact footer */}
       <div className="lg:hidden text-center">
-        <p className="font-extrabold text-gradient text-lg mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-6 w-auto" /> Uteelpay</p>
+        <p className="font-extrabold text-gradient text-lg mb-3 flex items-center justify-center gap-2"><img src={logo} alt="Uteelpay" className="h-9 w-auto" /> Uteelpay</p>
         <div className="flex flex-wrap justify-center gap-4 text-[11px] font-semibold text-muted-foreground mb-4">
           <a href="#services" className="hover:text-primary">Services</a>
           <a href="#pricing" className="hover:text-primary">Pricing</a>

@@ -81,8 +81,8 @@ function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarContent className="flex flex-col h-full">
         <div className="p-4 flex items-center gap-2">
-          {!collapsed && <span className="flex items-center gap-2"><img src={logo} alt="Uteelpay" className="h-7 w-auto" /><span className="text-xl font-bold text-gradient">Uteelpay</span></span>}
-          {collapsed && <img src={logo} alt="U" className="h-7 w-auto" />}
+          {!collapsed && <span className="flex items-center gap-2"><img src={logo} alt="Uteelpay" className="h-10 w-auto" /><span className="text-xl font-bold text-gradient">Uteelpay</span></span>}
+          {collapsed && <img src={logo} alt="U" className="h-10 w-auto" />}
         </div>
 
         <SidebarGroup>
@@ -183,7 +183,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
             <SidebarTrigger className="mr-4">
               <Menu className="h-5 w-5" />
             </SidebarTrigger>
-            <span className="flex items-center gap-2"><img src={logo} alt="Uteelpay" className="h-7 w-auto" /><span className="text-lg font-bold text-gradient">Uteelpay</span></span>
+            <span className="flex items-center gap-2"><img src={logo} alt="Uteelpay" className="h-10 w-auto" /><span className="text-lg font-bold text-gradient">Uteelpay</span></span>
           </header>
           <main className="flex-1 overflow-auto pb-20 lg:pb-0">{children}</main>
           {/* Mobile bottom nav */}
