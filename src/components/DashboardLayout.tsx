@@ -78,7 +78,7 @@ function AppSidebar() {
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border hidden lg:flex">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarContent className="flex flex-col h-full">
         <div className="p-4 flex items-center gap-2">
           {!collapsed && <span className="flex items-center gap-2"><img src={logo} alt="Uteelpay" className="h-7 w-auto" /><span className="text-xl font-bold text-gradient">Uteelpay</span></span>}
