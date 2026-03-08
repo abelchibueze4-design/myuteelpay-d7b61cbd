@@ -29,7 +29,7 @@ export const NetworkIcon = ({ networkName, className }: NetworkIconProps) => {
   }
 
   return (
-    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black bg-purple-100 text-purple-700", className)}>
+    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black bg-purple-100 text-purple-700", className)}>
       {networkName[0]}
     </div>
   );

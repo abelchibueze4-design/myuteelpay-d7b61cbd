@@ -28,8 +28,8 @@ export const CableIcon = ({ cableName, className }: CableIconProps) => {
   }
 
   return (
-    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center bg-purple-100 text-purple-700", className)}>
-      <Tv className="w-5 h-5" />
+    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center bg-purple-100 text-purple-700", className)}>
+      <Tv className="w-4 h-4" />
     </div>
   );
 };
