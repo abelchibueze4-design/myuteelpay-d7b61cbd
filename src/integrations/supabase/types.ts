@@ -50,6 +50,50 @@ export type Database = {
         }
         Relationships: []
       }
+      cable_plans: {
+        Row: {
+          cable_id: number | null
+          cableplan_amount: number
+          cableplan_id: number
+          cableplan_name: string
+        }
+        Insert: {
+          cable_id?: number | null
+          cableplan_amount: number
+          cableplan_id: number
+          cableplan_name: string
+        }
+        Update: {
+          cable_id?: number | null
+          cableplan_amount?: number
+          cableplan_id?: number
+          cableplan_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cable_plans_cable_id_fkey"
+            columns: ["cable_id"]
+            isOneToOne: false
+            referencedRelation: "cables"
+            referencedColumns: ["cable_id"]
+          },
+        ]
+      }
+      cables: {
+        Row: {
+          cable_id: number
+          cable_name: string
+        }
+        Insert: {
+          cable_id: number
+          cable_name: string
+        }
+        Update: {
+          cable_id?: number
+          cable_name?: string
+        }
+        Relationships: []
+      }
       data_plans: {
         Row: {
           amount: number | null
@@ -74,6 +118,21 @@ export type Database = {
           plan_type?: string | null
           size?: string | null
           validity?: string | null
+        }
+        Relationships: []
+      }
+      electricity_companies: {
+        Row: {
+          disco_id: number
+          disco_name: string
+        }
+        Insert: {
+          disco_id: number
+          disco_name: string
+        }
+        Update: {
+          disco_id?: number
+          disco_name?: string
         }
         Relationships: []
       }
