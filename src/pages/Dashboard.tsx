@@ -180,8 +180,9 @@ const Dashboard = () => {
       <div className="max-w-[420px] lg:max-w-7xl mx-auto px-4 lg:px-4 lg:-mt-16 relative z-20 space-y-4 lg:space-y-8 pb-24 lg:pb-12 pt-4 lg:pt-0">
 
         {/* Wallet Balance Card */}
-        <div className="fintech-card p-5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-12 -mt-12 blur-2xl" />
+        <div className="fintech-card p-5 relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-accent/80 text-primary-foreground border-none shadow-xl">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+          <div className="absolute bottom-0 left-0 w-28 h-28 bg-accent/20 rounded-full -ml-10 -mb-10 blur-2xl" />
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 text-primary rounded-full">
