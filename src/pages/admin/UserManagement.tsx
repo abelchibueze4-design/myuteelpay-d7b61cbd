@@ -35,6 +35,9 @@ const UserManagement = () => {
     const [walletAction, setWalletAction] = useState<"credit" | "debit">("credit");
     const [walletNote, setWalletNote] = useState("");
     const [processingWallet, setProcessingWallet] = useState(false);
+    const [profileDialog, setProfileDialog] = useState<{ open: boolean; user: any }>({ open: false, user: null });
+    const [roleDialog, setRoleDialog] = useState<{ open: boolean; user: any }>({ open: false, user: null });
+    const [newRole, setNewRole] = useState("user");
 
     const filtered = (users ?? []).filter((u) => {
         const matchSearch =
