@@ -7,6 +7,9 @@ import {
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
   ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
 } from "lucide-react";
+import { PageTransition, StaggerContainer, StaggerItem, ScaleTap } from "@/components/PageTransition";
+import { DashboardSkeleton } from "@/components/DashboardSkeleton";
+import { OnboardingTour } from "@/components/OnboardingTour";
 import TransactionHistory from "@/components/TransactionHistory";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -122,10 +125,14 @@ const Dashboard = () => {
     }
   }, [searchParams, setSearchParams]);
 
+  const isLoading = !user;
+
   if (activeTab === "transactions") return <TransactionHistory filter="services" />;
   if (activeTab === "history") return <TransactionHistory filter="all" />;
   if (activeTab === "wallet") return <TransactionHistory filter="wallet" />;
   if (activeTab === "settings") return <SettingsPage />;
+
+  if (isLoading) return <DashboardSkeleton />;
 
 
   const handleFund = () => {
@@ -144,7 +151,8 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <PageTransition className="min-h-screen bg-background relative">
+      <OnboardingTour />
       <div className="hidden">
         <AccountSettings 
           open={settingsOpen} 
@@ -310,18 +318,22 @@ const Dashboard = () => {
             <h2 className="text-sm font-extrabold text-foreground">Quick Actions</h2>
             <Link to="/services/airtime" className="text-[11px] font-bold text-primary">View All</Link>
           </div>
-          <div className="grid grid-cols-3 gap-2.5">
+          <StaggerContainer className="grid grid-cols-3 gap-2.5">
             {quickActions.map((a) => (
-              <Link key={a.path} to={a.path}>
-                <div className="fintech-card p-3 tap-target hover:scale-[1.03] transition-all text-center group">
-                  <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-2 mx-auto border transition-transform group-hover:scale-110", a.color, a.border)}>
-                    <a.icon className="w-5 h-5" />
-                  </div>
-                  <p className="text-[11px] font-bold text-foreground">{a.label}</p>
-                </div>
-              </Link>
+              <StaggerItem key={a.path}>
+                <Link to={a.path}>
+                  <ScaleTap>
+                    <div className="fintech-card p-3 tap-target text-center group">
+                      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-2 mx-auto border transition-transform group-hover:scale-110", a.color, a.border)}>
+                        <a.icon className="w-5 h-5" />
+                      </div>
+                      <p className="text-[11px] font-bold text-foreground">{a.label}</p>
+                    </div>
+                  </ScaleTap>
+                </Link>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
 
         {/* Recent Activity */}
@@ -417,7 +429,7 @@ const Dashboard = () => {
           </a>
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 

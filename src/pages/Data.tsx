@@ -1,10 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkIcon } from "@/components/NetworkIcon";
 import { Smartphone, Check, Loader2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
@@ -13,6 +12,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 import { useFavorites } from "@/hooks/useFavorites";
+import { PageTransition } from "@/components/PageTransition";
+import { ServicePageSkeleton } from "@/components/DashboardSkeleton";
+import { TransactionResultScreen } from "@/components/TransactionResultScreen";
+import { useSmartNetworkDefault } from "@/hooks/useSmartNetworkDefault";
 
 const Data = () => {
     const navigate = useNavigate();
@@ -29,7 +32,7 @@ const Data = () => {
     const { guardTransaction } = useTransactionGuard();
     const { favorites, addFavorite, removeFavorite, isFavorited } = useFavorites("data");
 
-    const { data: networks } = useQuery({
+    const { data: networks, isLoading: networksLoading } = useQuery({
         queryKey: ["networks"],
         queryFn: async () => {
             const { data, error } = await supabase.from("networks").select("*");
@@ -37,6 +40,14 @@ const Data = () => {
             return data;
         }
     });
+
+    const smartDefault = useSmartNetworkDefault(networks ?? undefined, "data");
+
+    useEffect(() => {
+        if (!network && smartDefault) {
+            setNetwork(smartDefault);
+        }
+    }, [smartDefault]);
 
     // Get unique categories for the selected network
     const { data: categories } = useQuery({
@@ -83,8 +94,10 @@ const Data = () => {
         }
     };
 
+    if (networksLoading) return <ServicePageSkeleton />;
+
     return (
-        <div className="min-h-screen bg-secondary pb-12">
+        <PageTransition className="min-h-screen bg-secondary pb-12">
             <div className="gradient-hero px-4 py-6 mb-6">
                 <div className="container mx-auto">
                     <h1 className="text-lg font-bold text-primary-foreground">Buy Data</h1>
@@ -240,20 +253,16 @@ const Data = () => {
                 isLoading={isVerifying || kvdata.isPending}
             />
 
-            <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
-                <DialogContent className="max-w-sm text-center">
-                    <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center mx-auto mb-4">
-                        <Check className="w-8 h-8 text-primary-foreground" />
-                    </div>
-                    <h2 className="text-xl font-bold">Transaction Successful!</h2>
-                    <p className="text-sm text-muted-foreground">Your data purchase was completed successfully.</p>
-                    <div className="flex gap-3 mt-4">
-                        <Button variant="outline" className="flex-1" onClick={() => setShowSuccess(false)}>New Purchase</Button>
-                        <Button variant="hero" className="flex-1" onClick={() => navigate("/dashboard")}>Done</Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
-        </div>
+            <TransactionResultScreen
+                open={showSuccess}
+                onOpenChange={setShowSuccess}
+                success={true}
+                title="Data Purchased!"
+                description="Your data bundle was activated successfully."
+                onNewPurchase={() => setShowSuccess(false)}
+                onDone={() => navigate("/dashboard")}
+            />
+        </PageTransition>
     );
 };
 

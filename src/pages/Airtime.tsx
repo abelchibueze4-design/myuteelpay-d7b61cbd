@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkIcon } from "@/components/NetworkIcon";
 import { Smartphone, Check, Loader2, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
@@ -13,6 +12,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 import { useFavorites } from "@/hooks/useFavorites";
+import { PageTransition, ScaleTap } from "@/components/PageTransition";
+import { ServicePageSkeleton } from "@/components/DashboardSkeleton";
+import { TransactionResultScreen } from "@/components/TransactionResultScreen";
+import { useSmartNetworkDefault } from "@/hooks/useSmartNetworkDefault";
 
 const Airtime = () => {
     const navigate = useNavigate();
@@ -26,7 +29,7 @@ const Airtime = () => {
     const { guardTransaction } = useTransactionGuard();
     const { favorites, addFavorite, removeFavorite, isFavorited } = useFavorites("airtime");
 
-    const { data: networks } = useQuery({
+    const { data: networks, isLoading: networksLoading } = useQuery({
         queryKey: ["networks"],
         queryFn: async () => {
             const { data, error } = await supabase.from("networks").select("*");
@@ -34,6 +37,17 @@ const Airtime = () => {
             return data;
         }
     });
+
+    const smartDefault = useSmartNetworkDefault(networks ?? undefined, "airtime");
+
+    // Auto-select smart default on first load
+    useEffect(() => {
+        if (!network && smartDefault) {
+            setNetwork(smartDefault);
+        }
+    }, [smartDefault]);
+
+    if (networksLoading) return <ServicePageSkeleton />;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -63,7 +77,7 @@ const Airtime = () => {
     };
 
     return (
-        <div className="min-h-screen bg-secondary pb-12">
+        <PageTransition className="min-h-screen bg-secondary pb-12">
             <div className="gradient-hero px-4 py-6 mb-6">
                 <div className="container mx-auto">
                     <h1 className="text-lg font-bold text-primary-foreground">Buy Airtime</h1>
@@ -188,20 +202,16 @@ const Airtime = () => {
                 isLoading={isVerifying || kvdata.isPending}
             />
 
-            <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
-                <DialogContent className="max-w-sm text-center">
-                    <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center mx-auto mb-4">
-                        <Check className="w-8 h-8 text-primary-foreground" />
-                    </div>
-                    <h2 className="text-xl font-bold">Transaction Successful!</h2>
-                    <p className="text-sm text-muted-foreground">Your airtime purchase was completed successfully.</p>
-                    <div className="flex gap-3 mt-4">
-                        <Button variant="outline" className="flex-1" onClick={() => setShowSuccess(false)}>New Purchase</Button>
-                        <Button variant="hero" className="flex-1" onClick={() => navigate("/dashboard")}>Done</Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
-        </div>
+            <TransactionResultScreen
+                open={showSuccess}
+                onOpenChange={setShowSuccess}
+                success={true}
+                title="Airtime Sent!"
+                description="Your airtime purchase was completed successfully."
+                onNewPurchase={() => setShowSuccess(false)}
+                onDone={() => navigate("/dashboard")}
+            />
+        </PageTransition>
     );
 };
 
