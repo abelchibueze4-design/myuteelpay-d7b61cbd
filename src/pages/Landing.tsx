@@ -75,7 +75,7 @@ const services = [
 
 const HeroSection = () => (
   <section className="pt-[72px] lg:pt-[100px] pb-8 lg:pb-16 px-4 lg:px-8">
-    <div className="max-w-[420px] lg:max-w-6xl mx-auto text-center lg:text-left">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto text-center lg:text-left">
       <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[11px] lg:text-xs font-bold mb-4 animate-fade-in">
         <Star className="w-3 h-3 text-accent" />
         Nigeria's Trusted Platform
