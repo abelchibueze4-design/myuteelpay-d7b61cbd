@@ -1,11 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { format, parseISO } from "date-fns";
 import {
   Search, Filter, ArrowDownLeft, ArrowUpRight, X,
-  Calendar, RotateCcw, FileText, Download, ChevronRight
+  Calendar, RotateCcw, FileText, Download, ChevronRight,
+  Receipt, MessageCircle, Printer
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -38,6 +45,8 @@ const TYPE_LABELS: Record<string, string> = {
   bulk_sms: "Bulk SMS",
   edu_pin: "Edu Pin",
   referral_bonus: "Referral Bonus",
+  data_card: "Data Card",
+  refund: "Refund",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -45,6 +54,8 @@ const STATUS_COLORS: Record<string, string> = {
   pending: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30",
   failed: "bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/30",
 };
+
+const WHATSAPP_NUMBER = "2349159024872";
 
 interface TransactionHistoryProps {
   defaultType?: string;
@@ -56,6 +67,8 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState(defaultType);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedTx, setSelectedTx] = useState<any>(null);
+  const receiptRef = useRef<HTMLDivElement>(null);
 
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["transactions", user?.id, "all"],
@@ -75,7 +88,6 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
   const filtered = useMemo(() => {
     if (!transactions) return [];
     return transactions.filter((t) => {
-      // Apply the high-level filter (Services vs Wallet)
       if (filter === "services") {
         const isService = t.type !== "wallet_fund" && t.type !== "referral_bonus";
         if (!isService) return false;
@@ -106,7 +118,7 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
   };
 
   const formatAmount = (amount: number, type: string) => {
-    const isCredit = type === "wallet_fund" || type === "referral_bonus";
+    const isCredit = type === "wallet_fund" || type === "referral_bonus" || type === "refund";
     const prefix = isCredit ? "+" : "-";
     return `${prefix}₦${Math.abs(amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
   };
@@ -116,7 +128,6 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       toast.error("No data available to export");
       return;
     }
-
     const headers = ["Date", "Description", "Reference", "Service", "Amount", "Status"];
     const data = filtered.map((t) => [
       format(parseISO(t.created_at), "yyyy-MM-dd HH:mm"),
@@ -124,11 +135,9 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       t.reference || "N/A",
       TYPE_LABELS[t.type] || t.type,
       formatAmount(t.amount, t.type),
-      t.status
+      t.status,
     ]);
-
     const reportTitle = filter === "wallet" ? "Wallet Summary" : filter === "services" ? "Service History" : "Transaction History";
-
     if (type === "csv") {
       exportToCSV(headers, data, reportTitle.toLowerCase().replace(/ /g, "_"));
       toast.success(`${reportTitle} exported to CSV`);
@@ -138,6 +147,83 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
     }
   };
 
+  const handleDownloadReceipt = (t: any) => {
+    const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
+    const receiptHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Receipt - ${t.reference || t.id}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background: #f8f9fa; }
+          .receipt { max-width: 400px; margin: 0 auto; background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+          .header { text-align: center; border-bottom: 2px dashed #e2e8f0; padding-bottom: 20px; margin-bottom: 20px; }
+          .header h1 { font-size: 22px; color: #7c3aed; font-weight: 800; }
+          .header p { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+          .status { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 8px; }
+          .status.success { background: #ecfdf5; color: #059669; }
+          .status.pending { background: #fffbeb; color: #d97706; }
+          .status.failed { background: #fef2f2; color: #dc2626; }
+          .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+          .row .label { color: #64748b; font-size: 13px; }
+          .row .value { color: #1e293b; font-size: 13px; font-weight: 600; text-align: right; max-width: 55%; word-break: break-all; }
+          .amount-row { margin-top: 16px; padding: 16px; border-radius: 12px; text-align: center; }
+          .amount-row.credit { background: #ecfdf5; }
+          .amount-row.debit { background: #faf5ff; }
+          .amount { font-size: 28px; font-weight: 800; }
+          .amount.credit { color: #059669; }
+          .amount.debit { color: #7c3aed; }
+          .footer { text-align: center; margin-top: 24px; padding-top: 16px; border-top: 2px dashed #e2e8f0; }
+          .footer p { font-size: 10px; color: #94a3b8; }
+        </style>
+      </head>
+      <body>
+        <div class="receipt">
+          <div class="header">
+            <h1>UteelPay</h1>
+            <p>Transaction Receipt</p>
+            <span class="status ${t.status}">${t.status}</span>
+          </div>
+          <div class="row"><span class="label">Service</span><span class="value">${TYPE_LABELS[t.type] || t.type}</span></div>
+          <div class="row"><span class="label">Description</span><span class="value">${t.description || 'N/A'}</span></div>
+          <div class="row"><span class="label">Reference</span><span class="value">${t.reference || t.id}</span></div>
+          <div class="row"><span class="label">Date</span><span class="value">${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")}</span></div>
+          <div class="amount-row ${isCredit ? 'credit' : 'debit'}">
+            <p style="font-size:11px;color:#64748b;margin-bottom:4px;">Amount</p>
+            <p class="amount ${isCredit ? 'credit' : 'debit'}">${formatAmount(t.amount, t.type)}</p>
+          </div>
+          <div class="footer">
+            <p>Thank you for using UteelPay</p>
+            <p style="margin-top:4px;">For support, contact us on WhatsApp</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(receiptHtml);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => printWindow.print(), 500);
+    }
+  };
+
+  const handleReportTransaction = (t: any) => {
+    const message = encodeURIComponent(
+      `Hello UteelPay Support,\n\nI'd like to report a transaction issue:\n\n` +
+      `• Service: ${TYPE_LABELS[t.type] || t.type}\n` +
+      `• Amount: ${formatAmount(t.amount, t.type)}\n` +
+      `• Reference: ${t.reference || t.id}\n` +
+      `• Status: ${t.status}\n` +
+      `• Date: ${format(parseISO(t.created_at), "MMM d, yyyy HH:mm")}\n` +
+      `• Description: ${t.description || 'N/A'}\n\n` +
+      `Please help me look into this. Thank you.`
+    );
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
+  };
+
   return (
     <div className="bg-[#F8FAFC] dark:bg-[#0F172A] min-h-screen flex flex-col font-sans">
       <DashboardTopBar />
@@ -145,7 +231,6 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       {/* Header Section */}
       <div className="relative overflow-hidden bg-primary px-4 pt-10 pb-20 sm:pt-12 lg:px-8">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
-
         <div className="container mx-auto relative z-10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -164,12 +249,8 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="rounded-2xl border-none shadow-2xl min-w-[180px]">
-                  <DropdownMenuItem onClick={() => handleExport("csv")} className="font-bold py-3 cursor-pointer">
-                    Export as CSV
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleExport("pdf")} className="font-bold py-3 cursor-pointer">
-                    Export as PDF/Print
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport("csv")} className="font-bold py-3 cursor-pointer">Export as CSV</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport("pdf")} className="font-bold py-3 cursor-pointer">Export as PDF/Print</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -178,30 +259,21 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       </div>
 
       <div className="container mx-auto px-4 -mt-10 relative z-20 pb-12">
-        {/* Modern Filters Card */}
+        {/* Filters */}
         <div className="bg-card rounded-3xl p-6 shadow-xl shadow-primary/5 border border-border/50 mb-8">
           <div className="flex flex-col lg:flex-row gap-4 items-end">
             <div className="relative flex-1 w-full">
               <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Search Records</label>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Reference, service, or description..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-11 h-12 rounded-2xl border-border/60 focus-visible:ring-primary/20 bg-secondary/30 font-medium"
-                />
+                <Input placeholder="Reference, service, or description..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-11 h-12 rounded-2xl border-border/60 focus-visible:ring-primary/20 bg-secondary/30 font-medium" />
               </div>
             </div>
-
             <div className="w-full lg:w-48">
               <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Service Type</label>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger className="h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4">
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-3.5 h-3.5 text-primary" />
-                    <SelectValue placeholder="All types" />
-                  </div>
+                  <div className="flex items-center gap-2"><Filter className="w-3.5 h-3.5 text-primary" /><SelectValue placeholder="All types" /></div>
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-none shadow-2xl">
                   <SelectItem value="all" className="font-bold">All Services</SelectItem>
@@ -211,13 +283,10 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 </SelectContent>
               </Select>
             </div>
-
             <div className="w-full lg:w-40">
               <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Status</label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
+                <SelectTrigger className="h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4"><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent className="rounded-2xl border-none shadow-2xl">
                   <SelectItem value="all" className="font-bold">Every Status</SelectItem>
                   <SelectItem value="success" className="font-medium text-emerald-600">Success Only</SelectItem>
@@ -226,13 +295,8 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 </SelectContent>
               </Select>
             </div>
-
             {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                onClick={clearFilters}
-                className="h-12 px-4 rounded-2xl text-red-500 font-bold hover:bg-red-50 transition-all gap-2"
-              >
+              <Button variant="ghost" onClick={clearFilters} className="h-12 px-4 rounded-2xl text-red-500 font-bold hover:bg-red-50 transition-all gap-2">
                 <RotateCcw className="w-4 h-4" /> Reset
               </Button>
             )}
@@ -246,9 +310,7 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
               <FileText className="w-5 h-5 text-primary" /> Transaction Stream
             </h2>
             {hasActiveFilters && (
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-secondary px-3 py-1 rounded-full">
-                {filtered.length} Fount
-              </p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-secondary px-3 py-1 rounded-full">{filtered.length} Found</p>
             )}
           </div>
 
@@ -258,40 +320,29 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 <div key={i} className="flex items-center justify-between p-6">
                   <div className="flex items-center gap-4">
                     <Skeleton className="w-12 h-12 rounded-2xl" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-40" />
-                      <Skeleton className="h-3 w-24" />
-                    </div>
+                    <div className="space-y-2"><Skeleton className="h-4 w-40" /><Skeleton className="h-3 w-24" /></div>
                   </div>
-                  <div className="text-right space-y-2">
-                    <Skeleton className="h-4 w-20 ml-auto" />
-                    <Skeleton className="h-3 w-16 ml-auto" />
-                  </div>
+                  <div className="text-right space-y-2"><Skeleton className="h-4 w-20 ml-auto" /><Skeleton className="h-3 w-16 ml-auto" /></div>
                 </div>
               ))
             ) : filtered.length > 0 ? (
               filtered.map((t) => {
-                const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus";
-                const isSuccess = t.status === "success";
-
+                const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
                 return (
-                  <div key={t.id} className="group p-5 sm:p-6 flex items-center justify-between hover:bg-accent/5 transition-all cursor-pointer">
+                  <div key={t.id} className="group p-5 sm:p-6 flex items-center justify-between hover:bg-accent/5 transition-all cursor-pointer" onClick={() => setSelectedTx(t)}>
                     <div className="flex items-center gap-5 min-w-0">
                       <div className={cn(
                         "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-110 shadow-sm",
-                        isCredit
-                          ? "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/30"
-                          : "bg-primary/5 text-primary border-primary/10"
+                        isCredit ? "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/30" : "bg-primary/5 text-primary border-primary/10"
                       )}>
                         {isCredit ? <ArrowDownLeft className="w-6 h-6" /> : <ArrowUpRight className="w-6 h-6" />}
                       </div>
-
                       <div className="min-w-0">
                         <p className="font-bold text-foreground text-sm sm:text-base tracking-tight truncate group-hover:text-primary transition-colors">
                           {t.description || TYPE_LABELS[t.type] || t.type}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <p className="text-[10px] font-bold text-muted-foreground/70 uppercase">Reference: {t.reference?.slice(0, 10)}...</p>
+                          <p className="text-[10px] font-bold text-muted-foreground/70 uppercase">Ref: {t.reference?.slice(0, 10)}...</p>
                           <span className="w-1 h-1 rounded-full bg-border" />
                           <div className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
                             <Calendar className="w-2.5 h-2.5" />
@@ -300,7 +351,6 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                         </div>
                       </div>
                     </div>
-
                     <div className="flex items-center gap-6 shrink-0 ml-4">
                       <div className="text-right hidden sm:block">
                         <p className={cn("text-lg font-black tracking-tighter", isCredit ? "text-emerald-600" : "text-foreground")}>
@@ -323,19 +373,79 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 <div>
                   <h3 className="text-lg font-bold text-foreground tracking-tight">Empty feed detected</h3>
                   <p className="text-sm text-muted-foreground max-w-xs mx-auto italic mt-1">
-                    {hasActiveFilters ? "We couldn't find any transactions matching your specific filters." : "You haven't made any transactions yet. Your financial journey begins with your first payment!"}
+                    {hasActiveFilters ? "We couldn't find any transactions matching your specific filters." : "You haven't made any transactions yet."}
                   </p>
                 </div>
                 {hasActiveFilters && (
-                  <Button variant="outline" onClick={clearFilters} className="rounded-xl font-bold border-2">
-                    Clear all filters
-                  </Button>
+                  <Button variant="outline" onClick={clearFilters} className="rounded-xl font-bold border-2">Clear all filters</Button>
                 )}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Transaction Detail Dialog */}
+      <Dialog open={!!selectedTx} onOpenChange={(open) => !open && setSelectedTx(null)}>
+        <DialogContent className="rounded-3xl max-w-md p-0 overflow-hidden border-none">
+          {selectedTx && (() => {
+            const t = selectedTx;
+            const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
+            return (
+              <div ref={receiptRef}>
+                {/* Receipt header */}
+                <div className="bg-primary px-6 pt-8 pb-6 text-center">
+                  <h2 className="text-xl font-black text-white">UteelPay</h2>
+                  <p className="text-white/50 text-xs mt-1">Transaction Receipt</p>
+                  <Badge variant="outline" className={cn("mt-3 text-[10px] font-black uppercase tracking-[0.15em] border-none", STATUS_COLORS[t.status])}>
+                    {t.status}
+                  </Badge>
+                </div>
+
+                {/* Amount */}
+                <div className={cn("text-center py-5 border-b border-dashed border-border/50", isCredit ? "bg-emerald-50/50 dark:bg-emerald-900/10" : "bg-primary/5")}>
+                  <p className="text-xs text-muted-foreground font-medium mb-1">Amount</p>
+                  <p className={cn("text-3xl font-black tracking-tighter", isCredit ? "text-emerald-600" : "text-primary")}>
+                    {formatAmount(t.amount, t.type)}
+                  </p>
+                </div>
+
+                {/* Details */}
+                <div className="px-6 py-5 space-y-3">
+                  {[
+                    ["Service", TYPE_LABELS[t.type] || t.type],
+                    ["Description", t.description || "N/A"],
+                    ["Reference", t.reference || t.id],
+                    ["Date", format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex justify-between items-start gap-4">
+                      <span className="text-xs text-muted-foreground font-medium shrink-0">{label}</span>
+                      <span className="text-xs font-bold text-foreground text-right break-all">{value}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Actions */}
+                <div className="px-6 pb-6 flex gap-3">
+                  <Button
+                    onClick={() => handleDownloadReceipt(t)}
+                    className="flex-1 rounded-2xl h-12 font-bold gap-2 bg-primary hover:bg-primary/90"
+                  >
+                    <Printer className="w-4 h-4" /> Download Receipt
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleReportTransaction(t)}
+                    className="flex-1 rounded-2xl h-12 font-bold gap-2 border-2 border-green-500 text-green-600 hover:bg-green-50"
+                  >
+                    <MessageCircle className="w-4 h-4" /> Report Issue
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
