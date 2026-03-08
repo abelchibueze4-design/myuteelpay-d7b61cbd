@@ -551,7 +551,7 @@ const Reconciliation = () => {
                             ) : (pendingFailedTxns ?? []).length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={7} className="text-center text-muted-foreground py-12 italic">
-                                        No pending or failed transactions. All clear ✅
+                                        No pending or failed transactions. All clear.
                                     </TableCell>
                                 </TableRow>
                             ) : (pendingFailedTxns ?? []).map((tx: any) => (
