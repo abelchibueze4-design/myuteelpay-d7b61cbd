@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import bcrypt from "bcryptjs";
 
 interface SecuritySettings {
   transactionPinEnabled: boolean;
@@ -16,7 +15,6 @@ export const useSecuritySettings = () => {
     transactionPinEnabled: false,
   });
 
-  // Fetch initial settings
   useEffect(() => {
     if (!user?.id) {
       setIsSettingsLoading(false);
@@ -25,19 +23,16 @@ export const useSecuritySettings = () => {
 
     const fetchSettings = async () => {
       try {
-        const db = supabase as any;
-        const { data, error } = await db
+        const { data, error } = await supabase
           .from("profiles")
           .select("transaction_pin_enabled, transaction_pin_hash")
           .eq("id", user.id)
           .single();
 
         if (error) throw error;
-        const profile = (data || {}) as { transaction_pin_enabled?: boolean; transaction_pin_hash?: string };
-        
-        // Check if hash exists effectively
-        const hasPinHash = !!profile.transaction_pin_hash;
-        const isPinEnabled = profile.transaction_pin_enabled || false;
+
+        const hasPinHash = !!(data as any)?.transaction_pin_hash;
+        const isPinEnabled = (data as any)?.transaction_pin_enabled || false;
 
         setSettings({
           transactionPinEnabled: isPinEnabled && hasPinHash,
@@ -65,8 +60,6 @@ export const useSecuritySettings = () => {
     setError(null);
 
     try {
-      // This would require backend validation in a real scenario
-      // Supabase doesn't allow direct password verification on client side
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -99,33 +92,12 @@ export const useSecuritySettings = () => {
     setError(null);
 
     try {
-      // Use the secure RPC function to set the PIN in Supabase
+      // Always use the secure server-side RPC function
       const { error: rpcError } = await supabase.rpc("set_transaction_pin", {
         p_pin: normalizedPin,
       });
 
-      if (rpcError) {
-        // Fallback to client-side bcrypt hashing if RPC fails (e.g. missing pgcrypto)
-        const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync(normalizedPin, salt);
-        // We store it with a prefix to identify it's a bcrypt hash handled by client if needed,
-        // or just store as is. The user requested "transaction_pin" column, but we are using "transaction_pin_hash".
-        // We will stick to the existing column for compatibility but ensure it is hashed.
-        
-        const { error: fallbackError } = await supabase
-          .from("profiles")
-          .update({
-            transaction_pin_hash: hash,
-            transaction_pin_enabled: true,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", user.id);
-
-        if (fallbackError) {
-          console.error("RPC error:", rpcError);
-          throw rpcError;
-        }
-      }
+      if (rpcError) throw rpcError;
 
       setSettings((prev) => ({ ...prev, transactionPinEnabled: true }));
       return true;
