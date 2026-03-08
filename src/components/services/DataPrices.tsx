@@ -5,61 +5,36 @@ import { PriceCard } from "../common/PriceCard";
 import { Loader2 } from "lucide-react";
 
 interface DataPricesProps {
-  networkId: number;
+  networkName: string;
   category?: string;
   onSelect: (plan: any) => void;
   selectedPlanId?: string;
 }
 
-type NetworkRow = {
-  id: string;
-};
-
-type DataPlanRow = {
-  id: string;
-  plan_id: number;
-  name: string;
-  price: number;
-  type: string;
-};
-
-export const DataPrices = ({ networkId, category, onSelect, selectedPlanId }: DataPricesProps) => {
+export const DataPrices = ({ networkName, category, onSelect, selectedPlanId }: DataPricesProps) => {
   const { data: dbPlans, isLoading, error } = useQuery({
-    queryKey: ["data_plans", networkId],
+    queryKey: ["data_plans", networkName],
     queryFn: async () => {
-      const db = supabase as any;
-      const { data: network, error: netError } = await db
-        .from("networks")
-        .select("id")
-        .eq("provider_id", networkId)
-        .single();
-      
-      if (netError || !network) throw new Error("Network not found");
-      const networkRow = network as NetworkRow;
-
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from("data_plans")
         .select("*")
-        .eq("network_id", networkRow.id)
-        .eq("is_active", true);
-      
+        .eq("network_name", networkName);
       if (error) throw error;
-      return (data || []) as DataPlanRow[];
+      return data || [];
     },
-    enabled: !!networkId
+    enabled: !!networkName
   });
 
   const filteredPlans = useMemo(() => {
     if (!dbPlans) return [];
     
     return dbPlans
-      .filter((p) => 
-        (!category || (p.type || "Standard") === category)
-      )
+      .filter((p) => !category || p.plan_type === category)
       .map((p) => ({
-        label: p.name,
+        label: `${p.size} - ${p.validity}`,
         plan_id: String(p.plan_id),
-        price: Number(p.price),
+        price: Number(p.amount),
+        type: p.plan_type,
         raw: p
       }));
   }, [dbPlans, category]);

@@ -1,27 +1,20 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Smartphone, Check, CreditCard, Download, Share2, Printer, Loader2 } from "lucide-react";
+import { Check, CreditCard, Download, Share2, Printer, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useKvdata, useKvdataQuery } from "@/hooks/useKvdata";
+import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { DataCardPrices } from "@/components/services/DataCardPrices";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-const networks = [
-    { name: "MTN", id: 1 },
-    { name: "Glo", id: 2 },
-    { name: "Airtel", id: 3 },
-    { name: "9mobile", id: 4 }
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const DataCard = () => {
     const navigate = useNavigate();
-    const [network, setNetwork] = useState("");
+    const [network, setNetwork] = useState<{ network_id: number; network_name: string } | null>(null);
     const [planId, setPlanId] = useState("");
     const [selectedPlan, setSelectedPlan] = useState<any>(null);
     const [quantity, setQuantity] = useState("1");
@@ -31,7 +24,14 @@ const DataCard = () => {
     const kvdata = useKvdata();
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
 
-    const selectedNetwork = networks.find(n => n.name === network);
+    const { data: networks } = useQuery({
+        queryKey: ["networks"],
+        queryFn: async () => {
+            const { data, error } = await supabase.from("networks").select("*");
+            if (error) throw error;
+            return data;
+        }
+    });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,13 +42,13 @@ const DataCard = () => {
     const handleConfirmPurchase = async (pin: string) => {
         const isValid = await verifyPin(pin);
         if (!isValid) return false;
-
-        if (!selectedPlan) return false;
+        if (!selectedPlan || !network) return false;
 
         try {
             await kvdata.mutateAsync({
                 action: "buy_data_card",
-                network,
+                network_id: network.network_id,
+                network_name: network.network_name,
                 plan_id: selectedPlan.plan_id,
                 plan_label: selectedPlan.label,
                 quantity: parseInt(quantity),
@@ -63,7 +63,6 @@ const DataCard = () => {
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] pb-24">
-            {/* Header */}
             <div className="bg-primary px-4 py-12 mb-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
                 <div className="container mx-auto relative z-10 flex flex-col items-center text-center max-w-2xl">
@@ -80,26 +79,26 @@ const DataCard = () => {
                     <div className="space-y-3">
                         <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Select Network</label>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {networks.map((n) => (
+                            {networks?.map((n) => (
                                 <button
-                                    key={n.name}
+                                    key={n.network_id}
                                     type="button"
-                                    onClick={() => { setNetwork(n.name); setPlanId(""); setSelectedPlan(null); }}
+                                    onClick={() => { setNetwork(n); setPlanId(""); setSelectedPlan(null); }}
                                     className={cn(
                                         "py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2",
-                                        network === n.name
+                                        network?.network_id === n.network_id
                                             ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
                                             : "border-border/50 hover:border-primary/30"
                                     )}
                                 >
                                     <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black",
-                                        n.name === "MTN" ? "bg-yellow-100 text-yellow-700" :
-                                            n.name === "Glo" ? "bg-green-100 text-green-700" :
-                                                n.name === "Airtel" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
+                                        n.network_name === "MTN" ? "bg-yellow-100 text-yellow-700" :
+                                            n.network_name === "GLO" ? "bg-green-100 text-green-700" :
+                                                n.network_name === "AIRTEL" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
                                     )}>
-                                        {n.name[0]}
+                                        {n.network_name[0]}
                                     </div>
-                                    <span className="text-[10px] font-bold uppercase">{n.name}</span>
+                                    <span className="text-[10px] font-bold uppercase">{n.network_name}</span>
                                 </button>
                             ))}
                         </div>
@@ -107,9 +106,9 @@ const DataCard = () => {
 
                     <div className="space-y-3">
                         <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Choose Data Plan</label>
-                        {network && selectedNetwork && (
+                        {network && (
                             <DataCardPrices 
-                                networkId={selectedNetwork.id}
+                                networkId={network.network_id}
                                 selectedPlanId={planId}
                                 onSelect={(plan) => {
                                     setPlanId(plan.plan_id);

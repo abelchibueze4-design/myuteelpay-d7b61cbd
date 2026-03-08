@@ -5,55 +5,32 @@ import { PriceCard } from "../common/PriceCard";
 import { Loader2 } from "lucide-react";
 
 interface CableTVPricesProps {
-  providerId: number;
+  cableId: number;
   onSelect: (plan: any) => void;
   selectedPlanId?: string;
 }
 
-type CableProviderRow = {
-  id: string;
-};
-
-type CablePlanRow = {
-  id: string;
-  plan_id: number;
-  name: string;
-  price: number;
-};
-
-export const CableTVPrices = ({ providerId, onSelect, selectedPlanId }: CableTVPricesProps) => {
+export const CableTVPrices = ({ cableId, onSelect, selectedPlanId }: CableTVPricesProps) => {
   const { data: dbPlans, isLoading, error } = useQuery({
-    queryKey: ["cable_plans", providerId],
+    queryKey: ["cable_plans", cableId],
     queryFn: async () => {
-      const db = supabase as any;
-      const { data: provider, error: pError } = await db
-        .from("cable_providers")
-        .select("id")
-        .eq("provider_id", providerId)
-        .single();
-      
-      if (pError || !provider) throw new Error("Provider not found");
-      const providerRow = provider as CableProviderRow;
-
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from("cable_plans")
         .select("*")
-        .eq("provider_id", providerRow.id)
-        .eq("is_active", true);
-      
+        .eq("cable_id", cableId);
       if (error) throw error;
-      return (data || []) as CablePlanRow[];
+      return data || [];
     },
-    enabled: !!providerId
+    enabled: !!cableId
   });
 
   const filteredPlans = useMemo(() => {
     if (!dbPlans) return [];
     
     return dbPlans.map((p) => ({
-      label: p.name,
-      plan_id: String(p.plan_id),
-      price: Number(p.price),
+      label: p.cableplan_name,
+      plan_id: String(p.cableplan_id),
+      price: Number(p.cableplan_amount),
       raw: p
     }));
   }, [dbPlans]);
