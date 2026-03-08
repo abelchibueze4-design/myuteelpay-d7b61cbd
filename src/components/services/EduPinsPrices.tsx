@@ -48,7 +48,7 @@ export const EduPinsPrices = ({ onSelect, selectedExamName }: EduPinsPricesProps
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div className="grid grid-cols-3 gap-2">
       {exams.map((exam: any) => (
         <PriceCard
           key={exam.id}
