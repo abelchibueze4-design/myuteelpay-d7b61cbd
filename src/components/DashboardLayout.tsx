@@ -143,7 +143,7 @@ function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <AccountSettings open={settingsOpen} onOpenChange={setSettingsOpen} />
+        
 
         <div className="mt-auto p-4 border-t border-sidebar-border">
           {!collapsed && (
