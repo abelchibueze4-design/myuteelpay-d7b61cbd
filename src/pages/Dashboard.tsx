@@ -7,6 +7,9 @@ import {
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
   ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
 } from "lucide-react";
+import { PageTransition, StaggerContainer, StaggerItem, ScaleTap } from "@/components/PageTransition";
+import { DashboardSkeleton } from "@/components/DashboardSkeleton";
+import { OnboardingTour } from "@/components/OnboardingTour";
 import TransactionHistory from "@/components/TransactionHistory";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
