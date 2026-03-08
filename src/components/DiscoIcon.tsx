@@ -39,6 +39,9 @@ const discoLogos: Record<string, { src: string; bg: string }> = {
   "ENUGU ELECTRIC": { src: eedcLogo, bg: "bg-emerald-50" },
   BEDC: { src: bedcLogo, bg: "bg-red-50" },
   "BENIN ELECTRIC": { src: bedcLogo, bg: "bg-red-50" },
+  YEDC: { src: yedcLogo, bg: "bg-green-50" },
+  "YOLA ELECTRIC": { src: yedcLogo, bg: "bg-green-50" },
+  "YOLA ELECTRICITY": { src: yedcLogo, bg: "bg-green-50" },
 };
 
 function findLogo(name: string) {
