@@ -278,6 +278,9 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
+            {/* API Health Monitor */}
+            <ApiHealthMonitor />
+
             {/* Recent Transactions */}
             <div className="bg-card border border-border rounded-2xl">
                 <div className="flex items-center justify-between p-6 border-b border-border">
