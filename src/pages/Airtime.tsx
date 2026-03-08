@@ -68,13 +68,13 @@ const Airtime = () => {
                 <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-6">
                     <div className="space-y-3">
                         <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Select Network</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-4 gap-2">
                             {networks?.map((n) => (
                                 <button
                                     key={n.network_id}
                                     type="button"
                                     onClick={() => setNetwork(n)}
-                                    className={`py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                                    className={`py-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 ${
                                         network?.network_id === n.network_id 
                                         ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
                                         : "border-border/50 hover:border-primary/30"

@@ -90,13 +90,13 @@ const CableTV = () => {
           {/* Provider Selection */}
           <div className="space-y-3">
             <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Select Provider</label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-4 gap-2">
                 {providers?.map((p) => (
                     <button
                         key={p.cable_id}
                         type="button"
                         onClick={() => { setProvider(p); setPlanId(""); setSelectedPlan(null); setCustomerName(""); }}
-                        className={`py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                        className={`py-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 ${
                             provider?.cable_id === p.cable_id 
                             ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
                             : "border-border/50 hover:border-primary/30"
