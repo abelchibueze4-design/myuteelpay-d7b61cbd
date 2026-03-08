@@ -118,10 +118,18 @@ const ServicesGrid = () => (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-5 max-w-xs lg:max-w-none mx-auto">
         {services.map((service, i) => (
           <Link key={i} to={service.path}>
-            <div className="fintech-card p-4 lg:p-6 tap-target hover:scale-[1.03] transition-all">
-              <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl ${service.color} flex items-center justify-center mb-2 mx-auto`}>
-                <service.icon className="w-5 h-5 lg:w-6 lg:h-6" />
-              </div>
+            <div className="fintech-card p-3 lg:p-5 tap-target hover:scale-[1.03] transition-all min-h-[120px] lg:min-h-[160px] flex flex-col items-center justify-center">
+              {service.logos ? (
+                <div className="flex flex-wrap items-center justify-center gap-2 lg:gap-3 mb-2 lg:mb-3 w-full">
+                  {service.logos.map((logoSrc, j) => (
+                    <img key={j} src={logoSrc} alt="" className="w-12 h-12 lg:w-16 lg:h-16 object-contain rounded-lg" />
+                  ))}
+                </div>
+              ) : (
+                <div className={`w-14 h-14 lg:w-20 lg:h-20 rounded-2xl ${service.color} flex items-center justify-center mb-2 lg:mb-3`}>
+                  <service.icon className="w-7 h-7 lg:w-10 lg:h-10" />
+                </div>
+              )}
               <p className="text-xs lg:text-sm font-bold text-foreground text-center">{service.label}</p>
             </div>
           </Link>
@@ -130,8 +138,6 @@ const ServicesGrid = () => (
     </div>
   </section>
 );
-
-/* ---------------- Features Row ---------------- */
 const features = [
   { icon: Shield, title: "Secure", desc: "Bank-grade encryption on every transaction" },
   { icon: Clock, title: "Instant", desc: "Processing under 5 seconds guaranteed" },
