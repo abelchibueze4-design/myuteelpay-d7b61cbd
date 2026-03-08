@@ -275,18 +275,18 @@ const UserManagement = () => {
                                         <DropdownMenuContent align="end" className="w-48">
                                             <DropdownMenuLabel className="text-xs">User Actions</DropdownMenuLabel>
                                             <DropdownMenuSeparator />
-                                            <DropdownMenuItem onClick={() => toast.info(`Viewing ${user.username}`)}>
-                                                <Eye className="w-4 h-4 mr-2" /> View Profile
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => { setWalletDialog({ open: true, user }); setWalletAction("credit"); }}>
-                                                <Wallet className="w-4 h-4 mr-2" /> Credit Wallet
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => { setWalletDialog({ open: true, user }); setWalletAction("debit"); }}>
-                                                <Wallet className="w-4 h-4 mr-2" /> Debit Wallet
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => toast.info("Role assignment coming soon")}>
-                                                <Shield className="w-4 h-4 mr-2" /> Assign Role
-                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => setProfileDialog({ open: true, user })}>
+                                                                <Eye className="w-4 h-4 mr-2" /> View Profile
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => { setWalletDialog({ open: true, user }); setWalletAction("credit"); }}>
+                                                                <Wallet className="w-4 h-4 mr-2" /> Credit Wallet
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => { setWalletDialog({ open: true, user }); setWalletAction("debit"); }}>
+                                                                <Wallet className="w-4 h-4 mr-2" /> Debit Wallet
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => { setRoleDialog({ open: true, user }); setNewRole(user.role || "user"); }}>
+                                                                <Shield className="w-4 h-4 mr-2" /> Assign Role
+                                                            </DropdownMenuItem>
                                             <DropdownMenuSeparator />
                                             {user.status === "active" ? (
                                                 <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleToggleStatus(user.id, "active")}>
