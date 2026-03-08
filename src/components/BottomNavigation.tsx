@@ -1,9 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Zap, Wallet, Gift, User } from "lucide-react";
+import { LayoutDashboard, Receipt, Wallet, Gift, User } from "lucide-react";
 
 const navItems = [
-  { icon: Home, label: "Home", path: "/dashboard", key: "home" },
-  { icon: Zap, label: "Services", path: "/services", key: "services" },
+  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", key: "home" },
+  { icon: Receipt, label: "Transactions", path: "/dashboard?tab=transactions", key: "transactions" },
   { icon: Wallet, label: "Wallet", path: "/dashboard?tab=wallet", key: "wallet" },
   { icon: Gift, label: "Referrals", path: "/services/referral", key: "referrals" },
   { icon: User, label: "Profile", path: "/dashboard?tab=settings", key: "profile" },
