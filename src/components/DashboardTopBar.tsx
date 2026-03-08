@@ -1,10 +1,12 @@
-import { Bell } from "lucide-react";
+import { Bell, Moon, Sun } from "lucide-react";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
 import { AccountSettings } from "@/components/AccountSettings";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "next-themes";
 
 export const DashboardTopBar = () => {
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
   const avatarUrl = user?.user_metadata?.avatar_url;
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
   const initials = displayName[0]?.toUpperCase();
