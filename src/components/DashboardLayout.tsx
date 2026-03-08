@@ -65,15 +65,8 @@ function AppSidebar() {
     navigate("/");
   };
 
-  const handleItemClick = (item?: any) => {
-    if (item?.isSettings) {
-      setSettingsOpen(true);
-      if (isMobile) setOpenMobile(false);
-      return;
-    }
-    if (isMobile) {
-      setOpenMobile(false);
-    }
+  const handleItemClick = () => {
+    if (isMobile) setOpenMobile(false);
   };
 
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
