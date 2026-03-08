@@ -131,7 +131,7 @@ function AppSidebar() {
             <SidebarMenu>
               {otherItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild onClick={() => handleItemClick(item)}>
+                  <SidebarMenuButton asChild onClick={() => handleItemClick()}>
                     <NavLink to={item.url} className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
