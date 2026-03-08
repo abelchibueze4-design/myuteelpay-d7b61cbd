@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Shield,
     Globe,
@@ -24,6 +25,7 @@ import {
     Ban,
     Eye,
     DollarSign,
+    Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
