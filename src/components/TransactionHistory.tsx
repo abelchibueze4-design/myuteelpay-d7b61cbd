@@ -271,50 +271,46 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
         </div>
       </div>
 
-      <div className="container mx-auto px-4 -mt-10 relative z-20 pb-12">
+      <div className="container mx-auto px-4 -mt-8 relative z-20 pb-8">
         {/* Filters */}
-        <div className="bg-card rounded-3xl p-6 shadow-xl shadow-primary/5 border border-border/50 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-end">
+        <div className="bg-card rounded-2xl p-3 shadow-lg shadow-primary/5 border border-border/50 mb-4">
+          <div className="flex flex-col lg:flex-row gap-2 items-end">
             <div className="relative flex-1 w-full">
-              <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Search Records</label>
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input placeholder="Reference, service, or description..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-11 h-12 rounded-2xl border-border/60 focus-visible:ring-primary/20 bg-secondary/30 font-medium" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9 rounded-xl border-border/60 bg-secondary/30 text-xs font-medium" />
               </div>
             </div>
-            <div className="w-full lg:w-48">
-              <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Service Type</label>
+            <div className="w-full lg:w-40">
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4">
-                  <div className="flex items-center gap-2"><Filter className="w-3.5 h-3.5 text-primary" /><SelectValue placeholder="All types" /></div>
+                <SelectTrigger className="h-9 rounded-xl border-border/60 bg-secondary/30 font-bold px-3 text-xs">
+                  <div className="flex items-center gap-1.5"><Filter className="w-3 h-3 text-primary" /><SelectValue placeholder="All types" /></div>
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-none shadow-2xl">
-                  <SelectItem value="all" className="font-bold">All Services</SelectItem>
+                <SelectContent className="rounded-xl border-none shadow-2xl">
+                  <SelectItem value="all" className="font-bold text-xs">All Services</SelectItem>
                   {Object.entries(TYPE_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key} className="font-medium">{label}</SelectItem>
+                    <SelectItem key={key} value={key} className="font-medium text-xs">{label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="w-full lg:w-40">
-              <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest ml-1 mb-1.5 block">Status</label>
+            <div className="w-full lg:w-32">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4"><SelectValue placeholder="Status" /></SelectTrigger>
-                <SelectContent className="rounded-2xl border-none shadow-2xl">
-                  <SelectItem value="all" className="font-bold">Every Status</SelectItem>
-                  <SelectItem value="success" className="font-medium text-emerald-600">Success Only</SelectItem>
-                  <SelectItem value="pending" className="font-medium text-amber-500">Pending</SelectItem>
-                  <SelectItem value="failed" className="font-medium text-red-500">Failed</SelectItem>
+                <SelectTrigger className="h-9 rounded-xl border-border/60 bg-secondary/30 font-bold px-3 text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
+                <SelectContent className="rounded-xl border-none shadow-2xl">
+                  <SelectItem value="all" className="font-bold text-xs">All Status</SelectItem>
+                  <SelectItem value="success" className="font-medium text-xs text-emerald-600">Success</SelectItem>
+                  <SelectItem value="pending" className="font-medium text-xs text-amber-500">Pending</SelectItem>
+                  <SelectItem value="failed" className="font-medium text-xs text-red-500">Failed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            {/* Date Range */}
-            <div className="flex gap-2 w-full lg:w-auto">
+            <div className="flex gap-1.5 w-full lg:w-auto">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4 gap-2 text-xs", !dateFrom && "text-muted-foreground")}>
-                    <CalendarIcon className="w-3.5 h-3.5" />
-                    {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From"}
+                  <Button variant="outline" className={cn("h-9 rounded-xl border-border/60 bg-secondary/30 font-bold px-3 gap-1.5 text-[10px]", !dateFrom && "text-muted-foreground")}>
+                    <CalendarIcon className="w-3 h-3" />
+                    {dateFrom ? format(dateFrom, "MMM d") : "From"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -323,9 +319,9 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
               </Popover>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("h-12 rounded-2xl border-border/60 bg-secondary/30 font-bold px-4 gap-2 text-xs", !dateTo && "text-muted-foreground")}>
-                    <CalendarIcon className="w-3.5 h-3.5" />
-                    {dateTo ? format(dateTo, "MMM d, yyyy") : "To"}
+                  <Button variant="outline" className={cn("h-9 rounded-xl border-border/60 bg-secondary/30 font-bold px-3 gap-1.5 text-[10px]", !dateTo && "text-muted-foreground")}>
+                    <CalendarIcon className="w-3 h-3" />
+                    {dateTo ? format(dateTo, "MMM d") : "To"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -334,8 +330,8 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
               </Popover>
             </div>
             {hasActiveFilters && (
-              <Button variant="ghost" onClick={clearFilters} className="h-12 px-4 rounded-2xl text-red-500 font-bold hover:bg-red-50 transition-all gap-2">
-                <RotateCcw className="w-4 h-4" /> Reset
+              <Button variant="ghost" onClick={clearFilters} className="h-9 px-3 rounded-xl text-red-500 font-bold hover:bg-red-50 transition-all gap-1.5 text-xs">
+                <RotateCcw className="w-3.5 h-3.5" /> Reset
               </Button>
             )}
           </div>
