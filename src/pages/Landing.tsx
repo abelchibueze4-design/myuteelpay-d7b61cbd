@@ -462,7 +462,7 @@ const FAQSection = () => (
 /* ---------------- Trust Bar ---------------- */
 const TrustBar = () => (
   <section className="py-6 lg:py-12 px-4 lg:px-8 border-t border-border/30">
-    <div className="max-w-[420px] lg:max-w-5xl mx-auto">
+    <div className="max-w-[420px] lg:max-w-7xl mx-auto">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
         {[
           { icon: Shield, text: "Secure Payments", color: "text-primary" },
