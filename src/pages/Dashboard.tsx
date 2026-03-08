@@ -125,10 +125,14 @@ const Dashboard = () => {
     }
   }, [searchParams, setSearchParams]);
 
+  const isLoading = !user;
+
   if (activeTab === "transactions") return <TransactionHistory filter="services" />;
   if (activeTab === "history") return <TransactionHistory filter="all" />;
   if (activeTab === "wallet") return <TransactionHistory filter="wallet" />;
   if (activeTab === "settings") return <SettingsPage />;
+
+  if (isLoading) return <DashboardSkeleton />;
 
 
   const handleFund = () => {
