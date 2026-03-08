@@ -113,6 +113,7 @@ const AdminSettings = () => {
                 min_wallet_fund: parseInt(minWalletFund),
                 service_status: serviceStatus,
                 service_status_message: serviceStatusMessage,
+                service_status_visible: serviceStatusVisible,
             };
 
             if (config?.id) {
