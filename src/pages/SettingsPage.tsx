@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  User, Shield, Bell, HeadphonesIcon, ChevronRight, ArrowLeft,
+  User, Shield, Bell, HeadphonesIcon, ChevronRight, ArrowLeft, LogOut,
 } from "lucide-react";
 import { DashboardTopBar } from "@/components/DashboardTopBar";
 import { SecuritySettings } from "@/components/SecuritySettings";
@@ -25,7 +25,7 @@ const menuItems = [
 const SettingsPage = () => {
   const [, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const handleBack = () => {
     if (activeSection) {
@@ -92,6 +92,24 @@ const SettingsPage = () => {
                   <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                 </button>
               ))}
+            </div>
+
+            {/* Logout */}
+            <div className="p-4 border-t border-border/30">
+              <button
+                onClick={async () => {
+                  await signOut();
+                }}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-destructive/5 transition-all group text-left"
+              >
+                <div className="w-11 h-11 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center shrink-0">
+                  <LogOut className="w-5 h-5 text-destructive" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-destructive text-sm tracking-tight">Log Out</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Sign out of your account</p>
+                </div>
+              </button>
             </div>
           </div>
         ) : (
