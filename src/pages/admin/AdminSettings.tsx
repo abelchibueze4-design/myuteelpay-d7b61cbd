@@ -306,6 +306,41 @@ const AdminSettings = () => {
                     </CardContent>
                 </Card>
 
+                {/* Service Status Banner */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Activity className="w-5 h-5 text-primary" />
+                            Service Status Banner
+                        </CardTitle>
+                        <CardDescription>Control the status message shown to all users on their dashboard</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Status</Label>
+                            <Select value={serviceStatus} onValueChange={(v) => setServiceStatus(v as any)}>
+                                <SelectTrigger className="w-48 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="operational">✅ Operational</SelectItem>
+                                    <SelectItem value="degraded">⚠️ Degraded</SelectItem>
+                                    <SelectItem value="outage">🔴 Outage</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Status Message</Label>
+                            <Textarea
+                                value={serviceStatusMessage}
+                                onChange={(e) => setServiceStatusMessage(e.target.value)}
+                                placeholder="All services are running smoothly"
+                                rows={2}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
                 {/* Transaction Limits */}
                 <Card>
                     <CardHeader>
