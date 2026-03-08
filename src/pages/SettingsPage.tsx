@@ -20,6 +20,7 @@ const menuItems = [
   { key: "profile", label: "Edit Profile", description: "Update your personal information", icon: User },
   { key: "security", label: "Security", description: "Password & transaction PIN", icon: Shield },
   { key: "notifications", label: "Notifications", description: "Manage alert preferences", icon: Bell },
+  { key: "appearance", label: "Appearance", description: "Dark mode & theme settings", icon: Palette },
   { key: "support", label: "Help & Support", description: "Get help from our team", icon: HeadphonesIcon },
 ];
 
