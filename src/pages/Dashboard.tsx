@@ -187,7 +187,16 @@ const Dashboard = () => {
           <div className="text-center flex-1">
             <h1 className="text-base font-extrabold text-foreground">Welcome, {displayName}</h1>
           </div>
-          <NotificationsDropdown />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center tap-target"
+              title="Toggle theme"
+            >
+              {resolvedTheme === "dark" ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
+            </button>
+            <NotificationsDropdown />
+          </div>
         </div>
       </div>
 
