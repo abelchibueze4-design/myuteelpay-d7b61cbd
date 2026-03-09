@@ -28,42 +28,42 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block"><img src={logo} alt="Uteelpay" className="h-24 w-auto mx-auto" /></Link>
-          <h1 className="text-2xl font-bold mt-4">Login</h1>
-          <p className="text-sm text-muted-foreground mt-1">Sign in to your account to continue</p>
+    <div className="min-h-screen flex flex-col justify-center bg-secondary px-4 py-6">
+      <div className="w-full max-w-md mx-auto">
+        <div className="text-center mb-5">
+          <Link to="/" className="inline-block"><img src={logo} alt="Uteelpay" className="h-16 w-auto mx-auto" /></Link>
+          <h1 className="text-xl font-bold mt-2">Login</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Sign in to your account to continue</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-8 shadow-card space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Username</label>
+        <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-5 shadow-card space-y-3">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium">Username</label>
             <div className="relative">
-              <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <Input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="johndoe"
-                className="pl-10"
+                className="h-10 pl-9 text-sm placeholder:text-[10px]"
                 type="text"
                 required
               />
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Password</label>
-              <Link to="/forgot-password" className="text-xs text-primary hover:underline">Forgot password?</Link>
+              <label className="text-xs font-medium">Password</label>
+              <Link to="/forgot-password" className="text-[10px] text-primary hover:underline">Forgot password?</Link>
             </div>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <Input
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="pl-10 pr-10"
+                className="h-10 pl-9 pr-9 text-sm placeholder:text-[10px]"
                 type={showPassword ? "text" : "password"}
                 required
               />
@@ -72,25 +72,24 @@ const Login = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>
 
-          <Button type="submit" className="w-full" variant="hero" disabled={loading}>
-            {loading ? "Signing In..." : "Sign In"} <ArrowRight className="w-4 h-4" />
+          <Button type="submit" className="w-full h-10 text-sm" variant="hero" disabled={loading}>
+            {loading ? "Signing In..." : "Sign In"} <ArrowRight className="w-3.5 h-3.5" />
           </Button>
 
-          {/* Admin login link */}
           <Link
             to="/admin/login"
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 mt-4 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition"
+            className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 transition"
           >
-            <Shield className="w-4 h-4" />
+            <Shield className="w-3.5 h-3.5" />
             Login as Admin
           </Link>
 
-          <p className="text-center text-sm text-muted-foreground mt-4">
+          <p className="text-center text-xs text-muted-foreground">
             Don't have an account? <Link to="/signup" className="text-primary font-semibold hover:underline">Sign Up</Link>
           </p>
         </form>
