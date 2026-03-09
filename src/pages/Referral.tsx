@@ -1,4 +1,5 @@
 import { Copy, Gift, Users, Wallet, ArrowRight, Check } from "lucide-react";
+import { PageBackButton } from "@/components/PageBackButton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
