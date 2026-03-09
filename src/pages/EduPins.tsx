@@ -9,6 +9,7 @@ import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerifica
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { EduPinsPrices } from "@/components/services/EduPinsPrices";
 import { useTransactionGuard } from "@/hooks/useTransactionGuard";
+import { PageBackButton } from "@/components/PageBackButton";
 
 const EduPins = () => {
   const navigate = useNavigate();
