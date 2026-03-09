@@ -164,13 +164,13 @@ const Electricity = () => {
             <label className="text-sm font-medium">Meter Number</label>
             <div className="relative">
               <Zap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input value={meter} onChange={(e) => { setMeter(e.target.value); setCustomerName(""); }} placeholder="Enter meter number" className="pl-10" required onBlur={handleValidateMeter} />
+              <Input value={meter} onChange={(e) => { setMeter(e.target.value); setCustomerName(""); }} placeholder="Enter meter number" className="pl-10 placeholder:text-[10px] placeholder:font-normal" required onBlur={handleValidateMeter} />
             </div>
             {customerName && <p className="text-xs text-primary font-medium">✓ {customerName}</p>}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Amount</label>
-            <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₦500 minimum" type="number" required />
+            <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₦500 minimum" type="number" required className="placeholder:text-[10px] placeholder:font-normal" />
           </div>
           <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
             {kvdata.isPending ? "Processing..." : "Pay Now"}

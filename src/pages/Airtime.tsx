@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkIcon } from "@/components/NetworkIcon";
-import { Smartphone, Check, Loader2, Star, X } from "lucide-react";
+import { Smartphone, Check, Loader2, Star, X, Contact } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useKvdata } from "@/hooks/useKvdata";
@@ -117,27 +117,49 @@ const Airtime = () => {
                                 value={phone} 
                                 onChange={(e) => setPhone(e.target.value)} 
                                 placeholder="080X XXX XXXX" 
-                                className="h-14 rounded-2xl border-2 border-border/50 pl-12 pr-12 focus-visible:ring-primary/20 bg-secondary/20 font-bold" 
+                                className="h-14 rounded-2xl border-2 border-border/50 pl-12 pr-20 focus-visible:ring-primary/20 bg-secondary/20 font-bold placeholder:text-[10px] placeholder:font-normal" 
                                 type="tel" 
                                 required 
                             />
-                            {phone.length >= 10 && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        if (isFavorited(phone)) {
-                                            const fav = favorites.find(f => f.identifier === phone);
-                                            if (fav) removeFavorite.mutate(fav.id);
-                                        } else {
-                                            addFavorite.mutate({ label: phone, identifier: phone, metadata: { network: network?.network_name } });
-                                        }
+                                    onClick={async () => {
+                                        try {
+                                            if ('contacts' in navigator && 'ContactsManager' in window) {
+                                                const contacts = await (navigator as any).contacts.select(['tel'], { multiple: false });
+                                                if (contacts?.length && contacts[0].tel?.length) {
+                                                    setPhone(contacts[0].tel[0].replace(/\D/g, ''));
+                                                }
+                                            } else {
+                                                const { toast } = await import('sonner');
+                                                toast.info("Contact picker not supported on this device");
+                                            }
+                                        } catch {}
                                     }}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1"
-                                    title={isFavorited(phone) ? "Remove from favorites" : "Save to favorites"}
+                                    className="p-1.5 rounded-lg hover:bg-secondary/50 transition-colors"
+                                    title="Import from contacts"
                                 >
-                                    <Star className={`w-4 h-4 transition-colors ${isFavorited(phone) ? "fill-accent text-accent" : "text-muted-foreground"}`} />
+                                    <Contact className="w-4 h-4 text-muted-foreground" />
                                 </button>
-                            )}
+                                {phone.length >= 10 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (isFavorited(phone)) {
+                                                const fav = favorites.find(f => f.identifier === phone);
+                                                if (fav) removeFavorite.mutate(fav.id);
+                                            } else {
+                                                addFavorite.mutate({ label: phone, identifier: phone, metadata: { network: network?.network_name } });
+                                            }
+                                        }}
+                                        className="p-1.5 rounded-lg hover:bg-secondary/50 transition-colors"
+                                        title={isFavorited(phone) ? "Remove from favorites" : "Save to favorites"}
+                                    >
+                                        <Star className={`w-4 h-4 transition-colors ${isFavorited(phone) ? "fill-accent text-accent" : "text-muted-foreground"}`} />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         {/* Saved numbers */}
                         {favorites.length > 0 && (
@@ -175,7 +197,7 @@ const Airtime = () => {
                             value={amount} 
                             onChange={(e) => setAmount(e.target.value)} 
                             placeholder="₦100 - ₦50,000" 
-                            className="h-14 rounded-2xl border-2 border-border/50 px-6 focus-visible:ring-primary/20 bg-secondary/20 text-xl font-black" 
+                            className="h-14 rounded-2xl border-2 border-border/50 px-6 focus-visible:ring-primary/20 bg-secondary/20 text-xl font-black placeholder:text-[10px] placeholder:font-normal" 
                             type="number" 
                             required 
                         />

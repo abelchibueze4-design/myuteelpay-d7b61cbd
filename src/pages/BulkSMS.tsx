@@ -72,7 +72,7 @@ const BulkSMS = () => {
         <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Sender Name</label>
-            <Input value={sender} onChange={(e) => setSender(e.target.value)} placeholder="Your brand name" maxLength={11} required />
+            <Input value={sender} onChange={(e) => setSender(e.target.value)} placeholder="Your brand name" maxLength={11} required className="placeholder:text-[10px] placeholder:font-normal" />
             <p className="text-xs text-muted-foreground">Max 11 characters</p>
           </div>
           <div className="space-y-2">
