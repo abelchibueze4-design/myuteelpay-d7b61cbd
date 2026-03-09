@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Eye, EyeOff, Lock, KeyRound, RotateCcw } from "lucide-react";
+import { Eye, EyeOff, Lock, KeyRound, RotateCcw, Fingerprint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { useSecuritySettings } from "@/hooks/useSecuritySettings";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
+import { useBiometricAuth } from "@/hooks/useBiometricAuth";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
