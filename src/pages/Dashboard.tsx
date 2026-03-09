@@ -51,6 +51,7 @@ const quickActions = [
 const Dashboard = () => {
   const { setOpenMobile } = useSidebar();
   const { user } = useAuth();
+  const { resolvedTheme, setTheme } = useTheme();
   const { data: isKycVerified } = useKycVerified();
   const { data: wallet } = useWallet();
   const { data: transactions } = useTransactions(5);
