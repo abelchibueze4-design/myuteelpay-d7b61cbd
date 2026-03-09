@@ -16,6 +16,7 @@ import { PageTransition, ScaleTap } from "@/components/PageTransition";
 import { ServicePageSkeleton } from "@/components/DashboardSkeleton";
 import { TransactionResultScreen } from "@/components/TransactionResultScreen";
 import { useSmartNetworkDefault } from "@/hooks/useSmartNetworkDefault";
+import { PageBackButton } from "@/components/PageBackButton";
 
 const Airtime = () => {
     const navigate = useNavigate();

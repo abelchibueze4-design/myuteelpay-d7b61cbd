@@ -71,12 +71,15 @@ const DataCard = () => {
         <div className="min-h-screen bg-background pb-24">
             <div className="bg-primary px-4 py-12 mb-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
-                <div className="container mx-auto relative z-10 flex flex-col items-center text-center max-w-2xl">
-                    <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-6 shadow-xl border border-white/10">
-                        <CreditCard className="w-8 h-8 text-white" />
+                <div className="container mx-auto relative z-10 max-w-2xl">
+                    <PageBackButton className="mb-4" />
+                    <div className="flex flex-col items-center text-center">
+                        <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-6 shadow-xl border border-white/10">
+                            <CreditCard className="w-8 h-8 text-white" />
+                        </div>
+                        <h1 className="text-3xl font-black text-white tracking-tight mb-2">Data PIN Generator</h1>
+                        <p className="text-white/70 text-sm font-medium">Generate printable data cards for any network instantly.</p>
                     </div>
-                    <h1 className="text-3xl font-black text-white tracking-tight mb-2">Data PIN Generator</h1>
-                    <p className="text-white/70 text-sm font-medium">Generate printable data cards for any network instantly.</p>
                 </div>
             </div>
 

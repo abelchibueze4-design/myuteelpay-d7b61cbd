@@ -121,6 +121,7 @@ const Referral = () => {
       <div className="bg-primary px-4 pt-8 pb-16 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20" />
         <div className="relative z-10 flex items-center gap-3 max-w-lg mx-auto">
+          <PageBackButton />
           <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg">
             <Gift className="w-5 h-5 text-white" />
           </div>
