@@ -58,8 +58,8 @@ const FAQs = () => {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
                 <div className="container mx-auto relative z-10 max-w-3xl">
                     <PageBackButton className="mb-4" />
-                    <Badge className="bg-white/20 text-white border-none mb-4 px-4 py-1">Support Center</Badge>
                     <div className="text-center">
+                        <Badge className="bg-white/20 text-white border-none mb-4 px-4 py-1">Support Center</Badge>
                         <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">How can we help you?</h1>
                         <p className="text-white/70 text-sm font-medium leading-relaxed">Find answers to frequently asked questions or reach out to our team.</p>
                     </div>
