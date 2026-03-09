@@ -75,6 +75,12 @@ export const SecuritySettings = () => {
   const [showResetPass, setShowResetPass] = useState(false);
   const [resetPasswordVerified, setResetPasswordVerified] = useState(false);
 
+  // Remove PIN state
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const [removePassword, setRemovePassword] = useState("");
+  const [showRemovePass, setShowRemovePass] = useState(false);
+  const [removeErrors, setRemoveErrors] = useState<Record<string, string>>({});
+
   const resetPinForm = () => {
     setPinMode(null);
     setCurrentPin("");
