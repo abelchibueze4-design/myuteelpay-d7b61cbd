@@ -90,6 +90,9 @@ export const SecuritySettings = () => {
     setPinErrors({});
     setResetPassword("");
     setResetPasswordVerified(false);
+    setShowRemoveConfirm(false);
+    setRemovePassword("");
+    setRemoveErrors({});
   };
 
   // === Password Validation ===
