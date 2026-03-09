@@ -23,7 +23,7 @@ export const PriceCard = ({ label, price, onClick, className, active }: PriceCar
         className
       )}
     >
-      <span className="font-medium text-[8px] leading-[1.2] mb-1 break-words hyphens-auto text-center w-full px-0.5" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word', textAlign: 'center', display: 'block' }}>{label}</span>
+      <span className="font-medium text-[8px] leading-[1.2] mb-1 break-words hyphens-auto text-center w-full px-0.5 whitespace-pre-line" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word', textAlign: 'center', display: 'block' }}>{label}</span>
       <span className="text-[9px] text-primary font-black uppercase tracking-wide">₦{price.toLocaleString()}</span>
     </Button>
   );
