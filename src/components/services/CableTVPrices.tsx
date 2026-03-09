@@ -24,11 +24,24 @@ export const CableTVPrices = ({ cableId, onSelect, selectedPlanId }: CableTVPric
     enabled: !!cableId
   });
 
+  const formatLabel = (name: string) => {
+    // Split on " + " and rejoin with line breaks, max ~2 parts per line
+    const parts = name.split(/\s*\+\s*/);
+    if (parts.length <= 2) return name;
+    // Group into lines of 2 parts joined by " + "
+    const lines: string[] = [];
+    for (let i = 0; i < parts.length; i += 2) {
+      const chunk = parts.slice(i, i + 2).join(" + ");
+      lines.push(chunk);
+    }
+    return lines.join("\n+ ");
+  };
+
   const filteredPlans = useMemo(() => {
     if (!dbPlans) return [];
     
     return dbPlans.map((p) => ({
-      label: p.cableplan_name,
+      label: formatLabel(p.cableplan_name),
       plan_id: String(p.cableplan_id),
       price: Number(p.cableplan_amount),
       raw: p
