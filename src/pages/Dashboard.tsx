@@ -6,6 +6,7 @@ import {
   Gift, ArrowRight, Mail, MessageCircle, Users, Eye, EyeOff,
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
   ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
+  Moon, Sun,
 } from "lucide-react";
 import { PageTransition, StaggerContainer, StaggerItem, ScaleTap } from "@/components/PageTransition";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
