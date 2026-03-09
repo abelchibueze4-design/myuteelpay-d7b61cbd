@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Eye, EyeOff, Lock, KeyRound, RotateCcw } from "lucide-react";
+import { Eye, EyeOff, Lock, KeyRound, RotateCcw, Fingerprint } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { useSecuritySettings } from "@/hooks/useSecuritySettings";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
+import { useBiometricAuth } from "@/hooks/useBiometricAuth";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -42,6 +44,13 @@ export const SecuritySettings = () => {
   } = useSecuritySettings();
   const { verifyPin } = useTransactionPinVerification();
   const { user } = useAuth();
+  const {
+    isSupported: biometricSupported,
+    isEnabled: biometricEnabled,
+    isLoading: biometricLoading,
+    toggleEnabled: toggleBiometric,
+    remove: removeBiometric,
+  } = useBiometricAuth();
 
   // Password change state
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -347,6 +356,42 @@ export const SecuritySettings = () => {
           </div>
         )}
       </div>
+
+      {/* Biometric Authentication Section */}
+      {biometricSupported && (
+        <div className="border border-border rounded-lg p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                <Fingerprint className="w-5 h-5 text-violet-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Biometric Authentication</h3>
+                <p className="text-xs text-muted-foreground">
+                  Use fingerprint or face recognition for transactions
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={biometricEnabled}
+              onCheckedChange={async (checked) => {
+                const success = await toggleBiometric(checked);
+                if (success) {
+                  toast.success(checked ? "Biometrics enabled" : "Biometrics disabled");
+                } else {
+                  toast.error("Failed to update biometric settings");
+                }
+              }}
+              disabled={biometricLoading || !settings.transactionPinEnabled}
+            />
+          </div>
+          {!settings.transactionPinEnabled && (
+            <p className="text-xs text-muted-foreground">
+              Enable Transaction PIN first to use biometric authentication
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
