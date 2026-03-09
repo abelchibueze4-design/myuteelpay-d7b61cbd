@@ -16,6 +16,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { ServicePageSkeleton } from "@/components/DashboardSkeleton";
 import { TransactionResultScreen } from "@/components/TransactionResultScreen";
 import { useSmartNetworkDefault } from "@/hooks/useSmartNetworkDefault";
+import { PageBackButton } from "@/components/PageBackButton";
 
 const Data = () => {
     const navigate = useNavigate();
@@ -99,7 +100,8 @@ const Data = () => {
     return (
         <PageTransition className="min-h-screen bg-secondary pb-12">
             <div className="gradient-hero px-4 py-6 mb-6">
-                <div className="container mx-auto">
+                <div className="container mx-auto flex items-center gap-3">
+                    <PageBackButton />
                     <h1 className="text-lg font-bold text-primary-foreground">Buy Data</h1>
                 </div>
             </div>

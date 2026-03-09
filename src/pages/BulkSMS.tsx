@@ -10,6 +10,7 @@ import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerifica
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { toast } from "sonner";
 import { useTransactionGuard } from "@/hooks/useTransactionGuard";
+import { PageBackButton } from "@/components/PageBackButton";
 
 const BulkSMS = () => {
   const navigate = useNavigate();
@@ -61,7 +62,8 @@ const BulkSMS = () => {
   return (
     <div className="min-h-screen bg-secondary">
       <div className="gradient-hero px-4 py-6">
-        <div className="container mx-auto">
+        <div className="container mx-auto flex items-center gap-3">
+          <PageBackButton />
           <h1 className="text-lg font-bold text-primary-foreground">Bulk SMS</h1>
         </div>
       </div>

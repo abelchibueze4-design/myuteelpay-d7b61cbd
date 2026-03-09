@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { HelpCircle, ChevronRight, ChevronDown, MessageSquare, Mail, Smartphone, Gift, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PageBackButton } from "@/components/PageBackButton";
 import { Badge } from "@/components/ui/badge";
 
 const faqCategories = [
@@ -55,10 +56,13 @@ const FAQs = () => {
             {/* Hero Header */}
             <div className="bg-primary pt-12 pb-20 px-6 overflow-hidden relative">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
-                <div className="container mx-auto relative z-10 text-center max-w-3xl">
-                    <Badge className="bg-white/20 text-white border-none mb-4 px-4 py-1">Support Center</Badge>
-                    <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">How can we help you?</h1>
-                    <p className="text-white/70 text-sm font-medium leading-relaxed">Find answers to frequently asked questions or reach out to our team.</p>
+                <div className="container mx-auto relative z-10 max-w-3xl">
+                    <PageBackButton className="mb-4" />
+                    <div className="text-center">
+                        <Badge className="bg-white/20 text-white border-none mb-4 px-4 py-1">Support Center</Badge>
+                        <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">How can we help you?</h1>
+                        <p className="text-white/70 text-sm font-medium leading-relaxed">Find answers to frequently asked questions or reach out to our team.</p>
+                    </div>
                 </div>
             </div>
 
