@@ -223,10 +223,7 @@ const Dashboard = () => {
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
           <div className="absolute bottom-0 left-0 w-28 h-28 bg-accent/20 rounded-full -ml-10 -mb-10 blur-2xl" />
           <div className="relative z-10">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/15 text-white rounded-full mb-3">
-                <Wallet className="w-3 h-3" />
-                <span className="text-[9px] font-bold uppercase tracking-widest">Main Wallet</span>
-              </div>
+            <span className="text-[11px] font-bold uppercase tracking-widest text-white/80">Main Wallet</span>
 
             <div className="flex items-center gap-2 mb-4">
               <p className="text-3xl lg:text-4xl font-black tracking-tighter text-white">
