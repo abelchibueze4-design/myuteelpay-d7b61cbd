@@ -37,7 +37,6 @@ import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useKycVerified, BALANCE_LIMIT_UNVERIFIED } from "@/hooks/useKyc";
 import { useTheme } from "next-themes";
-import { useKycVerified, BALANCE_LIMIT_UNVERIFIED } from "@/hooks/useKyc";
 
 const quickActions = [
   { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "text-primary bg-primary/10", border: "border-primary/20" },
