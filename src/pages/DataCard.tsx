@@ -1,53 +1,60 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Smartphone, Check, CreditCard, Download, Share2, Printer } from "lucide-react";
+import { NetworkIcon } from "@/components/NetworkIcon";
+import { Check, CreditCard, Download, Share2, Printer, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
-import { Badge } from "@/components/ui/badge";
+import { DataCardPrices } from "@/components/services/DataCardPrices";
 import { cn } from "@/lib/utils";
-
-const networks = ["MTN", "Glo", "Airtel", "9mobile"];
-const cardPlans = [
-    { label: "MTN 1GB Data Card", plan_id: 101, network: "MTN", price: 350 },
-    { label: "MTN 2GB Data Card", plan_id: 102, network: "MTN", price: 700 },
-    { label: "Airtel 1GB Data Card", plan_id: 201, network: "Airtel", price: 400 },
-    { label: "Glo 2GB Data Card", plan_id: 301, network: "Glo", price: 600 },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
+import { PageBackButton } from "@/components/PageBackButton";
 
 const DataCard = () => {
     const navigate = useNavigate();
-    const [network, setNetwork] = useState("");
-    const [plan, setPlan] = useState("");
+    const [network, setNetwork] = useState<{ network_id: number; network_name: string } | null>(null);
+    const [planId, setPlanId] = useState("");
+    const [selectedPlan, setSelectedPlan] = useState<any>(null);
     const [quantity, setQuantity] = useState("1");
     const [showSuccess, setShowSuccess] = useState(false);
     const [pinOpen, setPinOpen] = useState(false);
+    
     const kvdata = useKvdata();
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+    const { guardTransaction } = useTransactionGuard();
 
-    const filteredPlans = network ? cardPlans.filter(p => p.network === network) : cardPlans;
+    const { data: networks } = useQuery({
+        queryKey: ["networks"],
+        queryFn: async () => {
+            const { data, error } = await supabase.from("networks").select("*");
+            if (error) throw error;
+            return data;
+        }
+    });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!network || !plan) return;
+        if (!network || !planId) return;
+        const { allowed } = guardTransaction(selectedPlan?.amount || 0);
+        if (!allowed) return;
         setPinOpen(true);
     };
 
     const handleConfirmPurchase = async (pin: string) => {
         const isValid = await verifyPin(pin);
         if (!isValid) return false;
-
-        const selectedPlan = cardPlans.find((p) => String(p.plan_id) === plan);
-        if (!selectedPlan) return false;
+        if (!selectedPlan || !network) return false;
 
         try {
             await kvdata.mutateAsync({
                 action: "buy_data_card",
-                network,
+                network_id: network.network_id,
+                network_name: network.network_name,
                 plan_id: selectedPlan.plan_id,
                 plan_label: selectedPlan.label,
                 quantity: parseInt(quantity),
@@ -61,16 +68,18 @@ const DataCard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] pb-24">
-            {/* Header */}
+        <div className="min-h-screen bg-background pb-24">
             <div className="bg-primary px-4 py-12 mb-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
-                <div className="container mx-auto relative z-10 flex flex-col items-center text-center max-w-2xl">
-                    <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-6 shadow-xl border border-white/10">
-                        <CreditCard className="w-8 h-8 text-white" />
+                <div className="container mx-auto relative z-10 max-w-2xl">
+                    <PageBackButton className="mb-4" />
+                    <div className="flex flex-col items-center text-center">
+                        <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-6 shadow-xl border border-white/10">
+                            <CreditCard className="w-8 h-8 text-white" />
+                        </div>
+                        <h1 className="text-3xl font-black text-white tracking-tight mb-2">Data PIN Generator</h1>
+                        <p className="text-white/70 text-sm font-medium">Generate printable data cards for any network instantly.</p>
                     </div>
-                    <h1 className="text-3xl font-black text-white tracking-tight mb-2">Data PIN Generator</h1>
-                    <p className="text-white/70 text-sm font-medium">Generate printable data cards for any network instantly.</p>
                 </div>
             </div>
 
@@ -78,27 +87,21 @@ const DataCard = () => {
                 <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 shadow-2xl shadow-primary/5 border border-border/50 space-y-6">
                     <div className="space-y-3">
                         <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Select Network</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {networks.map((n) => (
+                        <div className="grid grid-cols-4 gap-2">
+                            {networks?.map((n) => (
                                 <button
-                                    key={n}
+                                    key={n.network_id}
                                     type="button"
-                                    onClick={() => setNetwork(n)}
+                                    onClick={() => { setNetwork(n); setPlanId(""); setSelectedPlan(null); }}
                                     className={cn(
-                                        "py-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2",
-                                        network === n
+                                        "py-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5",
+                                        network?.network_id === n.network_id
                                             ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
                                             : "border-border/50 hover:border-primary/30"
                                     )}
                                 >
-                                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black",
-                                        n === "MTN" ? "bg-yellow-100 text-yellow-700" :
-                                            n === "Glo" ? "bg-green-100 text-green-700" :
-                                                n === "Airtel" ? "bg-red-100 text-red-700" : "bg-purple-100 text-purple-700"
-                                    )}>
-                                        {n[0]}
-                                    </div>
-                                    <span className="text-[10px] font-bold uppercase">{n}</span>
+                                    <NetworkIcon networkName={n.network_name} />
+                                    <span className="text-[10px] font-bold uppercase">{n.network_name}</span>
                                 </button>
                             ))}
                         </div>
@@ -106,21 +109,21 @@ const DataCard = () => {
 
                     <div className="space-y-3">
                         <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Choose Data Plan</label>
-                        <Select value={plan} onValueChange={setPlan}>
-                            <SelectTrigger className="h-16 rounded-2xl border-2 border-border/50 focus:ring-primary/20 bg-secondary/20">
-                                <SelectValue placeholder="Browse available plans" />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-none shadow-2xl">
-                                {filteredPlans.map((p) => (
-                                    <SelectItem key={p.plan_id} value={String(p.plan_id)} className="py-3 rounded-xl">
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-sm tracking-tight">{p.label}</span>
-                                            <span className="text-[10px] text-primary font-black uppercase">₦{p.price.toLocaleString()}</span>
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        {network && (
+                            <DataCardPrices 
+                                networkId={network.network_id}
+                                selectedPlanId={planId}
+                                onSelect={(plan) => {
+                                    setPlanId(plan.plan_id);
+                                    setSelectedPlan(plan);
+                                }}
+                            />
+                        )}
+                        {!network && (
+                            <div className="p-8 text-center bg-secondary/30 text-muted-foreground rounded-2xl border-2 border-dashed border-border/50">
+                                <p className="font-bold text-sm">Select network first</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-3">
@@ -141,7 +144,7 @@ const DataCard = () => {
                     </div>
 
                     <div className="pt-4">
-                        <Button type="submit" className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 font-black text-lg gap-2" disabled={kvdata.isPending || !network || !plan}>
+                        <Button type="submit" className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 font-black text-lg gap-2" disabled={kvdata.isPending || !network || !planId}>
                             {kvdata.isPending ? "Generating..." : "Generate Pins"}
                         </Button>
                     </div>

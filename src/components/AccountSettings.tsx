@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SecuritySettings } from "@/components/SecuritySettings";
 import { NotificationPreferences } from "@/components/NotificationPreferences";
-import { DangerZone } from "@/components/DangerZone";
+import { SupportSection } from "@/components/SupportSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { toast } from "sonner";
@@ -29,6 +29,13 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isOpen, setIsOpen] = useState(open ?? false);
+
+  // Sync internal state with prop
+  useEffect(() => {
+    if (open !== undefined) {
+      setIsOpen(open);
+    }
+  }, [open]);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -114,7 +121,7 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
             <TabsTrigger value="profile" className="text-xs sm:text-sm">Profile</TabsTrigger>
             <TabsTrigger value="security" className="text-xs sm:text-sm">Security</TabsTrigger>
             <TabsTrigger value="notifications" className="text-xs sm:text-sm">Notifications</TabsTrigger>
-            <TabsTrigger value="danger" className="text-xs sm:text-sm text-destructive font-bold">Deactivate/Delete Account</TabsTrigger>
+            <TabsTrigger value="support" className="text-xs sm:text-sm text-blue-600 font-bold">Support</TabsTrigger>
           </TabsList>
 
           {/* Profile Tab */}
@@ -236,9 +243,9 @@ export const AccountSettings = ({ open, onOpenChange }: AccountSettingsProps) =>
             <NotificationPreferences />
           </TabsContent>
 
-          {/* Danger Zone Tab */}
-          <TabsContent value="danger" className="mt-6">
-            <DangerZone />
+          {/* Support Tab - Replaces Danger Zone */}
+          <TabsContent value="support" className="mt-6">
+            <SupportSection />
           </TabsContent>
         </Tabs>
       </DialogContent>

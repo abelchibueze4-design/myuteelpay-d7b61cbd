@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,6 +6,7 @@
 
 @layer base {
   :root {
+    /* Premium Fintech Color Scheme - Orchid Purple & Royal Gold */
     --background: 0 0% 100%;
     --foreground: 260 20% 16%;
 
@@ -15,11 +16,11 @@
     --popover: 0 0% 100%;
     --popover-foreground: 260 20% 16%;
 
-    --primary: 270 50% 50%;
+    /* Soft Orchid Purple Primary */
+    --primary: 270 40% 55%;
     --primary-foreground: 0 0% 100%;
-
-    --primary-light: 270 60% 96%;
-    --primary-glow: 275 60% 70%;
+    --primary-light: 270 50% 96%;
+    --primary-glow: 275 50% 75%;
 
     --secondary: 260 10% 96%;
     --secondary-foreground: 260 20% 16%;
@@ -27,32 +28,39 @@
     --muted: 260 10% 96%;
     --muted-foreground: 260 8% 50%;
 
-    --accent: 38 45% 55%;
-    --accent-foreground: 38 40% 15%;
+    /* Royal Gold Accent */
+    --accent: 45 85% 55%;
+    --accent-foreground: 45 40% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 260 10% 90%;
     --input: 260 10% 90%;
-    --ring: 270 50% 50%;
+    --ring: 270 40% 55%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --gradient-primary: linear-gradient(135deg, hsl(270, 50%, 50%), hsl(275, 60%, 70%));
-    --gradient-hero: linear-gradient(160deg, hsl(270, 50%, 55%) 0%, hsl(275, 55%, 75%) 50%, hsl(280, 50%, 80%) 100%);
-    --shadow-primary: 0 4px 20px -4px hsl(270 50% 50% / 0.25);
-    --shadow-card: 0 2px 12px -2px hsl(260 20% 16% / 0.05);
-    --shadow-brass: 0 4px 15px -3px hsl(38 45% 55% / 0.3);
+    /* Premium Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(270, 40%, 55%), hsl(275, 45%, 65%));
+    --gradient-hero: linear-gradient(160deg, hsl(270, 40%, 60%) 0%, hsl(275, 45%, 70%) 50%, hsl(280, 40%, 80%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(45, 85%, 55%), hsl(40, 80%, 65%));
+    --gradient-card: linear-gradient(135deg, hsl(0, 0%, 100%), hsl(270, 50%, 98%));
+    
+    /* Soft Shadows */
+    --shadow-primary: 0 4px 20px -4px hsl(270 40% 55% / 0.15);
+    --shadow-card: 0 8px 24px -8px hsl(260 20% 16% / 0.08);
+    --shadow-gold: 0 4px 20px -4px hsl(45 85% 55% / 0.25);
+    --shadow-soft: 0 2px 16px -4px hsl(260 20% 16% / 0.06);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 270 50% 50%;
+    --sidebar-primary: 270 40% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 260 10% 96%;
     --sidebar-accent-foreground: 260 20% 16%;
     --sidebar-border: 260 10% 90%;
-    --sidebar-ring: 270 50% 50%;
+    --sidebar-ring: 270 40% 55%;
   }
 
   .dark {
@@ -62,29 +70,29 @@
     --card-foreground: 0 0% 95%;
     --popover: 260 18% 12%;
     --popover-foreground: 0 0% 95%;
-    --primary: 270 50% 60%;
+    --primary: 270 40% 60%;
     --primary-foreground: 0 0% 100%;
     --primary-light: 270 30% 18%;
-    --primary-glow: 275 60% 70%;
+    --primary-glow: 275 50% 75%;
     --secondary: 260 14% 18%;
     --secondary-foreground: 0 0% 95%;
     --muted: 260 14% 18%;
     --muted-foreground: 260 8% 60%;
-    --accent: 38 45% 55%;
-    --accent-foreground: 38 40% 15%;
+    --accent: 45 85% 55%;
+    --accent-foreground: 45 40% 15%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
     --border: 260 14% 22%;
     --input: 260 14% 22%;
-    --ring: 270 50% 60%;
+    --ring: 270 40% 60%;
     --sidebar-background: 260 20% 8%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 270 50% 60%;
+    --sidebar-primary: 270 40% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 260 14% 18%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 260 14% 22%;
-    --sidebar-ring: 270 50% 60%;
+    --sidebar-ring: 270 40% 60%;
   }
 }
 
@@ -95,7 +103,39 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Mobile-first container with max-width 420px */
+  .mobile-container {
+    @apply w-full max-w-[420px] mx-auto px-4;
+  }
+
+  /* Premium fintech card styling */
+  .fintech-card {
+    @apply bg-card rounded-2xl shadow-soft border border-border/80;
+  }
+
+  /* Royal gold button */
+  .btn-gold {
+    @apply bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold;
+    background: var(--gradient-gold);
+    box-shadow: var(--shadow-gold);
+  }
+
+  /* Smooth micro-interactions */
+  .tap-target {
+    @apply min-h-[44px] min-w-[44px] active:scale-95 transition-all duration-150;
+  }
+
+  /* Mobile-first spacing utilities */
+  .mobile-spacing {
+    @apply space-y-4 sm:space-y-6;
+  }
+
+  /* Compact mobile layout */
+  .mobile-compact {
+    @apply p-4 space-y-3;
   }
 }
 
@@ -108,6 +148,10 @@
     background: var(--gradient-hero);
   }
 
+  .gradient-gold {
+    background: var(--gradient-gold);
+  }
+
   .shadow-primary {
     box-shadow: var(--shadow-primary);
   }
@@ -116,12 +160,23 @@
     box-shadow: var(--shadow-card);
   }
 
-  .shadow-brass {
-    box-shadow: var(--shadow-brass);
+  .shadow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
   }
 
   .text-gradient {
     background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gold {
+    background: var(--gradient-gold);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -133,5 +188,114 @@
 
   .glass-morphism {
     @apply backdrop-blur-md bg-white/30 dark:bg-black/20 border border-white/20 dark:border-white/10;
+  }
+
+  /* Mobile-first responsive utilities */
+  .mobile-hero {
+    @apply text-3xl sm:text-4xl font-bold leading-tight;
+  }
+
+  .mobile-card {
+    @apply rounded-2xl p-4 shadow-soft border border-white/80;
+    background: var(--gradient-card);
+  }
+
+  .mobile-input {
+    @apply rounded-xl h-14 text-base tap-target;
+  }
+
+  .mobile-button {
+    @apply rounded-xl h-14 text-base font-bold tap-target;
+  }
+
+  /* Bottom navigation */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border;
+    z-index: 50;
+  }
+
+  /* Smooth animations */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.5s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.4s ease-out;
+  }
+
+  .animate-bounce-in {
+    animation: bounce-in 0.6s ease-out;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 2s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes slide-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scale-in {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes bounce-in {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* Hover effects for interactive elements */
+  .hover-lift {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
+  }
+
+  .hover-glow {
+    transition: all 0.3s ease;
+  }
+  .hover-glow:hover {
+    box-shadow: 0 0 20px -5px rgba(147, 51, 234, 0.3);
+  }
+
+  /* Loading states */
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+
+  @keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
 }

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -33,8 +33,16 @@ export function useKvdata() {
       queryClient.invalidateQueries({ queryKey: ["wallet"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
-    onError: (err: Error) => {
-      toast.error(err.message || "Transaction failed");
+    onError: () => {
+      toast.error("An error occurred. Please try again.");
     },
+  });
+}
+
+export function useKvdataQuery(body: Record<string, unknown>, enabled = true) {
+  return useQuery({
+    queryKey: ["kvdata", body],
+    queryFn: () => callKvdata(body),
+    enabled: enabled,
   });
 }

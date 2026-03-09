@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/admin/PageHeader";
 import { StatCard } from "@/components/admin/StatCard";
+import { DateRangeExport } from "@/components/admin/DateRangeExport";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -7,7 +8,7 @@ import {
 } from "lucide-react";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
 import { useUsers } from "@/hooks/useUsers";
-import { format, startOfMonth, isAfter } from "date-fns";
+import { format, startOfMonth, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
 import { exportToCSV, printPDF } from "@/utils/exportUtils";
 
@@ -106,9 +107,26 @@ const Reports = () => {
                 description="Financial summaries and data exports based on real platform activity"
                 icon={FileText}
                 actions={
-                    <Button size="sm" onClick={generatePDF}>
-                        <FileText className="w-3.5 h-3.5 mr-1.5" /> Generate Monthly PDF
-                    </Button>
+                    <DateRangeExport
+                        reportTitle="Platform Operations Report"
+                        headers={["Reference", "User", "Type", "Amount", "Status", "Date"]}
+                        getFilteredData={(from, to) => {
+                            const rows = allTx.filter((t) => {
+                                const d = new Date(t.created_at);
+                                const mf = !from || !isBefore(d, startOfDay(from));
+                                const mt = !to || !isAfter(d, endOfDay(to));
+                                return mf && mt;
+                            });
+                            return rows.map((t) => [
+                                t.reference || "N/A",
+                                t.user_name,
+                                t.type,
+                                `₦${Math.abs(t.amount).toLocaleString()}`,
+                                t.status,
+                                format(new Date(t.created_at), "yyyy-MM-dd HH:mm"),
+                            ]);
+                        }}
+                    />
                 }
             />
 

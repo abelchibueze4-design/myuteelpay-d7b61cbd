@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useUsers } from "@/hooks/useUsers";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { DateRangeExport } from "@/components/admin/DateRangeExport";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -21,10 +22,9 @@ import {
     Users, Search, Filter, MoreVertical, UserCheck, UserX,
     Wallet, Shield, Eye, Download, Mail,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, isBefore, isAfter, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { exportToCSV, printPDF } from "@/utils/exportUtils";
 
 const UserManagement = () => {
     const { data: users, isLoading, error, refetch } = useUsers();
@@ -35,6 +35,9 @@ const UserManagement = () => {
     const [walletAction, setWalletAction] = useState<"credit" | "debit">("credit");
     const [walletNote, setWalletNote] = useState("");
     const [processingWallet, setProcessingWallet] = useState(false);
+    const [profileDialog, setProfileDialog] = useState<{ open: boolean; user: any }>({ open: false, user: null });
+    const [roleDialog, setRoleDialog] = useState<{ open: boolean; user: any }>({ open: false, user: null });
+    const [newRole, setNewRole] = useState("user");
 
     const filtered = (users ?? []).filter((u) => {
         const matchSearch =
@@ -60,44 +63,59 @@ const UserManagement = () => {
     const handleWalletAdjust = async () => {
         const amt = parseFloat(walletAmount);
         if (!amt || amt <= 0) return toast.error("Enter a valid amount");
+        if (!walletDialog.user) return;
         setProcessingWallet(true);
-        // Log to admin_wallet_adjustments table (must exist in DB)
-        const { error } = await supabase.from("transactions" as any).insert({
-            user_id: walletDialog.user?.id,
-            type: walletAction === "credit" ? "admin_credit" : "admin_debit",
-            amount: walletAction === "credit" ? amt : -amt,
-            status: "success",
-            description: walletNote || `Admin ${walletAction}`,
-            reference: `ADM-${Date.now()}`,
-        });
-        setProcessingWallet(false);
-        if (error) toast.error("Adjustment failed: " + error.message);
-        else {
+
+        try {
+            if (walletAction === "credit") {
+                // Credit: update wallet balance and log transaction
+                const { error: walletError } = await supabase
+                    .from("wallets")
+                    .update({ balance: (walletDialog.user.wallet_balance ?? 0) + amt } as any)
+                    .eq("id", walletDialog.user.id);
+                if (walletError) throw walletError;
+
+                const { error: txError } = await supabase.from("transactions").insert({
+                    user_id: walletDialog.user.id,
+                    type: "wallet_fund" as any,
+                    amount: amt,
+                    status: "success" as any,
+                    description: walletNote || "Admin wallet credit",
+                    reference: `ADM-CR-${Date.now()}`,
+                });
+                if (txError) throw txError;
+            } else {
+                // Debit: check sufficient balance
+                if ((walletDialog.user.wallet_balance ?? 0) < amt) {
+                    setProcessingWallet(false);
+                    return toast.error("Insufficient wallet balance for debit");
+                }
+                const { error: walletError } = await supabase
+                    .from("wallets")
+                    .update({ balance: (walletDialog.user.wallet_balance ?? 0) - amt } as any)
+                    .eq("id", walletDialog.user.id);
+                if (walletError) throw walletError;
+
+                const { error: txError } = await supabase.from("transactions").insert({
+                    user_id: walletDialog.user.id,
+                    type: "refund" as any,
+                    amount: -amt,
+                    status: "success" as any,
+                    description: walletNote || "Admin wallet debit",
+                    reference: `ADM-DB-${Date.now()}`,
+                });
+                if (txError) throw txError;
+            }
+
             toast.success(`Wallet ${walletAction} of ₦${amt.toLocaleString()} successful`);
             setWalletDialog({ open: false, user: null });
             setWalletAmount("");
             setWalletNote("");
             refetch();
-        }
-    };
-
-    const handleExport = (type: "csv" | "pdf") => {
-        const headers = ["Name", "Username", "Phone", "Wallet Balance", "Status", "Joined"];
-        const data = filtered.map((u) => [
-            u.full_name,
-            u.username,
-            u.phone_number,
-            `N${(u.wallet_balance ?? 0).toLocaleString()}`,
-            u.status,
-            format(new Date(u.created_at), "yyyy-MM-dd")
-        ]);
-
-        if (type === "csv") {
-            exportToCSV(headers, data, "users_report");
-            toast.success("Users exported to CSV");
-        } else {
-            printPDF("User Management Report", headers, data);
-            toast.success("Print dialog opened for PDF report");
+        } catch (err: any) {
+            toast.error("Adjustment failed: " + err.message);
+        } finally {
+            setProcessingWallet(false);
         }
     };
 
@@ -109,23 +127,26 @@ const UserManagement = () => {
                 icon={Users}
                 badge={`${(users ?? []).length} total`}
                 actions={
-                    <div className="flex gap-2">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                    <Download className="w-3.5 h-3.5 mr-1.5" /> Export Data
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => handleExport("csv")}>
-                                    Export as CSV
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleExport("pdf")}>
-                                    Export as PDF/Print
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
+                    <DateRangeExport
+                        reportTitle="User Management Report"
+                        headers={["Name", "Username", "Phone", "Wallet Balance", "Status", "Joined"]}
+                        getFilteredData={(from, to) => {
+                            const rows = (users ?? []).filter((u) => {
+                                const d = new Date(u.created_at);
+                                const mf = !from || !isBefore(d, startOfDay(from));
+                                const mt = !to || !isAfter(d, endOfDay(to));
+                                return mf && mt;
+                            });
+                            return rows.map((u) => [
+                                u.full_name,
+                                u.username,
+                                u.phone_number,
+                                `N${(u.wallet_balance ?? 0).toLocaleString()}`,
+                                u.status,
+                                format(new Date(u.created_at), "yyyy-MM-dd"),
+                            ]);
+                        }}
+                    />
                 }
             />
 
@@ -237,18 +258,18 @@ const UserManagement = () => {
                                         <DropdownMenuContent align="end" className="w-48">
                                             <DropdownMenuLabel className="text-xs">User Actions</DropdownMenuLabel>
                                             <DropdownMenuSeparator />
-                                            <DropdownMenuItem onClick={() => toast.info(`Viewing ${user.username}`)}>
-                                                <Eye className="w-4 h-4 mr-2" /> View Profile
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => { setWalletDialog({ open: true, user }); setWalletAction("credit"); }}>
-                                                <Wallet className="w-4 h-4 mr-2" /> Credit Wallet
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => { setWalletDialog({ open: true, user }); setWalletAction("debit"); }}>
-                                                <Wallet className="w-4 h-4 mr-2" /> Debit Wallet
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => toast.info("Role assignment coming soon")}>
-                                                <Shield className="w-4 h-4 mr-2" /> Assign Role
-                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => setProfileDialog({ open: true, user })}>
+                                                                <Eye className="w-4 h-4 mr-2" /> View Profile
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => { setWalletDialog({ open: true, user }); setWalletAction("credit"); }}>
+                                                                <Wallet className="w-4 h-4 mr-2" /> Credit Wallet
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => { setWalletDialog({ open: true, user }); setWalletAction("debit"); }}>
+                                                                <Wallet className="w-4 h-4 mr-2" /> Debit Wallet
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => { setRoleDialog({ open: true, user }); setNewRole(user.role || "user"); }}>
+                                                                <Shield className="w-4 h-4 mr-2" /> Assign Role
+                                                            </DropdownMenuItem>
                                             <DropdownMenuSeparator />
                                             {user.status === "active" ? (
                                                 <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleToggleStatus(user.id, "active")}>
@@ -306,6 +327,86 @@ const UserManagement = () => {
                             variant={walletAction === "debit" ? "destructive" : "default"}
                         >
                             {processingWallet ? "Processing..." : `Confirm ${walletAction}`}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* View Profile Dialog */}
+            <Dialog open={profileDialog.open} onOpenChange={(o) => setProfileDialog({ open: o, user: profileDialog.user })}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Eye className="w-5 h-5 text-primary" /> User Profile
+                        </DialogTitle>
+                    </DialogHeader>
+                    {profileDialog.user && (
+                        <div className="space-y-3 pt-2 text-sm">
+                            {[
+                                ["Full Name", profileDialog.user.full_name],
+                                ["Username", profileDialog.user.username || "—"],
+                                ["Email", profileDialog.user.email || "—"],
+                                ["Phone", profileDialog.user.phone_number || "—"],
+                                ["Address", profileDialog.user.address || "—"],
+                                ["Role", profileDialog.user.role || "user"],
+                                ["Wallet Balance", `₦${(profileDialog.user.wallet_balance ?? 0).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`],
+                                ["Transaction PIN", profileDialog.user.transaction_pin_enabled ? "Enabled" : "Not set"],
+                                ["Status", profileDialog.user.status],
+                                ["Joined", format(new Date(profileDialog.user.created_at), "PPpp")],
+                            ].map(([k, v]) => (
+                                <div key={k} className="flex justify-between border-b border-border/50 pb-2">
+                                    <p className="text-muted-foreground text-xs">{k}</p>
+                                    <p className="font-medium text-xs text-right max-w-[55%] capitalize">{v}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Assign Role Dialog */}
+            <Dialog open={roleDialog.open} onOpenChange={(o) => setRoleDialog({ open: o, user: roleDialog.user })}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Shield className="w-5 h-5 text-primary" /> Assign Role
+                        </DialogTitle>
+                    </DialogHeader>
+                    {roleDialog.user && (
+                        <div className="space-y-4 pt-2">
+                            <div className="p-3 bg-accent/50 rounded-xl text-sm">
+                                <p className="font-semibold">{roleDialog.user.full_name}</p>
+                                <p className="text-muted-foreground text-xs">Current role: <span className="font-bold capitalize">{roleDialog.user.role || "user"}</span></p>
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">New Role</label>
+                                <Select value={newRole} onValueChange={setNewRole}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="user">User</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setRoleDialog({ open: false, user: null })}>Cancel</Button>
+                        <Button onClick={async () => {
+                            if (!roleDialog.user) return;
+                            const { error } = await supabase
+                                .from("profiles")
+                                .update({ role: newRole } as any)
+                                .eq("id", roleDialog.user.id);
+                            if (error) {
+                                toast.error("Failed to assign role: " + error.message);
+                            } else {
+                                toast.success(`Role updated to "${newRole}" for ${roleDialog.user.full_name}`);
+                                setRoleDialog({ open: false, user: null });
+                                refetch();
+                            }
+                        }}>
+                            Confirm Role
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -1,3 +1,4 @@
+import ApiHealthMonitor from "@/components/admin/ApiHealthMonitor";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
 import { useUsers } from "@/hooks/useUsers";
 import { StatCard } from "@/components/admin/StatCard";
@@ -27,8 +28,8 @@ import { exportToCSV, printPDF } from "@/utils/exportUtils";
 const CHART_COLORS = ["#7C3AED", "#D4AF37", "#10b981", "#3b82f6", "#ef4444"];
 
 const AdminDashboard = () => {
-    const { data: users, isLoading: loadingUsers } = useUsers();
-    const { data: transactions, isLoading: loadingTx } = useAdminTransactions();
+    const { data: users, isLoading: loadingUsers, refetch: refetchUsers } = useUsers();
+    const { data: transactions, isLoading: loadingTx, refetch: refetchTx } = useAdminTransactions();
 
     const totalUsers = users?.length ?? 0;
     const activeUsers = users?.filter((u) => u.status === "active").length ?? 0;
@@ -113,7 +114,7 @@ const AdminDashboard = () => {
                 badgeVariant="default"
                 actions={
                     <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => { refetchUsers(); refetchTx(); toast.success("Dashboard refreshed"); }}>
                             <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
                         </Button>
                         <DropdownMenu>
@@ -200,26 +201,85 @@ const AdminDashboard = () => {
 
             {/* Insights Row */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                <div className="xl:col-span-2 bg-card border border-border rounded-2xl p-12 flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center text-primary/30">
-                        <Activity className="w-8 h-8" />
+                {/* Revenue Trend Chart */}
+                <div className="xl:col-span-2 bg-card border border-border rounded-2xl p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 className="font-bold text-base">Revenue Trend</h3>
+                            <p className="text-xs text-muted-foreground">Last 14 days</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="font-bold text-lg">Activity Analytics</h3>
-                        <p className="text-sm text-muted-foreground max-w-sm">Detailed visual insights will become available as your transaction volume grows. Current platform data is shown in the overview cards above.</p>
+                    <div className="h-[260px]">
+                        {chartData.some(d => d.revenue > 0) ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#7C3AED" stopOpacity={0.3} />
+                                            <stop offset="100%" stopColor="#7C3AED" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" opacity={0.06} />
+                                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} stroke="currentColor" opacity={0.4} />
+                                    <YAxis fontSize={10} tickLine={false} axisLine={false} stroke="currentColor" opacity={0.4} tickFormatter={(v) => `₦${(v / 1000).toFixed(0)}k`} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }}
+                                        formatter={(v: any) => [`₦${Number(v).toLocaleString()}`, "Revenue"]}
+                                    />
+                                    <Area type="monotone" dataKey="revenue" stroke="#7C3AED" strokeWidth={2} fill="url(#areaGrad)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-muted-foreground text-sm italic">
+                                No revenue data for the last 14 days.
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <div className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="w-12 h-12 rounded-full bg-amber-500/5 flex items-center justify-center text-amber-500/30">
-                        <TrendingUp className="w-6 h-6" />
+                {/* Service Distribution */}
+                <div className="bg-card border border-border rounded-2xl p-6">
+                    <div className="mb-4">
+                        <h3 className="font-bold text-base">Service Distribution</h3>
+                        <p className="text-xs text-muted-foreground">By transaction count</p>
                     </div>
-                    <div>
-                        <h3 className="font-bold text-base">Service Trends</h3>
-                        <p className="text-xs text-muted-foreground">Monitoring service performance and distribution across all active users.</p>
+                    {topServices.length > 0 ? (
+                        <div className="h-[200px] mb-4">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie data={topServices} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} strokeWidth={2}>
+                                        {topServices.map((_, i) => (
+                                            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "10px", fontSize: "12px" }}
+                                        formatter={(v: any, name: string) => [v, name]}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    ) : (
+                        <div className="h-[200px] flex items-center justify-center text-muted-foreground text-sm italic">
+                            No service data yet.
+                        </div>
+                    )}
+                    <div className="space-y-2">
+                        {topServices.slice(0, 4).map((s, i) => (
+                            <div key={s.name} className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
+                                    <span className="capitalize">{s.name}</span>
+                                </div>
+                                <span className="font-bold">{s.value}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
+
+            {/* API Health Monitor */}
+            <ApiHealthMonitor />
 
             {/* Recent Transactions */}
             <div className="bg-card border border-border rounded-2xl">

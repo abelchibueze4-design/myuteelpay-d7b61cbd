@@ -3,6 +3,7 @@ import { Lock, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -23,7 +24,7 @@ export const SetupTransactionPinModal = ({
   onComplete,
   isRequired = false,
 }: SetupTransactionPinModalProps) => {
-  const { setTransactionPin, isLoading } = useSecuritySettings();
+  const { setTransactionPin, isLoading, error } = useSecuritySettings();
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -33,8 +34,8 @@ export const SetupTransactionPinModal = ({
 
     if (!pin) {
       newErrors.pin = "PIN is required";
-    } else if (!/^\d{4,6}$/.test(pin)) {
-      newErrors.pin = "PIN must be 4-6 digits";
+    } else if (!/^\d{4}$/.test(pin)) {
+      newErrors.pin = "PIN must be exactly 4 digits";
     }
 
     if (!confirmPin) {
@@ -58,7 +59,7 @@ export const SetupTransactionPinModal = ({
       setErrors({});
       onComplete();
     } else {
-      toast.error("Failed to set transaction PIN");
+      toast.error(error || "Failed to set transaction PIN");
     }
   };
 
@@ -78,6 +79,9 @@ export const SetupTransactionPinModal = ({
             <Lock className="w-5 h-5" />
             Set Up Transaction PIN
           </DialogTitle>
+          <DialogDescription>
+            Create a 4-digit PIN to secure utility purchases and wallet operations.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -90,23 +94,21 @@ export const SetupTransactionPinModal = ({
             </div>
           )}
 
-          <p className="text-sm text-muted-foreground">
-            Create a 4-6 digit PIN. You'll need to enter this PIN before making sensitive transactions like utility purchases or wallet withdrawals.
-          </p>
-
           <div className="space-y-4 border-t border-border pt-4">
             <div>
-              <Label htmlFor="setup-pin">Transaction PIN (4-6 digits)</Label>
+              <Label htmlFor="setup-pin">Transaction PIN (4 digits)</Label>
               <Input
                 id="setup-pin"
                 type="password"
                 inputMode="numeric"
-                maxLength={6}
+                maxLength={4}
                 placeholder="••••"
                 value={pin}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, "");
-                  setPin(val);
+                  if (val.length <= 4) {
+                    setPin(val);
+                  }
                   if (errors.pin) setErrors({ ...errors, pin: "" });
                 }}
                 className={errors.pin ? "border-destructive" : ""}
@@ -123,12 +125,14 @@ export const SetupTransactionPinModal = ({
                 id="setup-confirm-pin"
                 type="password"
                 inputMode="numeric"
-                maxLength={6}
+                maxLength={4}
                 placeholder="••••"
                 value={confirmPin}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, "");
-                  setConfirmPin(val);
+                  if (val.length <= 4) {
+                    setConfirmPin(val);
+                  }
                   if (errors.confirmPin) setErrors({ ...errors, confirmPin: "" });
                 }}
                 className={errors.confirmPin ? "border-destructive" : ""}

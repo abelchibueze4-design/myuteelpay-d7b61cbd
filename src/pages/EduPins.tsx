@@ -1,34 +1,39 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, Loader2, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useKvdata } from "@/hooks/useKvdata";
+import { useKvdata, useKvdataQuery } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
-
-const exams = [
-  { name: "WAEC", price: 3500 },
-  { name: "NECO", price: 1800 },
-];
+import { EduPinsPrices } from "@/components/services/EduPinsPrices";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
+import { PageBackButton } from "@/components/PageBackButton";
 
 const EduPins = () => {
   const navigate = useNavigate();
-  const [exam, setExam] = useState("");
+  const [examName, setExamName] = useState("");
+  const [selectedExam, setSelectedExam] = useState<any>(null);
   const [quantity, setQuantity] = useState("1");
   const [showSuccess, setShowSuccess] = useState(false);
   const [pinData, setPinData] = useState<any>(null);
   const [pinOpen, setPinOpen] = useState(false);
+  
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+  const { guardTransaction } = useTransactionGuard();
 
-  const selected = exams.find((e) => e.name === exam);
-  const total = selected ? selected.price * parseInt(quantity) : 0;
+  const total = useMemo(() => 
+    selectedExam ? selectedExam.price * parseInt(quantity) : 0,
+    [selectedExam, quantity]
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selected) return;
+    if (!selectedExam) return;
+    const { allowed } = guardTransaction(total);
+    if (!allowed) return;
     setPinOpen(true);
   };
 
@@ -36,12 +41,12 @@ const EduPins = () => {
     const isValid = await verifyPin(pin);
     if (!isValid) return false;
 
-    if (!selected) return false;
+    if (!selectedExam) return false;
 
     try {
       const res = await kvdata.mutateAsync({
         action: "buy_edu_pin",
-        exam_name: exam,
+        exam_name: examName,
         quantity: parseInt(quantity),
         amount: total,
       });
@@ -54,36 +59,65 @@ const EduPins = () => {
   };
 
   return (
-    <div className="min-h-screen bg-secondary">
-      <div className="gradient-hero px-4 py-6">
-        <div className="container mx-auto">
+    <div className="min-h-screen bg-secondary pb-12">
+      <div className="gradient-hero px-4 py-6 mb-6">
+        <div className="container mx-auto flex items-center gap-3">
+          <PageBackButton />
           <h1 className="text-lg font-bold text-primary-foreground">Education Pins</h1>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 -mt-2">
-        <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Exam Type</label>
-            <Select value={exam} onValueChange={setExam}>
-              <SelectTrigger><SelectValue placeholder="Select exam" /></SelectTrigger>
-              <SelectContent>{exams.map((e) => <SelectItem key={e.name} value={e.name}>{e.name} — ₦{e.price.toLocaleString()}</SelectItem>)}</SelectContent>
-            </Select>
+      <div className="container mx-auto px-4 max-w-2xl">
+        <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-6">
+          <div className="space-y-3">
+            <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Exam Type</label>
+            <EduPinsPrices 
+                selectedExamName={examName}
+                onSelect={(exam) => {
+                    setExamName(exam.name);
+                    setSelectedExam(exam);
+                }}
+            />
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Quantity</label>
+
+          <div className="space-y-3">
+            <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Quantity</label>
             <Select value={quantity} onValueChange={setQuantity}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{[1, 2, 3, 4, 5].map((n) => <SelectItem key={n} value={String(n)}>{n} pin{n > 1 ? "s" : ""}</SelectItem>)}</SelectContent>
+              <SelectTrigger className="h-14 rounded-2xl border-2 border-border/50 focus:ring-primary/20 bg-secondary/20 font-bold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-none shadow-2xl">
+                {[1, 2, 3, 4, 5].map((n) => <SelectItem key={n} value={String(n)}>{n} pin{n > 1 ? "s" : ""}</SelectItem>)}
+              </SelectContent>
             </Select>
           </div>
-          {selected && (
-            <div className="bg-secondary rounded-lg p-3 text-sm">
-              <div className="flex justify-between"><span className="text-muted-foreground">Total</span><span className="font-bold text-gradient">₦{total.toLocaleString()}</span></div>
+
+          {selectedExam && (
+            <div className="bg-primary/5 border-2 border-primary/10 rounded-2xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <GraduationCap className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Amount</p>
+                    <p className="text-xl font-black text-primary">₦{total.toLocaleString()}</p>
+                </div>
+              </div>
             </div>
           )}
-          <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
-            {kvdata.isPending ? "Processing..." : "Purchase Pin"}
+
+          <Button 
+            type="submit" 
+            variant="hero" 
+            className="w-full h-14 rounded-2xl text-lg font-black shadow-lg shadow-primary/20" 
+            disabled={kvdata.isPending || !examName}
+          >
+            {kvdata.isPending ? (
+                <div className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Processing...
+                </div>
+            ) : "Purchase Pin"}
           </Button>
         </form>
       </div>
@@ -101,7 +135,7 @@ const EduPins = () => {
             <Check className="w-8 h-8 text-primary-foreground" />
           </div>
           <h2 className="text-xl font-bold">Pin Generated!</h2>
-          <p className="text-sm text-muted-foreground mb-2">Your {exam} pin has been generated.</p>
+          <p className="text-sm text-muted-foreground mb-2">Your {examName} pin has been generated.</p>
           {pinData && (
             <div className="bg-secondary rounded-lg p-3">
               <p className="text-xs text-muted-foreground">PIN</p>

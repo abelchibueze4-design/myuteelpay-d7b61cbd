@@ -1,4 +1,5 @@
 import { Copy, Gift, Users, Wallet, ArrowRight, Check } from "lucide-react";
+import { PageBackButton } from "@/components/PageBackButton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -89,13 +90,13 @@ const Referral = () => {
     toast.success("Referral link copied!");
   };
 
-  const unclaimedUsers = (referredUsers as any[])?.filter(r => !r.is_claimed) || [];
+  const unclaimedUsers = Array.isArray(referredUsers) ? referredUsers.filter(r => !r.is_claimed) : [];
   const totalReferrals = unclaimedUsers.length;
 
   // Sum of: Unclaimed Referral rewards + Unclaimed Referee (Signup) reward
-  const referrerBonus = unclaimedUsers.reduce((sum, r) => sum + (r.reward_amount || 10), 0);
-  const signupBonus = (mySignupReferral && !(mySignupReferral as any).referee_is_claimed)
-    ? (mySignupReferral as any).referee_reward_amount || 10
+  const referrerBonus = unclaimedUsers.reduce((sum, r) => sum + (Number(r.reward_amount) || 10), 0);
+  const signupBonus = (mySignupReferral && !mySignupReferral.referee_is_claimed)
+    ? (Number(mySignupReferral.referee_reward_amount) || 10)
     : 0;
 
   const totalEarnings = referrerBonus + signupBonus;
@@ -115,94 +116,91 @@ const Referral = () => {
   const transferThresholdReached = totalReferrals >= 10 && totalEarnings >= 100;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] pb-24">
-      <div className="bg-primary px-4 pt-12 pb-24 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
-        <div className="container mx-auto relative z-10 flex flex-col items-center text-center max-w-2xl">
-          <div className="w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-6 shadow-xl border border-white/10">
-            <Gift className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-background pb-20">
+      {/* Compact header */}
+      <div className="bg-primary px-4 pt-8 pb-16 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20" />
+        <div className="relative z-10 flex items-center gap-3 max-w-lg mx-auto">
+          <PageBackButton />
+          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg">
+            <Gift className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight mb-2">Refer & Earn Big</h1>
-          <p className="text-white/70 text-sm font-medium">Invite your friends and get rewarded for every successful signup.</p>
+          <div>
+            <h1 className="text-lg font-black text-white tracking-tight">Refer & Earn</h1>
+            <p className="text-white/60 text-[10px] font-medium">Invite friends, get rewarded.</p>
+          </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 -mt-12 relative z-20 max-w-3xl">
-        <div className="flex bg-white dark:bg-slate-800 p-2 rounded-[2rem] shadow-xl shadow-primary/5 mb-8 border border-border/50">
+      <div className="px-4 -mt-8 relative z-20 max-w-lg mx-auto">
+        {/* Compact tab switcher */}
+        <div className="flex bg-card p-1.5 rounded-2xl shadow-lg shadow-primary/5 mb-5 border border-border/50">
           <button
             onClick={() => setSearchParams({ tab: "referral" })}
             className={cn(
-              "flex-1 py-4 rounded-[1.5rem] text-sm font-black transition-all flex items-center justify-center gap-2",
-              activeTab === "referral" ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-secondary"
+              "flex-1 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5",
+              activeTab === "referral" ? "bg-primary text-white shadow-md shadow-primary/20" : "text-muted-foreground hover:bg-secondary"
             )}
           >
-            <Users className="w-4 h-4" /> My Network
+            <Users className="w-3.5 h-3.5" /> My Network
           </button>
           <button
             onClick={() => setSearchParams({ tab: "bonus" })}
             className={cn(
-              "flex-1 py-4 rounded-[1.5rem] text-sm font-black transition-all flex items-center justify-center gap-2",
-              activeTab === "bonus" ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-muted-foreground hover:bg-secondary"
+              "flex-1 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5",
+              activeTab === "bonus" ? "bg-primary text-white shadow-md shadow-primary/20" : "text-muted-foreground hover:bg-secondary"
             )}
           >
-            <Wallet className="w-4 h-4" /> Bonus Funds
+            <Wallet className="w-3.5 h-3.5" /> Bonus Funds
           </button>
         </div>
 
         {activeTab === "referral" ? (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-white dark:bg-slate-800 rounded-[2rem] p-8 border border-border/50 shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform blur-xl" />
-                <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-1">Total Network</p>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-black text-foreground">{totalReferrals}</p>
-                  <p className="text-[10px] font-black text-muted-foreground">/ 10 GOAL</p>
+          <div className="space-y-4">
+            {/* Stats row */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-card rounded-2xl p-4 border border-border/50 shadow-sm">
+                <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Network</p>
+                <div className="flex items-baseline gap-1.5">
+                  <p className="text-2xl font-black text-foreground">{totalReferrals}</p>
+                  <p className="text-[9px] font-black text-muted-foreground">/ 10</p>
                 </div>
-                <div className="mt-4 w-full bg-secondary h-1.5 rounded-full overflow-hidden">
-                  <div
-                    className="bg-primary h-full transition-all duration-1000"
-                    style={{ width: `${Math.min((totalReferrals / 10) * 100, 100)}%` }}
-                  />
+                <div className="mt-2 w-full bg-secondary h-1 rounded-full overflow-hidden">
+                  <div className="bg-primary h-full transition-all duration-1000" style={{ width: `${Math.min((totalReferrals / 10) * 100, 100)}%` }} />
                 </div>
               </div>
-              <div className="bg-slate-900 rounded-[2rem] p-8 border border-slate-800 shadow-xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform blur-xl" />
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 text-white/50">Total Commissions</p>
-                <p className="text-4xl font-black text-white">₦{totalEarnings.toLocaleString()}</p>
-                <div className="mt-4 flex items-center gap-2 text-emerald-400 font-bold text-[10px] uppercase">
-                  Available to claim <ArrowRight className="w-3 h-3" />
-                </div>
+              <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 shadow-sm">
+                <p className="text-[9px] font-black text-white/50 uppercase tracking-widest mb-0.5">Commissions</p>
+                <p className="text-2xl font-black text-white">₦{totalEarnings.toLocaleString()}</p>
+                <p className="mt-2 text-emerald-400 font-bold text-[9px] uppercase flex items-center gap-1">
+                  Claimable <ArrowRight className="w-2.5 h-2.5" />
+                </p>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-border/50 shadow-sm">
-              <h2 className="text-lg font-black text-foreground mb-1 tracking-tight">Share Your Link</h2>
-              <p className="text-xs font-medium text-muted-foreground mb-6">Earn instant bonuses when people join through you.</p>
-
-              <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-2xl border-2 border-dashed border-border/50">
-                <div className="flex-1 px-3 text-xs font-black text-foreground truncate">
-                  {refLink || "Generating your unique link..."}
+            {/* Share link */}
+            <div className="bg-card rounded-2xl p-4 border border-border/50 shadow-sm">
+              <h2 className="text-sm font-black text-foreground mb-0.5">Share Your Link</h2>
+              <p className="text-[10px] font-medium text-muted-foreground mb-3">Earn bonuses when people join through you.</p>
+              <div className="flex items-center gap-2 p-2 bg-secondary/50 rounded-xl border border-dashed border-border/50">
+                <div className="flex-1 px-2 text-[10px] font-bold text-foreground truncate">
+                  {refLink || "Generating link..."}
                 </div>
-                <Button onClick={copyLink} disabled={!referralCode} className="h-12 px-6 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 transition-transform active:scale-95">
-                  <Copy className="w-4 h-4 mr-2" /> Copy
+                <Button onClick={copyLink} disabled={!referralCode} size="sm" className="h-9 px-4 rounded-lg bg-primary hover:bg-primary/90 text-white text-xs shadow-sm">
+                  <Copy className="w-3.5 h-3.5 mr-1.5" /> Copy
                 </Button>
               </div>
-
               {referralCode && (
-                <div className="mt-6 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Your Referral Code</p>
-                    <p className="text-2xl font-black text-primary tracking-tighter uppercase">{referralCode}</p>
+                    <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Code</p>
+                    <p className="text-base font-black text-primary tracking-tight uppercase">{referralCode}</p>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(referralCode);
-                      toast.success("Referral code copied!");
-                    }}
-                    className="rounded-xl border-primary/20 text-primary font-bold hover:bg-primary/5"
+                    onClick={() => { navigator.clipboard.writeText(referralCode); toast.success("Referral code copied!"); }}
+                    className="rounded-lg border-primary/20 text-primary font-bold text-[10px] h-8 hover:bg-primary/5"
                   >
                     Copy Code
                   </Button>
@@ -210,126 +208,121 @@ const Referral = () => {
               )}
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-black text-foreground tracking-tight px-2">Recent Referrals</h3>
-              <div className="bg-white dark:bg-slate-800 rounded-3xl border border-border/50 divide-y divide-border/30 shadow-sm overflow-hidden">
+            {/* Referrals list */}
+            <div>
+              <h3 className="text-sm font-black text-foreground mb-2 px-1">Recent Referrals</h3>
+              <div className="bg-card rounded-2xl border border-border/50 divide-y divide-border/30 shadow-sm overflow-hidden">
                 {(mySignupReferral || (referredUsers && referredUsers.length > 0)) ? (
                   <>
-                    {/* Display user's own signup bonus if they were referred */}
                     {mySignupReferral && (
-                      <div className="flex items-center justify-between p-6 bg-accent/5 group hover:bg-accent/10 transition-colors">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center text-accent text-sm font-black transition-transform group-hover:scale-110">
-                            ME
-                          </div>
+                      <div className="flex items-center justify-between p-3.5 bg-accent/5 hover:bg-accent/10 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center text-accent text-xs font-black">ME</div>
                           <div>
-                            <p className="font-black text-sm text-foreground">My Signup Bonus</p>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                              {format(new Date((mySignupReferral as any).created_at), "MMM d, yyyy")}
-                            </p>
+                            <p className="font-black text-xs text-foreground">Signup Bonus</p>
+                            <p className="text-[9px] font-bold text-muted-foreground uppercase">{format(new Date((mySignupReferral as any).created_at), "MMM d, yyyy")}</p>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <Badge className={cn(
-                            "border-none px-3 py-1 font-black text-[10px] uppercase",
-                            (mySignupReferral as any).referee_is_claimed ? "bg-slate-100 text-slate-500" : "bg-emerald-50 text-emerald-600"
-                          )}>
+                        <div className="flex flex-col items-end gap-0.5">
+                          <Badge className={cn("border-none px-2 py-0.5 font-black text-[8px] uppercase", (mySignupReferral as any).referee_is_claimed ? "bg-slate-100 text-slate-500" : "bg-emerald-50 text-emerald-600")}>
                             {(mySignupReferral as any).referee_is_claimed ? "Claimed" : "Available"}
                           </Badge>
-                          <p className="text-xs font-black text-foreground">
-                            + ₦{((mySignupReferral as any).referee_reward_amount || 10).toLocaleString()}
-                          </p>
+                          <p className="text-[10px] font-black text-foreground">+ ₦{((mySignupReferral as any).referee_reward_amount || 10).toLocaleString()}</p>
                         </div>
                       </div>
                     )}
-
                     {referredUsers?.map((r: any) => (
-                      <div key={r.id} className="flex items-center justify-between p-6 group hover:bg-slate-50 dark:hover:bg-slate-700/5 transition-colors">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-sm font-black transition-transform group-hover:scale-110">
+                      <div key={r.id} className="flex items-center justify-between p-3.5 hover:bg-secondary/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-xs font-black">
                             {(r.profiles as any)?.full_name?.[0]?.toUpperCase() || "?"}
                           </div>
                           <div>
-                            <p className="font-black text-sm text-foreground">{(r.profiles as any)?.full_name || "New Uteel User"}</p>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{format(new Date(r.created_at), "MMM d, yyyy")}</p>
+                            <p className="font-black text-xs text-foreground">{(r.profiles as any)?.full_name || "New User"}</p>
+                            <p className="text-[9px] font-bold text-muted-foreground uppercase">{format(new Date(r.created_at), "MMM d, yyyy")}</p>
                           </div>
                         </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <Badge className={cn(
-                            "border-none px-3 py-1 font-black text-[10px] uppercase",
-                            r.is_claimed ? "bg-slate-100 text-slate-500" : "bg-emerald-50 text-emerald-600"
-                          )}>
+                        <div className="flex flex-col items-end gap-0.5">
+                          <Badge className={cn("border-none px-2 py-0.5 font-black text-[8px] uppercase", r.is_claimed ? "bg-slate-100 text-slate-500" : "bg-emerald-50 text-emerald-600")}>
                             {r.is_claimed ? "Claimed" : "Available"}
                           </Badge>
-                          <p className="text-xs font-black text-foreground">
-                            + ₦{(r.reward_amount || 10).toLocaleString()}
-                          </p>
+                          <p className="text-[10px] font-black text-foreground">+ ₦{(r.reward_amount || 10).toLocaleString()}</p>
                         </div>
                       </div>
                     ))}
                   </>
                 ) : (
-                  <div className="p-20 text-center opacity-40 grayscale flex flex-col items-center gap-4">
-                    <Users className="w-12 h-12" />
-                    <p className="font-bold text-sm">Your network is empty. Start sharing!</p>
+                  <div className="py-10 px-6 text-center flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto">
+                      <span className="text-2xl">👥</span>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground">No referrals yet</h3>
+                      <p className="text-xs text-muted-foreground max-w-[240px] mx-auto mt-1 leading-relaxed">
+                        Share your referral link with friends and earn ₦10 for each person who signs up!
+                      </p>
+                    </div>
+                    <Button size="sm" onClick={copyLink} className="rounded-xl font-bold text-xs mt-1">
+                      <Copy className="w-3.5 h-3.5 mr-1.5" /> Copy Referral Link
+                    </Button>
                   </div>
                 )}
               </div>
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
+            {/* Bonus card */}
             <div className={cn(
-              "rounded-[2.5rem] p-12 text-center text-white relative overflow-hidden shadow-2xl transition-all duration-500",
-              transferThresholdReached ? "bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-emerald-200" : "bg-gradient-to-br from-slate-600 to-slate-800 shadow-slate-200"
+              "rounded-2xl p-6 text-center text-white relative overflow-hidden shadow-lg transition-all",
+              transferThresholdReached ? "bg-gradient-to-br from-emerald-500 to-emerald-700" : "bg-gradient-to-br from-slate-600 to-slate-800"
             )}>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
-              <div className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center mx-auto mb-8 shadow-xl">
-                <Wallet className="w-10 h-10 text-white" />
+              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20" />
+              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Wallet className="w-7 h-7 text-white" />
               </div>
-              <p className="text-white/70 text-xs font-black uppercase tracking-widest mb-2">Claimable Bonus</p>
-              <h2 className="text-6xl font-black mb-4 tracking-tighter">₦{totalEarnings.toLocaleString()}</h2>
-
-              <div className="mb-10 space-y-2">
-                <p className="text-[11px] font-bold opacity-80 decoration-primary text-white/90">
-                  {totalReferrals < 10 ? `Progress: ${totalReferrals}/10 Referrals Required` : "Referral Goal Reached!"}
+              <p className="text-white/60 text-[9px] font-black uppercase tracking-widest mb-1">Claimable Bonus</p>
+              <h2 className="text-4xl font-black mb-3 tracking-tighter">₦{totalEarnings.toLocaleString()}</h2>
+              <div className="mb-5 space-y-1.5">
+                <p className="text-[10px] font-bold text-white/80">
+                  {totalReferrals < 10 ? `${totalReferrals}/10 Referrals` : "Goal Reached!"}
                 </p>
-                <div className="w-max mx-auto px-4 py-1.5 rounded-full bg-black/20 text-[10px] font-black uppercase tracking-widest">
-                  Threshold: 10 Refs + ₦100 Balance
+                <div className="w-max mx-auto px-3 py-1 rounded-full bg-black/20 text-[9px] font-black uppercase tracking-widest">
+                  Min: 10 Refs + ₦100
                 </div>
               </div>
-
               <Button
                 onClick={handleTransfer}
                 disabled={transferMutation.isPending || !transferThresholdReached}
                 className={cn(
-                  "w-full h-16 rounded-2xl font-black text-lg gap-2 transition-all shadow-xl",
+                  "w-full h-12 rounded-xl font-black text-sm gap-2 transition-all shadow-lg",
                   transferThresholdReached
-                    ? "bg-white text-emerald-600 hover:bg-white/90 shadow-emerald-800/20"
+                    ? "bg-white text-emerald-600 hover:bg-white/90"
                     : "bg-white/10 text-white/40 cursor-not-allowed shadow-none"
                 )}
               >
-                {transferMutation.isPending ? "Processing..." : "Transfer to Wallet"} <ArrowRight className="w-5 h-5" />
+                {transferMutation.isPending ? "Processing..." : "Transfer to Wallet"} <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] p-10 border border-border/50 shadow-sm text-center">
-              <h3 className="text-lg font-black text-foreground mb-4 tracking-tight">How it works</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto font-black">1</div>
-                  <p className="text-xs font-black">Invite Friends</p>
-                  <p className="text-[10px] text-muted-foreground font-medium">Friend joins via link</p>
+            {/* How it works */}
+            <div className="bg-card rounded-2xl p-5 border border-border/50 shadow-sm text-center">
+              <h3 className="text-sm font-black text-foreground mb-3">How it works</h3>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center mx-auto font-black text-xs">1</div>
+                  <p className="text-[10px] font-black">Invite</p>
+                  <p className="text-[9px] text-muted-foreground">Share your link</p>
                 </div>
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mx-auto font-black">2</div>
-                  <p className="text-xs font-black">Hold Funds</p>
-                  <p className="text-[10px] text-muted-foreground font-medium">Pending verification</p>
+                <div className="space-y-1">
+                  <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center mx-auto font-black text-xs">2</div>
+                  <p className="text-[10px] font-black">Hold</p>
+                  <p className="text-[9px] text-muted-foreground">Pending review</p>
                 </div>
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto font-black">3</div>
-                  <p className="text-xs font-black">Instant Transfer</p>
-                  <p className="text-[10px] text-muted-foreground font-medium">Transfer to your wallet</p>
+                <div className="space-y-1">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto font-black text-xs">3</div>
+                  <p className="text-[10px] font-black">Claim</p>
+                  <p className="text-[9px] text-muted-foreground">Transfer to wallet</p>
                 </div>
               </div>
             </div>
@@ -338,13 +331,13 @@ const Referral = () => {
       </div>
 
       <Dialog open={showTransferSuccess} onOpenChange={setShowTransferSuccess}>
-        <DialogContent className="max-w-sm text-center p-12 rounded-[2.5rem]">
-          <div className="w-20 h-20 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-6">
-            <Check className="w-10 h-10" />
+        <DialogContent className="max-w-xs text-center p-8 rounded-2xl">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+            <Check className="w-7 h-7" />
           </div>
-          <h2 className="text-2xl font-black mb-2 tracking-tight">Funds Transferred!</h2>
-          <p className="text-xs text-muted-foreground font-medium mb-8">Your bonus has been successfully added to your main wallet balance.</p>
-          <Button className="w-full h-14 rounded-2xl bg-primary font-black" onClick={() => setShowTransferSuccess(false)}>Great!</Button>
+          <h2 className="text-lg font-black mb-1 tracking-tight">Funds Transferred!</h2>
+          <p className="text-[10px] text-muted-foreground font-medium mb-5">Bonus added to your wallet.</p>
+          <Button className="w-full h-11 rounded-xl bg-primary font-black text-sm" onClick={() => setShowTransferSuccess(false)}>Great!</Button>
         </DialogContent>
       </Dialog>
     </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { DateRangeExport } from "@/components/admin/DateRangeExport";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +23,7 @@ import {
     CheckCircle2, XCircle, Clock, AlertTriangle, Eye,
     ArrowLeftRight, Flag,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, isAfter, isBefore, startOfDay, endOfDay, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { exportToCSV, printPDF } from "@/utils/exportUtils";
 
@@ -33,10 +34,12 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 const TransactionMonitoring = () => {
-    const { data: transactions, isLoading, error, refetch } = useAdminTransactions();
+    const { data: transactions, isLoading, error, refetch, updateStatus, isUpdating } = useAdminTransactions();
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [typeFilter, setTypeFilter] = useState("all");
+    const [dateFrom, setDateFrom] = useState<Date | undefined>();
+    const [dateTo, setDateTo] = useState<Date | undefined>();
     const [selectedTx, setSelectedTx] = useState<any>(null);
     const [flagged, setFlagged] = useState<Set<string>>(new Set());
 
@@ -50,7 +53,10 @@ const TransactionMonitoring = () => {
             || t.description?.toLowerCase().includes(s);
         const matchStatus = statusFilter === "all" || t.status === statusFilter;
         const matchType = typeFilter === "all" || t.type === typeFilter;
-        return matchSearch && matchStatus && matchType;
+        const txDate = new Date(t.created_at);
+        const matchDateFrom = !dateFrom || !isBefore(txDate, startOfDay(dateFrom));
+        const matchDateTo = !dateTo || !isAfter(txDate, endOfDay(dateTo));
+        return matchSearch && matchStatus && matchType && matchDateFrom && matchDateTo;
     });
 
     const handleExport = (type: "csv" | "pdf") => {
@@ -88,25 +94,31 @@ const TransactionMonitoring = () => {
                 icon={Receipt}
                 badge={`${(transactions ?? []).length}`}
                 actions={
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                         <Button variant="outline" size="sm" onClick={() => refetch()}>
                             <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
                         </Button>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button size="sm">
-                                    <Download className="w-3.5 h-3.5 mr-1.5" /> Export Data
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => handleExport("csv")}>
-                                    Export as CSV
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleExport("pdf")}>
-                                    Export as PDF/Print
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <DateRangeExport
+                            reportTitle="Transaction Audit Report"
+                            headers={["Reference", "User", "Type", "Amount", "Status", "Date"]}
+                            getFilteredData={(from, to) => {
+                                const rows = (transactions ?? []).filter((t) => {
+                                    const txDate = new Date(t.created_at);
+                                    const matchFrom = !from || !isBefore(txDate, startOfDay(from));
+                                    const matchTo = !to || !isAfter(txDate, endOfDay(to));
+                                    return matchFrom && matchTo;
+                                });
+                                return rows.map((t) => [
+                                    t.reference || t.id.split("-")[0].toUpperCase(),
+                                    t.user_name,
+                                    t.type?.replace(/_/g, " "),
+                                    `N${Math.abs(t.amount).toLocaleString()}`,
+                                    t.status,
+                                    format(new Date(t.created_at), "yyyy-MM-dd HH:mm"),
+                                ]);
+                            }}
+                            onDateRangeChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
+                        />
                     </div>
                 }
             />
@@ -221,14 +233,38 @@ const TransactionMonitoring = () => {
                                                 <MoreVertical className="w-4 h-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-44">
+                                        <DropdownMenuContent align="end" className="w-48">
                                             <DropdownMenuItem onClick={() => setSelectedTx(t)}>
                                                 <Eye className="w-4 h-4 mr-2" /> View Details
                                             </DropdownMenuItem>
+                                            {t.status === "pending" && (
+                                                <>
+                                                    <DropdownMenuItem
+                                                        disabled={isUpdating}
+                                                        onClick={() => updateStatus({ id: t.id, status: "success" })}
+                                                    >
+                                                        <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Mark as Success
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        disabled={isUpdating}
+                                                        onClick={() => updateStatus({ id: t.id, status: "failed" })}
+                                                    >
+                                                        <XCircle className="w-4 h-4 mr-2 text-destructive" /> Mark as Failed
+                                                    </DropdownMenuItem>
+                                                </>
+                                            )}
                                             {t.status === "failed" && (
-                                                <DropdownMenuItem onClick={() => toast.info("Retrying transaction...")}>
-                                                    <RefreshCw className="w-4 h-4 mr-2" /> Retry
-                                                </DropdownMenuItem>
+                                                <>
+                                                    <DropdownMenuItem
+                                                        disabled={isUpdating}
+                                                        onClick={() => updateStatus({ id: t.id, status: "success" })}
+                                                    >
+                                                        <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Mark as Success
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => toast.info("Retrying transaction...")}>
+                                                        <RefreshCw className="w-4 h-4 mr-2" /> Retry
+                                                    </DropdownMenuItem>
+                                                </>
                                             )}
                                             {t.status === "success" && (
                                                 <DropdownMenuItem onClick={() => toast.info("Reversal request submitted")}>

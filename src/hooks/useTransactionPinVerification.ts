@@ -8,6 +8,11 @@ export const useTransactionPinVerification = () => {
   const [error, setError] = useState<string | null>(null);
 
   const verifyPin = async (pin: string): Promise<boolean> => {
+    // Biometric bypass — already verified by WebAuthn
+    if (pin === "__biometric__") {
+      return true;
+    }
+
     if (!user?.id) {
       setError("User not authenticated");
       return false;
@@ -17,27 +22,18 @@ export const useTransactionPinVerification = () => {
     setError(null);
 
     try {
-      // Fetch the stored PIN hash
-      const { data, error: fetchError } = await supabase
-        .from("profiles")
-        .select("transaction_pin_hash, transaction_pin_enabled" as any)
-        .eq("id", user.id)
-        .single();
+      // Always use server-side RPC for verification
+      const { data, error: rpcError } = await supabase.rpc("verify_transaction_pin", {
+        p_pin: pin,
+      });
 
-      if (fetchError) throw fetchError;
-
-      if (!(data as any)?.transaction_pin_enabled) {
-        setError("Transaction PIN is not enabled");
+      if (rpcError) {
+        console.error("PIN verification RPC error:", rpcError);
+        setError("Failed to verify PIN. Please try again.");
         return false;
       }
 
-      // Hash the provided PIN the same way
-      const hashedInput = Array.from(pin)
-        .map((char) => String.fromCharCode(char.charCodeAt(0) ^ 123))
-        .join("");
-
-      // Compare hashes
-      if (hashedInput !== (data as any).transaction_pin_hash) {
+      if (data === false) {
         setError("Incorrect PIN");
         return false;
       }
@@ -59,22 +55,21 @@ export const useTransactionPinVerification = () => {
     try {
       const { data, error: fetchError } = await supabase
         .from("profiles")
-        .select("transaction_pin_enabled" as any)
+        .select("transaction_pin_enabled, transaction_pin_hash")
         .eq("id", user.id)
         .single();
 
       if (fetchError) throw fetchError;
-      return (data as any)?.transaction_pin_enabled ?? false;
+      
+      // PIN is required only if both enabled AND hash exists
+      const pinEnabled = (data as any)?.transaction_pin_enabled ?? false;
+      const pinHash = (data as any)?.transaction_pin_hash;
+      return pinEnabled && !!pinHash;
     } catch (err) {
       console.error("Error checking PIN requirement:", err);
       return false;
     }
   };
 
-  return {
-    verifyPin,
-    checkIfPinRequired,
-    isLoading,
-    error,
-  };
+  return { verifyPin, checkIfPinRequired, isLoading, error };
 };

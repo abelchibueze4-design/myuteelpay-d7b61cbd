@@ -5,8 +5,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "next-themes";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardLayout from "@/components/DashboardLayout";
+import { DashboardWrapper } from "@/components/DashboardWrapper";
 
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -18,6 +20,7 @@ import Dashboard from "./pages/Dashboard";
 // Services
 import Airtime from "./pages/Airtime";
 import Data from "./pages/Data";
+import Services from "./pages/Services";
 import CableTV from "./pages/CableTV";
 import Electricity from "./pages/Electricity";
 import BulkSMS from "./pages/BulkSMS";
@@ -25,6 +28,8 @@ import EduPins from "./pages/EduPins";
 import Referral from "./pages/Referral";
 import DataCard from "./pages/DataCard";
 import FAQs from "./pages/FAQs";
+import DebugKVData from "./pages/DebugKVData";
+import KycVerification from "./pages/KycVerification";
 
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -41,6 +46,7 @@ import SecurityMonitoring from "./pages/admin/SecurityMonitoring";
 import Reports from "./pages/admin/Reports";
 import Reconciliation from "./pages/admin/Reconciliation";
 import NotificationCenter from "./pages/admin/NotificationCenter";
+import AdminKycReview from "./pages/admin/AdminKycReview";
 
 import NotFound from "./pages/NotFound";
 
@@ -48,17 +54,20 @@ const queryClient = new QueryClient();
 
 const ProtectedWithLayout = ({ children }: { children: React.ReactNode }) => (
   <ProtectedRoute>
-    <DashboardLayout>{children}</DashboardLayout>
+    <DashboardWrapper>
+      <DashboardLayout>{children}</DashboardLayout>
+    </DashboardWrapper>
   </ProtectedRoute>
 );
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true} storageKey="uteelpay-theme">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <AuthProvider>
             <Routes>
               {/* Public Routes */}
@@ -82,6 +91,14 @@ function App() {
               />
 
               {/* Services */}
+              <Route
+                path="/services"
+                element={
+                  <ProtectedWithLayout>
+                    <Services />
+                  </ProtectedWithLayout>
+                }
+              />
               <Route
                 path="/services/airtime"
                 element={
@@ -131,7 +148,7 @@ function App() {
                 }
               />
               <Route
-                path="/referral"
+                path="/services/referral"
                 element={
                   <ProtectedWithLayout>
                     <Referral />
@@ -146,13 +163,21 @@ function App() {
                   </ProtectedWithLayout>
                 }
               />
+              <Route
+                path="/kyc"
+                element={
+                  <ProtectedWithLayout>
+                    <KycVerification />
+                  </ProtectedWithLayout>
+                }
+              />
               <Route path="/faqs" element={<FAQs />} />
 
               {/* Admin Protected Routes */}
               <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/dashboard" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
               <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
-              <Route path="/admin/users/kyc" element={<AdminLayout><UserManagement /></AdminLayout>} />
+              <Route path="/admin/users/kyc" element={<AdminLayout><AdminKycReview /></AdminLayout>} />
               <Route path="/admin/transactions" element={<AdminLayout><TransactionMonitoring /></AdminLayout>} />
               <Route path="/admin/finance" element={<AdminLayout><WalletFinance /></AdminLayout>} />
               <Route path="/admin/finance/refunds" element={<AdminLayout><WalletFinance /></AdminLayout>} />
@@ -166,6 +191,15 @@ function App() {
               <Route path="/admin/notifications" element={<AdminLayout><NotificationCenter /></AdminLayout>} />
               <Route path="/admin/settings" element={<AdminLayout><AdminSettings /></AdminLayout>} />
 
+              <Route
+                path="/debug/kvdata"
+                element={
+                  <ProtectedWithLayout>
+                    <DebugKVData />
+                  </ProtectedWithLayout>
+                }
+              />
+
               {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
@@ -173,6 +207,7 @@ function App() {
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

@@ -1,20 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface SecuritySettings {
-  twoFaEnabled: boolean;
   transactionPinEnabled: boolean;
 }
 
 export const useSecuritySettings = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSettingsLoading, setIsSettingsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<SecuritySettings>({
-    twoFaEnabled: false,
     transactionPinEnabled: false,
   });
+
+  useEffect(() => {
+    if (!user?.id) {
+      setIsSettingsLoading(false);
+      return;
+    }
+
+    const fetchSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("transaction_pin_enabled, transaction_pin_hash")
+          .eq("id", user.id)
+          .single();
+
+        if (error) throw error;
+
+        const hasPinHash = !!(data as any)?.transaction_pin_hash;
+        const isPinEnabled = (data as any)?.transaction_pin_enabled || false;
+
+        setSettings({
+          transactionPinEnabled: isPinEnabled && hasPinHash,
+        });
+      } catch (err) {
+        console.error("Failed to load security settings:", err);
+      } finally {
+        setIsSettingsLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, [user]);
 
   const updatePassword = async (
     currentPassword: string,
@@ -29,8 +60,6 @@ export const useSecuritySettings = () => {
     setError(null);
 
     try {
-      // This would require backend validation in a real scenario
-      // Supabase doesn't allow direct password verification on client side
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -53,8 +82,9 @@ export const useSecuritySettings = () => {
       return false;
     }
 
-    if (!/^\d{4,6}$/.test(pin)) {
-      setError("PIN must be 4-6 digits");
+    const normalizedPin = pin.trim();
+    if (!/^[0-9]{4}$/.test(normalizedPin)) {
+      setError("PIN must be exactly 4 digits");
       return false;
     }
 
@@ -62,31 +92,20 @@ export const useSecuritySettings = () => {
     setError(null);
 
     try {
-      // In a real production app, PIN should be hashed on the backend
-      // For now, create a simple hash-like transformation
-      const hashedPin = Array.from(pin)
-        .map((char) => String.fromCharCode(char.charCodeAt(0) ^ 123))
-        .join("");
+      // Always use the secure server-side RPC function
+      const { error: rpcError } = await supabase.rpc("set_transaction_pin", {
+        p_pin: normalizedPin,
+      });
 
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          transaction_pin_enabled: true,
-          transaction_pin_hash: hashedPin,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-
-      if (updateError) {
-        console.error("Update error:", updateError);
-        throw updateError;
-      }
+      if (rpcError) throw rpcError;
 
       setSettings((prev) => ({ ...prev, transactionPinEnabled: true }));
       return true;
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Failed to set transaction PIN";
+        err && typeof err === "object" && "message" in err
+          ? String((err as { message?: string }).message || "Failed to set transaction PIN")
+          : "Failed to set transaction PIN";
       console.error("PIN setup error:", err);
       setError(message);
       return false;
@@ -130,45 +149,13 @@ export const useSecuritySettings = () => {
     }
   };
 
-  const toggleTwoFA = async (enabled: boolean): Promise<boolean> => {
-    if (!user?.id) {
-      setError("User not authenticated");
-      return false;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          two_fa_enabled: enabled,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
-      setSettings((prev) => ({ ...prev, twoFaEnabled: enabled }));
-      return true;
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to update 2FA settings";
-      setError(message);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return {
     settings,
     isLoading,
+    isSettingsLoading,
     error,
     updatePassword,
     setTransactionPin,
     removeTransactionPin,
-    toggleTwoFA,
   };
 };

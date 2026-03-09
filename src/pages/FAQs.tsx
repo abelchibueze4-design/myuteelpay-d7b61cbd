@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { HelpCircle, ChevronRight, ChevronDown, MessageSquare, Mail, Smartphone, Gift, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PageBackButton } from "@/components/PageBackButton";
 import { Badge } from "@/components/ui/badge";
 
 const faqCategories = [
@@ -51,14 +52,17 @@ const FAQs = () => {
     const filteredFaqs = faqs.filter(f => f.category === activeCategory);
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] pb-24">
+        <div className="min-h-screen bg-background pb-24">
             {/* Hero Header */}
             <div className="bg-primary pt-12 pb-20 px-6 overflow-hidden relative">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
-                <div className="container mx-auto relative z-10 text-center max-w-3xl">
-                    <Badge className="bg-white/20 text-white border-none mb-4 px-4 py-1">Support Center</Badge>
-                    <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">How can we help you?</h1>
-                    <p className="text-white/70 text-sm font-medium leading-relaxed">Find answers to frequently asked questions or reach out to our team.</p>
+                <div className="container mx-auto relative z-10 max-w-3xl">
+                    <PageBackButton className="mb-4" />
+                    <div className="text-center">
+                        <Badge className="bg-white/20 text-white border-none mb-4 px-4 py-1">Support Center</Badge>
+                        <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">How can we help you?</h1>
+                        <p className="text-white/70 text-sm font-medium leading-relaxed">Find answers to frequently asked questions or reach out to our team.</p>
+                    </div>
                 </div>
             </div>
 
@@ -89,7 +93,7 @@ const FAQs = () => {
                             <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-white/10 rounded-full group-hover:scale-125 transition-transform" />
                             <h3 className="text-lg font-black mb-2 tracking-tight">Still stuck?</h3>
                             <p className="text-white/80 text-[10px] font-medium mb-6 leading-relaxed">Our support heroes are ready to help you 24/7.</p>
-                            <a href="https://wa.me/2347036006762" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full py-3 bg-white text-accent rounded-xl text-xs font-black shadow-lg hover:bg-white/90 transition-all gap-2">
+                            <a href="https://wa.me/2349022334478" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full py-3 bg-white text-accent rounded-xl text-xs font-black shadow-lg hover:bg-white/90 transition-all gap-2">
                                 Chat Support <MessageSquare className="w-4 h-4" />
                             </a>
                         </div>

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { DateRangeExport } from "@/components/admin/DateRangeExport";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,9 +10,9 @@ import {
 import {
     ShieldCheck, Search, User, Clock, FileText, Activity, Download,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, isBefore, isAfter, startOfDay, endOfDay } from "date-fns";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const typeBadge: Record<string, JSX.Element> = {
@@ -36,6 +37,27 @@ interface AuditLog {
 const AuditLogs = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
+    const [dateFrom, setDateFrom] = useState<Date | undefined>();
+    const [dateTo, setDateTo] = useState<Date | undefined>();
+    const queryClient = useQueryClient();
+
+    // Real-time subscription
+    useEffect(() => {
+        const channel = supabase
+            .channel("audit-logs-realtime")
+            .on(
+                "postgres_changes",
+                { event: "INSERT", schema: "public", table: "audit_logs" },
+                () => {
+                    queryClient.invalidateQueries({ queryKey: ["admin_audit_logs"] });
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [queryClient]);
 
     const { data: logs, isLoading } = useQuery({
         queryKey: ["admin_audit_logs"],
@@ -56,21 +78,13 @@ const AuditLogs = () => {
             log.action?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             log.target_type?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchType = typeFilter === "all" || log.target_type === typeFilter;
-        return matchSearch && matchType;
+        const logDate = new Date(log.created_at);
+        const matchDateFrom = !dateFrom || !isBefore(logDate, startOfDay(dateFrom));
+        const matchDateTo = !dateTo || !isAfter(logDate, endOfDay(dateTo));
+        return matchSearch && matchType && matchDateFrom && matchDateTo;
     });
 
     const types = [...new Set((logs ?? []).map((l) => l.target_type).filter(Boolean))];
-
-    const exportCSV = () => {
-        const rows = [
-            ["Admin", "Action", "Target Type", "Target ID", "Timestamp"],
-            ...filtered.map((l) => [l.admin_email, l.action, l.target_type, l.target_id ?? "", format(new Date(l.created_at), "yyyy-MM-dd HH:mm:ss")]),
-        ];
-        const csv = rows.map((r) => r.join(",")).join("\n");
-        const blob = new Blob([csv], { type: "text/csv" });
-        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "audit_logs.csv"; a.click();
-        toast.success("Exported audit_logs.csv");
-    };
 
     return (
         <div className="max-w-screen-2xl space-y-6">
@@ -80,9 +94,26 @@ const AuditLogs = () => {
                 icon={ShieldCheck}
                 badge={`${filtered.length} entries`}
                 actions={
-                    <Button variant="outline" size="sm" onClick={exportCSV}>
-                        <Download className="w-3.5 h-3.5 mr-1.5" /> Export Logs
-                    </Button>
+                    <DateRangeExport
+                        reportTitle="Audit Logs Report"
+                        headers={["Admin", "Action", "Target Type", "Target ID", "Timestamp"]}
+                        getFilteredData={(from, to) => {
+                            const rows = (logs ?? []).filter((l) => {
+                                const d = new Date(l.created_at);
+                                const mf = !from || !isBefore(d, startOfDay(from));
+                                const mt = !to || !isAfter(d, endOfDay(to));
+                                return mf && mt;
+                            });
+                            return rows.map((l) => [
+                                l.admin_email,
+                                l.action,
+                                l.target_type,
+                                l.target_id ?? "",
+                                format(new Date(l.created_at), "yyyy-MM-dd HH:mm:ss"),
+                            ]);
+                        }}
+                        onDateRangeChange={(from, to) => { setDateFrom(from); setDateTo(to); }}
+                    />
                 }
             />
 

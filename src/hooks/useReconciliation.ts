@@ -201,6 +201,131 @@ export const useTriggerReconciliation = () => {
     });
 };
 
+// ─── Fetch pending/failed transactions for reconciliation ────────────────────
+export const usePendingFailedTransactions = () => {
+    return useQuery({
+        queryKey: ["reconciliation_pending_failed_txns"],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from("transactions")
+                .select(`*, profiles ( full_name, username )`)
+                .in("status", ["pending", "failed"])
+                .order("created_at", { ascending: false });
+            if (error) throw error;
+            return (data ?? []).map((t: any) => ({
+                ...t,
+                user_name: t.profiles?.full_name || t.profiles?.username || "Unknown",
+            }));
+        },
+        refetchInterval: 30000,
+    });
+};
+
+// ─── Force-resolve a pending transaction (mark success & credit wallet) ──────
+export const useForceResolveTransaction = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ txId, userId, amount }: { txId: string; userId: string; amount: number }) => {
+            // Update transaction status to success
+            const { error: txErr } = await supabase
+                .from("transactions")
+                .update({ status: "success" as any })
+                .eq("id", txId);
+            if (txErr) throw txErr;
+
+            // If it was a wallet_fund, credit the wallet
+            const { data: tx } = await supabase
+                .from("transactions")
+                .select("type")
+                .eq("id", txId)
+                .single();
+
+            if (tx?.type === "wallet_fund") {
+                const { data: wallet } = await supabase
+                    .from("wallets")
+                    .select("balance")
+                    .eq("id", userId)
+                    .single();
+                if (wallet) {
+                    await supabase
+                        .from("wallets")
+                        .update({ balance: wallet.balance + amount })
+                        .eq("id", userId);
+                }
+            }
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["reconciliation_pending_failed_txns"] });
+            queryClient.invalidateQueries({ queryKey: ["admin_transactions"] });
+            toast.success("Transaction force-resolved successfully");
+        },
+        onError: (err: Error) => toast.error("Force-resolve failed: " + err.message),
+    });
+};
+
+// ─── Refund a failed transaction (credit wallet + log refund) ────────────────
+export const useRefundFailedTransaction = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ txId, userId, amount, reference }: { txId: string; userId: string; amount: number; reference: string | null }) => {
+            // Credit wallet
+            const { data: wallet } = await supabase
+                .from("wallets")
+                .select("balance")
+                .eq("id", userId)
+                .single();
+            if (!wallet) throw new Error("Wallet not found");
+
+            await supabase
+                .from("wallets")
+                .update({ balance: wallet.balance + Math.abs(amount) })
+                .eq("id", userId);
+
+            // Log refund transaction
+            await supabase.from("transactions").insert({
+                user_id: userId,
+                type: "refund" as any,
+                amount: Math.abs(amount),
+                status: "success" as any,
+                description: `Admin refund for failed txn ${reference || txId.slice(0, 8)}`,
+                reference: `REFUND-ADM-${Date.now()}`,
+            });
+
+            // Mark original as resolved via metadata
+            await supabase
+                .from("transactions")
+                .update({ metadata: { admin_refunded: true, refunded_at: new Date().toISOString() } as any })
+                .eq("id", txId);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["reconciliation_pending_failed_txns"] });
+            queryClient.invalidateQueries({ queryKey: ["admin_transactions"] });
+            toast.success("Refund processed successfully");
+        },
+        onError: (err: Error) => toast.error("Refund failed: " + err.message),
+    });
+};
+
+// ─── Mark a pending transaction as failed ────────────────────────────────────
+export const useMarkTransactionFailed = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ txId }: { txId: string }) => {
+            const { error } = await supabase
+                .from("transactions")
+                .update({ status: "failed" as any })
+                .eq("id", txId);
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["reconciliation_pending_failed_txns"] });
+            queryClient.invalidateQueries({ queryKey: ["admin_transactions"] });
+            toast.success("Transaction marked as failed");
+        },
+        onError: (err: Error) => toast.error("Failed to update: " + err.message),
+    });
+};
+
 // ─── Log admin action to audit_logs ──────────────────────────────────────────
 export const useLogAdminAction = () => {
     return useMutation({

@@ -1,18 +1,52 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useMemo } from "react";
+import logo from "@/assets/logo.png";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import {
     LayoutDashboard, Users, Receipt, Settings, ShieldCheck, Bell,
     LogOut, Package, BarChart3, Menu, X, Wallet, GitBranch,
     FileText, AlertTriangle, ChevronDown, ChevronRight, Shield,
-    TrendingUp, Zap, Scale,
+    TrendingUp, Zap, Scale, Moon, Sun, Monitor,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useAdminBadges } from "@/hooks/useAdminBadges";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import { useTheme } from "next-themes";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const AdminThemeToggle = () => {
+    const { resolvedTheme, setTheme } = useTheme();
+    const ThemeIcon = resolvedTheme === "dark" ? Sun : Moon;
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                    <ThemeIcon className="w-5 h-5" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setTheme("light")} className="gap-2">
+                    <Sun className="w-4 h-4" /> Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("dark")} className="gap-2">
+                    <Moon className="w-4 h-4" /> Dark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("system")} className="gap-2">
+                    <Monitor className="w-4 h-4" /> System
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};
 
 interface NavItem {
     title: string;
@@ -20,6 +54,7 @@ interface NavItem {
     icon: React.ElementType;
     badge?: string;
     badgeColor?: string;
+    badgeKey?: string;
     children?: NavItem[];
 }
 
@@ -29,9 +64,10 @@ const navItems: NavItem[] = [
         title: "Users",
         url: "/admin/users",
         icon: Users,
+        badgeKey: "totalUsers",
         children: [
             { title: "All Users", url: "/admin/users", icon: Users },
-            { title: "KYC Review", url: "/admin/users/kyc", icon: ShieldCheck },
+            { title: "KYC Review", url: "/admin/users/kyc", icon: ShieldCheck, badgeKey: "kycPending" },
         ],
     },
     {
@@ -43,7 +79,7 @@ const navItems: NavItem[] = [
             { title: "Refunds", url: "/admin/finance/refunds", icon: Receipt },
         ],
     },
-    { title: "Transactions", url: "/admin/transactions", icon: Receipt },
+    { title: "Transactions", url: "/admin/transactions", icon: Receipt, badgeKey: "txIssues" },
     { title: "Services", url: "/admin/services", icon: Package },
     { title: "Referrals", url: "/admin/referrals", icon: GitBranch },
     { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
@@ -58,8 +94,8 @@ const navItems: NavItem[] = [
             { title: "IP & Sessions", url: "/admin/security", icon: Shield },
         ],
     },
-    { title: "Reconciliation", url: "/admin/reconciliation", icon: Scale, badge: "Auto", badgeColor: "bg-primary" },
-    { title: "Notifications", url: "/admin/notifications", icon: Bell, badge: "New", badgeColor: "bg-amber-500" },
+    { title: "Reconciliation", url: "/admin/reconciliation", icon: Scale, badgeKey: "reconOpen" },
+    { title: "Notifications", url: "/admin/notifications", icon: Bell },
     { title: "Reports", url: "/admin/reports", icon: FileText },
     { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
@@ -67,9 +103,11 @@ const navItems: NavItem[] = [
 const SidebarNavItem = ({
     item,
     collapsed,
+    badges,
 }: {
     item: NavItem;
     collapsed: boolean;
+    badges: Record<string, number>;
 }) => {
     const location = useLocation();
     const [open, setOpen] = useState(() =>
@@ -77,6 +115,11 @@ const SidebarNavItem = ({
     );
     const isActive = location.pathname === item.url;
     const hasChildren = !!item.children?.length;
+
+    // Compute badge count for this item (or sum children)
+    const badgeCount = item.badgeKey
+        ? badges[item.badgeKey] || 0
+        : item.children?.reduce((sum, c) => sum + (c.badgeKey ? (badges[c.badgeKey] || 0) : 0), 0) || 0;
 
     if (hasChildren && !collapsed) {
         return (
@@ -91,28 +134,41 @@ const SidebarNavItem = ({
                 >
                     <item.icon className="w-4 h-4 shrink-0" />
                     <span className="flex-1 text-left">{item.title}</span>
-                    {item.badge && (
+                    {badgeCount > 0 && (
+                        <span className="min-w-[18px] h-[18px] flex items-center justify-center text-[9px] font-bold text-primary-foreground bg-primary rounded-full px-1">
+                            {badgeCount > 99 ? "99+" : badgeCount}
+                        </span>
+                    )}
+                    {item.badge && !badgeCount && (
                         <span className={`w-2 h-2 rounded-full ${item.badgeColor || "bg-primary"}`} />
                     )}
                     {open ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                 </button>
                 {open && (
                     <div className="ml-4 mt-1 space-y-1 border-l border-border pl-3">
-                        {item.children!.map((child) => (
-                            <Link
-                                key={child.url}
-                                to={child.url}
-                                className={cn(
-                                    "flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium transition-all",
-                                    location.pathname === child.url
-                                        ? "text-primary bg-primary/10"
-                                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                                )}
-                            >
-                                <child.icon className="w-3.5 h-3.5" />
-                                {child.title}
-                            </Link>
-                        ))}
+                        {item.children!.map((child) => {
+                            const childCount = child.badgeKey ? (badges[child.badgeKey] || 0) : 0;
+                            return (
+                                <Link
+                                    key={child.url}
+                                    to={child.url}
+                                    className={cn(
+                                        "flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium transition-all",
+                                        location.pathname === child.url
+                                            ? "text-primary bg-primary/10"
+                                            : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                                    )}
+                                >
+                                    <child.icon className="w-3.5 h-3.5" />
+                                    <span className="flex-1">{child.title}</span>
+                                    {childCount > 0 && (
+                                        <span className="min-w-[16px] h-[16px] flex items-center justify-center text-[8px] font-bold text-primary-foreground bg-destructive rounded-full px-1">
+                                            {childCount}
+                                        </span>
+                                    )}
+                                </Link>
+                            );
+                        })}
                     </div>
                 )}
             </div>
@@ -132,18 +188,32 @@ const SidebarNavItem = ({
         >
             <item.icon className="w-4 h-4 shrink-0" />
             {!collapsed && <span className="flex-1">{item.title}</span>}
-            {!collapsed && item.badge && (
+            {!collapsed && badgeCount > 0 && (
+                <span className={cn(
+                    "min-w-[18px] h-[18px] flex items-center justify-center text-[9px] font-bold rounded-full px-1",
+                    isActive ? "bg-white/25 text-white" : "bg-destructive text-primary-foreground"
+                )}>
+                    {badgeCount > 99 ? "99+" : badgeCount}
+                </span>
+            )}
+            {!collapsed && item.badge && !badgeCount && (
                 <span className={`text-[9px] font-bold text-white px-1.5 py-0.5 rounded-full ${item.badgeColor || "bg-primary"}`}>
                     {item.badge}
                 </span>
             )}
-            {collapsed && item.badge && (
+            {collapsed && badgeCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] flex items-center justify-center text-[8px] font-bold text-primary-foreground bg-destructive rounded-full px-0.5">
+                    {badgeCount > 9 ? "9+" : badgeCount}
+                </span>
+            )}
+            {collapsed && !badgeCount && item.badge && (
                 <span className={`absolute top-0.5 right-0.5 w-2 h-2 rounded-full ${item.badgeColor || "bg-primary"}`} />
             )}
             {/* Tooltip for collapsed */}
             {collapsed && (
                 <div className="absolute left-full ml-2 px-2 py-1 bg-popover border text-foreground text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 shadow-lg">
                     {item.title}
+                    {badgeCount > 0 && <span className="ml-1 text-destructive font-bold">({badgeCount})</span>}
                 </div>
             )}
         </Link>
@@ -153,9 +223,12 @@ const SidebarNavItem = ({
 const AdminLayout = ({ children }: { children: ReactNode }) => {
     const { isAdmin, loading, role } = useAdmin();
     const { signOut, user } = useAuth();
+    const { data: badges } = useAdminBadges();
     const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+
+    const badgeCounts = useMemo(() => badges || { kycPending: 0, txIssues: 0, reconOpen: 0, totalUsers: 0 }, [badges]);
 
     const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Admin";
     const roleLabel = role?.replace(/_/g, " ") || "Administrator";
@@ -187,7 +260,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         navigate("/login");
     };
 
-    const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
+    const totalAlerts = badgeCounts.kycPending + badgeCounts.txIssues + badgeCounts.reconOpen;
+
+    const SidebarComponent = ({ mobile = false }: { mobile?: boolean }) => (
         <div
             className={cn(
                 "flex flex-col h-full bg-card border-r border-border",
@@ -196,9 +271,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         >
             {/* Logo */}
             <div className="h-16 flex items-center gap-3 px-4 border-b border-border shrink-0">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-purple-700 flex items-center justify-center shadow-md">
-                    <Zap className="w-4 h-4 text-white" />
-                </div>
+                <img src={logo} alt="Uteelpay" className="w-10 h-10 rounded-xl object-contain" />
                 {(!collapsed || mobile) && (
                     <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm text-foreground leading-none">UteelPay</p>
@@ -231,7 +304,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
             {/* Nav */}
             <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
                 {navItems.map((item) => (
-                    <SidebarNavItem key={item.url} item={item} collapsed={collapsed && !mobile} />
+                    <SidebarNavItem key={item.url} item={item} collapsed={collapsed && !mobile} badges={badgeCounts} />
                 ))}
             </nav>
 
@@ -266,7 +339,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         <div className="min-h-screen flex w-full bg-background">
             {/* Desktop Sidebar */}
             <div className={cn("hidden md:flex shrink-0 h-screen sticky top-0", collapsed ? "w-[68px]" : "w-64")}>
-                <Sidebar />
+                <SidebarComponent />
             </div>
 
             {/* Mobile sidebar overlay */}
@@ -274,7 +347,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                 <div className="fixed inset-0 z-50 md:hidden">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
                     <div className="absolute left-0 top-0 h-full w-64 z-50">
-                        <Sidebar mobile />
+                        <SidebarComponent mobile />
                     </div>
                 </div>
             )}
@@ -294,15 +367,27 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
                     <div className="flex items-center gap-2">
                         {/* Live indicator */}
-                        <div className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-600 font-medium bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                        <div className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-600 font-medium bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-full">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             System Online
                         </div>
 
-                        {/* Alerts */}
-                        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
+                        {/* Theme toggle */}
+                        <AdminThemeToggle />
+
+                        {/* Alerts bell with total count */}
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="relative text-muted-foreground hover:text-foreground"
+                            onClick={() => navigate("/admin/notifications")}
+                        >
                             <Bell className="w-5 h-5" />
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-background" />
+                            {totalAlerts > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] flex items-center justify-center text-[9px] font-bold text-primary-foreground bg-destructive rounded-full px-0.5 border-2 border-background">
+                                    {totalAlerts > 99 ? "99+" : totalAlerts}
+                                </span>
+                            )}
                         </Button>
 
                         {/* User avatar */}

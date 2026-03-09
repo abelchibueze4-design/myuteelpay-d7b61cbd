@@ -1,0 +1,7 @@
+{
+  "name": "myuteelpay",
+  "version": "1.0.0",
+  "dist": "dist",
+  "framework": "vite",
+  "routing": "index.html"
+}

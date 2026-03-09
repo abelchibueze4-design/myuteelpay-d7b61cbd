@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Zap, Check } from "lucide-react";
+import { Zap, Check, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DiscoIcon } from "@/components/DiscoIcon";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useKvdata } from "@/hooks/useKvdata";
 import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerification";
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
-
-const discos = ["IKEDC", "EKEDC", "AEDC", "KEDCO", "PHEDC", "BEDC", "IBEDC", "JEDC", "KAEDCO"];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useTransactionGuard } from "@/hooks/useTransactionGuard";
+import { PageBackButton } from "@/components/PageBackButton";
 
 const Electricity = () => {
   const navigate = useNavigate();
@@ -21,17 +23,42 @@ const Electricity = () => {
   const [token, setToken] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [pinOpen, setPinOpen] = useState(false);
+  const [discoDropdownOpen, setDiscoDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
+  const { guardTransaction } = useTransactionGuard();
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDiscoDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const { data: discos, isLoading: isLoadingDiscos } = useQuery({
+    queryKey: ["electricity_companies"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("electricity_companies").select("*");
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const handleValidateMeter = async () => {
     if (!meter || !disco) return;
     try {
+      const selectedDisco = discos?.find(d => String(d.disco_id) === disco);
       const res = await kvdata.mutateAsync({
         action: "validate_meter",
         meter_number: meter,
-        disco_name: disco,
+        disco_id: Number(disco),
         meter_type: type,
+        disco_label: selectedDisco?.disco_name
       });
       setCustomerName(res?.Customer_Name || res?.name || "Validated");
     } catch {
@@ -42,6 +69,8 @@ const Electricity = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!disco || !meter || !amount) return;
+    const { allowed } = guardTransaction(Number(amount));
+    if (!allowed) return;
     setPinOpen(true);
   };
 
@@ -50,12 +79,14 @@ const Electricity = () => {
     if (!isValid) return false;
 
     try {
+      const selectedDisco = discos?.find(d => String(d.disco_id) === disco);
       const res = await kvdata.mutateAsync({
         action: "buy_electricity",
-        disco_name: disco,
+        disco_id: Number(disco),
         meter_number: meter,
         meter_type: type,
         amount: Number(amount),
+        disco_label: selectedDisco?.disco_name
       });
       setToken(res?.kvdata?.token || res?.kvdata?.Token || "");
       setShowSuccess(true);
@@ -68,7 +99,8 @@ const Electricity = () => {
   return (
     <div className="min-h-screen bg-secondary">
       <div className="gradient-hero px-4 py-6">
-        <div className="container mx-auto">
+        <div className="container mx-auto flex items-center gap-3">
+          <PageBackButton />
           <h1 className="text-lg font-bold text-primary-foreground">Electricity</h1>
         </div>
       </div>
@@ -85,22 +117,60 @@ const Electricity = () => {
         <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 shadow-card space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Distribution Company</label>
-            <Select value={disco} onValueChange={setDisco}>
-              <SelectTrigger><SelectValue placeholder="Select disco" /></SelectTrigger>
-              <SelectContent>{discos.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-            </Select>
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setDiscoDropdownOpen(!discoDropdownOpen)}
+                className="w-full flex items-center justify-between gap-3 px-3 py-3 rounded-xl border-2 border-border bg-card text-left transition-all hover:border-primary/30"
+              >
+                {disco && discos ? (
+                  <div className="flex items-center gap-3">
+                    <DiscoIcon discoName={discos.find(d => String(d.disco_id) === disco)?.disco_name || ""} />
+                    <span className="text-sm font-medium">{discos.find(d => String(d.disco_id) === disco)?.disco_name}</span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground">Select distribution company</span>
+                )}
+                <ChevronDown className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform ${discoDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {discoDropdownOpen && (
+                <div className="absolute z-50 mt-1 w-full bg-card border border-border rounded-xl shadow-lg max-h-64 overflow-y-auto">
+                  {isLoadingDiscos ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    discos?.map((d) => (
+                      <button
+                        key={d.disco_id}
+                        type="button"
+                        onClick={() => { setDisco(String(d.disco_id)); setCustomerName(""); setDiscoDropdownOpen(false); }}
+                        className={`w-full flex items-center gap-3 px-3 py-3 transition-all hover:bg-primary/5 ${
+                          disco === String(d.disco_id) ? "bg-primary/5" : ""
+                        } first:rounded-t-xl last:rounded-b-xl`}
+                      >
+                        <DiscoIcon discoName={d.disco_name} />
+                        <span className="text-sm font-medium">{d.disco_name}</span>
+                        {disco === String(d.disco_id) && <Check className="w-4 h-4 text-primary ml-auto" />}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Meter Number</label>
             <div className="relative">
               <Zap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input value={meter} onChange={(e) => { setMeter(e.target.value); setCustomerName(""); }} placeholder="Enter meter number" className="pl-10" required onBlur={handleValidateMeter} />
+              <Input value={meter} onChange={(e) => { setMeter(e.target.value); setCustomerName(""); }} placeholder="Enter meter number" className="pl-10 placeholder:text-[10px] placeholder:font-normal" required onBlur={handleValidateMeter} />
             </div>
             {customerName && <p className="text-xs text-primary font-medium">✓ {customerName}</p>}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Amount</label>
-            <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₦500 minimum" type="number" required />
+            <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₦500 minimum" type="number" required className="placeholder:text-[10px] placeholder:font-normal" />
           </div>
           <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
             {kvdata.isPending ? "Processing..." : "Pay Now"}
