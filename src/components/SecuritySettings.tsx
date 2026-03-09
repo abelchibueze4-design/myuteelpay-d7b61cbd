@@ -179,10 +179,34 @@ export const SecuritySettings = () => {
     }
   };
 
-  const handleRemovePin = async () => {
-    const success = await removeTransactionPin();
-    if (success) toast.success("Transaction PIN removed");
-    else toast.error("Failed to remove PIN");
+  const handleVerifyPasswordForRemove = async () => {
+    if (!removePassword) {
+      setRemoveErrors({ removePassword: "Enter your account password" });
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: user?.email || "",
+        password: removePassword,
+      });
+      if (error) {
+        setRemoveErrors({ removePassword: "Incorrect password" });
+        return;
+      }
+      // Password verified, proceed with removal
+      const success = await removeTransactionPin();
+      if (success) {
+        if (biometricEnabled) removeBiometric();
+        toast.success("Transaction PIN removed");
+        setShowRemoveConfirm(false);
+        setRemovePassword("");
+        setRemoveErrors({});
+      } else {
+        toast.error("Failed to remove PIN");
+      }
+    } catch {
+      setRemoveErrors({ removePassword: "Verification failed" });
+    }
   };
 
   // PinInput moved outside component — see below
