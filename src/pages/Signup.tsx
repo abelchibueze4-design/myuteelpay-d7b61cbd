@@ -46,65 +46,65 @@ const Signup = () => {
     { key: "name", label: "Full Name", icon: User, type: "text", placeholder: "John Doe", required: true },
     { key: "username", label: "Username", icon: AtSign, type: "text", placeholder: "johndoe", required: true },
     { key: "email", label: "Email", icon: Mail, type: "email", placeholder: "you@example.com", required: true },
-    { key: "phone", label: "Phone Number", icon: Phone, type: "tel", placeholder: "+234 800 000 0000", required: true },
+    { key: "phone", label: "Phone", icon: Phone, type: "tel", placeholder: "+234 800 000 0000", required: true },
     { key: "address", label: "Address", icon: MapPin, type: "text", placeholder: "Lagos, Nigeria", required: true },
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block"><img src={logo} alt="Uteelpay" className="h-24 w-auto mx-auto" /></Link>
-          <h1 className="text-2xl font-bold mt-4">Create Account</h1>
-          <p className="text-sm text-muted-foreground mt-1">Join thousands of Nigerians saving on bills</p>
+    <div className="min-h-screen flex flex-col justify-center bg-secondary px-4 py-6">
+      <div className="w-full max-w-md mx-auto">
+        <div className="text-center mb-4">
+          <Link to="/" className="inline-block"><img src={logo} alt="Uteelpay" className="h-14 w-auto mx-auto" /></Link>
+          <h1 className="text-xl font-bold mt-2">Create Account</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Join thousands of Nigerians saving on bills</p>
         </div>
-        <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-8 shadow-card space-y-4">
+        <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-5 shadow-card space-y-2.5">
           {fields.map((f) => (
-            <div key={f.key} className="space-y-2">
-              <label className="text-sm font-medium">{f.label}</label>
+            <div key={f.key} className="space-y-1">
+              <label className="text-xs font-medium">{f.label}</label>
               <div className="relative">
-                <f.icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <f.icon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <Input
                   value={form[f.key as keyof typeof form]}
                   onChange={(e) => update(f.key, e.target.value)}
                   placeholder={f.placeholder}
-                  className="pl-10"
+                  className="h-9 pl-9 text-sm placeholder:text-[10px]"
                   type={f.type}
                   required={f.required}
                 />
               </div>
               {f.key === "username" && form.username && (
-                <p className={`text-xs ${validateUsername(form.username) ? "text-green-600" : "text-destructive"}`}>
+                <p className={`text-[10px] ${validateUsername(form.username) ? "text-green-600" : "text-destructive"}`}>
                   {validateUsername(form.username) ? "Username available format" : "3-20 chars, starts with letter, letters/numbers/_ only"}
                 </p>
               )}
             </div>
           ))}
 
-          {/* Password with visibility toggle */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Password</label>
+          {/* Password */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium">Password</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <Input
                 value={form.password}
                 onChange={(e) => update("password", e.target.value)}
                 placeholder="••••••••"
-                className="pl-10 pr-10"
+                className="h-9 pl-9 pr-9 text-sm placeholder:text-[10px]"
                 type={showPassword ? "text" : "password"}
                 required
               />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
               </button>
             </div>
             {form.password && (
-              <div className="space-y-1 mt-2">
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 mt-1">
                 {passwordRules.map((rule, i) => {
                   const pass = rule.test(form.password);
                   return (
-                    <div key={i} className={`flex items-center gap-2 text-xs ${pass ? "text-green-600" : "text-muted-foreground"}`}>
-                      {pass ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                    <div key={i} className={`flex items-center gap-1 text-[10px] ${pass ? "text-green-600" : "text-muted-foreground"}`}>
+                      {pass ? <Check className="w-2.5 h-2.5" /> : <X className="w-2.5 h-2.5" />}
                       {rule.label}
                     </div>
                   );
@@ -114,20 +114,21 @@ const Signup = () => {
           </div>
 
           {/* Referral code */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Referral Code (Optional)</label>
+          <div className="space-y-1">
+            <label className="text-xs font-medium">Referral Code <span className="text-muted-foreground">(Optional)</span></label>
             <Input
               value={form.referralCode}
               onChange={(e) => update("referralCode", e.target.value)}
               placeholder="Enter referral code"
+              className="h-9 text-sm placeholder:text-[10px]"
             />
           </div>
 
-          <Button type="submit" className="w-full" variant="hero" disabled={loading}>
-            {loading ? "Creating Account..." : "Create Account"} <ArrowRight className="w-4 h-4" />
+          <Button type="submit" className="w-full h-10 text-sm mt-1" variant="hero" disabled={loading}>
+            {loading ? "Creating Account..." : "Create Account"} <ArrowRight className="w-3.5 h-3.5" />
           </Button>
 
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-xs text-muted-foreground">
             Already have an account? <Link to="/login" className="text-primary font-semibold hover:underline">Sign In</Link>
           </p>
         </form>
