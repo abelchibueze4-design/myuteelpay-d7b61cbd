@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock } from "lucide-react";
+import { TransactionProcessingOverlay } from "@/components/TransactionProcessingOverlay";
 
 interface PinVerificationDialogProps {
   open: boolean;
@@ -32,6 +33,7 @@ export const PinVerificationDialog = ({
 }: PinVerificationDialogProps) => {
   const [pin, setPin] = useState("");
   const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
 
   const handleVerify = async () => {
     if (!pin) {
@@ -44,19 +46,24 @@ export const PinVerificationDialog = ({
       return;
     }
 
+    setProcessing(true);
     const success = await onVerify(pin);
     if (success) {
       setPin("");
       setVerifyError(null);
+      setProcessing(false);
       onOpenChange(false);
     } else {
+      setProcessing(false);
       setVerifyError(error || "Incorrect PIN");
     }
   };
 
   const handleClose = () => {
+    if (processing) return;
     setPin("");
     setVerifyError(null);
+    setProcessing(false);
     onOpenChange(false);
   };
 
@@ -69,54 +76,58 @@ export const PinVerificationDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Lock className="w-5 h-5" />
-            {title}
-          </DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
+    <>
+      <TransactionProcessingOverlay open={processing} />
 
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="pin">Transaction PIN</Label>
-            <Input
-              id="pin"
-              type="password"
-              inputMode="numeric"
-              placeholder="••••"
-              maxLength={4}
-              value={pin}
-              onChange={(e) => handleInputChange(e.target.value)}
-              className={verifyError ? "border-destructive" : ""}
-              disabled={isLoading}
-            />
-            {verifyError && (
-              <p className="text-xs text-destructive mt-1">{verifyError}</p>
-            )}
-          </div>
+      <Dialog open={open && !processing} onOpenChange={handleClose}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5" />
+              {title}
+            </DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
+          </DialogHeader>
 
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleClose}
-              className="flex-1"
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleVerify}
-              disabled={isLoading || !pin}
-              className="flex-1"
-            >
-              {isLoading ? "Verifying..." : "Verify"}
-            </Button>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="pin">Transaction PIN</Label>
+              <Input
+                id="pin"
+                type="password"
+                inputMode="numeric"
+                placeholder="••••"
+                maxLength={4}
+                value={pin}
+                onChange={(e) => handleInputChange(e.target.value)}
+                className={verifyError ? "border-destructive" : ""}
+                disabled={isLoading}
+              />
+              {verifyError && (
+                <p className="text-xs text-destructive mt-1">{verifyError}</p>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                className="flex-1"
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleVerify}
+                disabled={isLoading || !pin}
+                className="flex-1"
+              >
+                {isLoading ? "Verifying..." : "Verify"}
+              </Button>
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
