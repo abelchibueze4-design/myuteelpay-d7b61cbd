@@ -81,14 +81,6 @@ const Login = () => {
             {loading ? "Signing In..." : "Sign In"} <ArrowRight className="w-3.5 h-3.5" />
           </Button>
 
-          <Link
-            to="/admin/login"
-            className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 transition"
-          >
-            <Shield className="w-3.5 h-3.5" />
-            Login as Admin
-          </Link>
-
           <p className="text-center text-xs text-muted-foreground">
             Don't have an account? <Link to="/signup" className="text-primary font-semibold hover:underline">Sign Up</Link>
           </p>
