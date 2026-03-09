@@ -356,6 +356,42 @@ export const SecuritySettings = () => {
           </div>
         )}
       </div>
+
+      {/* Biometric Authentication Section */}
+      {biometricSupported && (
+        <div className="border border-border rounded-lg p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                <Fingerprint className="w-5 h-5 text-violet-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Biometric Authentication</h3>
+                <p className="text-xs text-muted-foreground">
+                  Use fingerprint or face recognition for transactions
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={biometricEnabled}
+              onCheckedChange={async (checked) => {
+                const success = await toggleBiometric(checked);
+                if (success) {
+                  toast.success(checked ? "Biometrics enabled" : "Biometrics disabled");
+                } else {
+                  toast.error("Failed to update biometric settings");
+                }
+              }}
+              disabled={biometricLoading || !settings.transactionPinEnabled}
+            />
+          </div>
+          {!settings.transactionPinEnabled && (
+            <p className="text-xs text-muted-foreground">
+              Enable Transaction PIN first to use biometric authentication
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

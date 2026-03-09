@@ -8,6 +8,11 @@ export const useTransactionPinVerification = () => {
   const [error, setError] = useState<string | null>(null);
 
   const verifyPin = async (pin: string): Promise<boolean> => {
+    // Biometric bypass — already verified by WebAuthn
+    if (pin === "__biometric__") {
+      return true;
+    }
+
     if (!user?.id) {
       setError("User not authenticated");
       return false;
