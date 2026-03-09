@@ -11,6 +11,7 @@ import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTransactionGuard } from "@/hooks/useTransactionGuard";
+import { PageBackButton } from "@/components/PageBackButton";
 
 const Electricity = () => {
   const navigate = useNavigate();
