@@ -85,7 +85,17 @@ export const PinVerificationDialog = ({
       onOpenChange(false);
     } else {
       setProcessing(false);
-      setVerifyError(error || "Incorrect PIN");
+      // Only show PIN-specific errors, not generic transaction failures
+      if (error && error.toLowerCase().includes("pin")) {
+        setVerifyError(error);
+      } else if (error) {
+        // Non-PIN error — close dialog and let the caller handle it
+        setPin("");
+        setVerifyError(null);
+        onOpenChange(false);
+      } else {
+        setVerifyError("Incorrect PIN");
+      }
     }
   };
 
@@ -148,8 +158,9 @@ export const PinVerificationDialog = ({
               <Label htmlFor="pin">Transaction PIN</Label>
               <Input
                 id="pin"
-                type="password"
+                type="tel"
                 inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="••••"
                 maxLength={4}
                 value={pin}
