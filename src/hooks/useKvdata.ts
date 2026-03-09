@@ -33,8 +33,8 @@ export function useKvdata() {
       queryClient.invalidateQueries({ queryKey: ["wallet"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
-    onError: (err: Error) => {
-      toast.error(err.message || "Transaction failed");
+    onError: () => {
+      toast.error("An error occurred. Please try again.");
     },
   });
 }
