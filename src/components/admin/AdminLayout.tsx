@@ -376,7 +376,12 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         <AdminThemeToggle />
 
                         {/* Alerts bell with total count */}
-                        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="relative text-muted-foreground hover:text-foreground"
+                            onClick={() => navigate("/admin/notifications")}
+                        >
                             <Bell className="w-5 h-5" />
                             {totalAlerts > 0 && (
                                 <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] flex items-center justify-center text-[9px] font-bold text-primary-foreground bg-destructive rounded-full px-0.5 border-2 border-background">

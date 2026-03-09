@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AtSign, Lock, ArrowRight, Eye, EyeOff, Shield } from "lucide-react";
+import { AtSign, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -80,14 +80,6 @@ const Login = () => {
           <Button type="submit" className="w-full h-10 text-sm" variant="hero" disabled={loading}>
             {loading ? "Signing In..." : "Sign In"} <ArrowRight className="w-3.5 h-3.5" />
           </Button>
-
-          <Link
-            to="/admin/login"
-            className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 transition"
-          >
-            <Shield className="w-3.5 h-3.5" />
-            Login as Admin
-          </Link>
 
           <p className="text-center text-xs text-muted-foreground">
             Don't have an account? <Link to="/signup" className="text-primary font-semibold hover:underline">Sign Up</Link>
