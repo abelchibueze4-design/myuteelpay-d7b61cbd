@@ -44,6 +44,13 @@ export const SecuritySettings = () => {
   } = useSecuritySettings();
   const { verifyPin } = useTransactionPinVerification();
   const { user } = useAuth();
+  const {
+    isSupported: biometricSupported,
+    isEnabled: biometricEnabled,
+    isLoading: biometricLoading,
+    toggleEnabled: toggleBiometric,
+    remove: removeBiometric,
+  } = useBiometricAuth();
 
   // Password change state
   const [showPasswordChange, setShowPasswordChange] = useState(false);
