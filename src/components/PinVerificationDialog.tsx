@@ -158,8 +158,9 @@ export const PinVerificationDialog = ({
               <Label htmlFor="pin">Transaction PIN</Label>
               <Input
                 id="pin"
-                type="password"
+                type="tel"
                 inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="••••"
                 maxLength={4}
                 value={pin}
