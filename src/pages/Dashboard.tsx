@@ -6,6 +6,7 @@ import {
   Gift, ArrowRight, Mail, MessageCircle, Users, Eye, EyeOff,
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
   ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
+  Moon, Sun,
 } from "lucide-react";
 import { PageTransition, StaggerContainer, StaggerItem, ScaleTap } from "@/components/PageTransition";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
@@ -35,6 +36,7 @@ import { cn } from "@/lib/utils";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useKycVerified, BALANCE_LIMIT_UNVERIFIED } from "@/hooks/useKyc";
+import { useTheme } from "next-themes";
 
 const quickActions = [
   { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "text-primary bg-primary/10", border: "border-primary/20" },
@@ -48,6 +50,7 @@ const quickActions = [
 const Dashboard = () => {
   const { setOpenMobile } = useSidebar();
   const { user } = useAuth();
+  const { resolvedTheme, setTheme } = useTheme();
   const { data: isKycVerified } = useKycVerified();
   const { data: wallet } = useWallet();
   const { data: transactions } = useTransactions(5);
@@ -183,7 +186,16 @@ const Dashboard = () => {
           <div className="text-center flex-1">
             <h1 className="text-base font-extrabold text-foreground">Welcome, {displayName}</h1>
           </div>
-          <NotificationsDropdown />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center tap-target"
+              title="Toggle theme"
+            >
+              {resolvedTheme === "dark" ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
+            </button>
+            <NotificationsDropdown />
+          </div>
         </div>
       </div>
 
