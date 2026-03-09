@@ -35,7 +35,7 @@ const WalletCard = ({ balance = 125000, showBalance = true, onToggleVisibility }
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-2">
         <Wallet className="w-4 h-4 text-purple-600" />
-        <span className="text-xs font-semibold text-purple-700 uppercase tracking-wide">Main Wallet</span>
+        <span className="text-xs font-semibold text-purple-700 uppercase tracking-wide">Wallet Balance</span>
       </div>
       <Button 
         variant="ghost" 
