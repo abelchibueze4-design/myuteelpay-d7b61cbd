@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { HelpCircle, ChevronRight, ChevronDown, MessageSquare, Mail, Smartphone, Gift, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PageBackButton } from "@/components/PageBackButton";
 import { Badge } from "@/components/ui/badge";
 
 const faqCategories = [
