@@ -16,6 +16,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { ServicePageSkeleton } from "@/components/DashboardSkeleton";
 import { TransactionResultScreen } from "@/components/TransactionResultScreen";
 import { useSmartNetworkDefault } from "@/hooks/useSmartNetworkDefault";
+import { PageBackButton } from "@/components/PageBackButton";
 
 const Data = () => {
     const navigate = useNavigate();
