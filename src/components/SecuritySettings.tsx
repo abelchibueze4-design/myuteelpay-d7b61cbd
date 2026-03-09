@@ -375,17 +375,42 @@ export const SecuritySettings = () => {
           </form>
         )}
 
-        {/* Remove PIN button */}
-        {settings.transactionPinEnabled && !pinMode && (
+        {/* Remove PIN section */}
+        {settings.transactionPinEnabled && !pinMode && !showRemoveConfirm && (
           <div className="flex gap-2 pt-2">
             <Button variant="outline" size="sm" className="text-destructive border-destructive/30 hover:bg-destructive/5"
-              onClick={handleRemovePin} disabled={isLoading}>
+              onClick={() => setShowRemoveConfirm(true)} disabled={isLoading}>
               Remove PIN
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setPinMode("reset")}
               className="text-primary font-semibold gap-1">
               <RotateCcw className="w-3.5 h-3.5" /> Reset PIN
             </Button>
+          </div>
+        )}
+
+        {/* Remove PIN — password verification */}
+        {showRemoveConfirm && (
+          <div className="space-y-3 pt-4 border-t border-border">
+            <p className="text-sm font-medium text-foreground">Enter your account password to remove PIN</p>
+            <div>
+              <Label htmlFor="removePassword">Account Password</Label>
+              <div className="relative">
+                <Input id="removePassword" type={showRemovePass ? "text" : "password"} value={removePassword}
+                  onChange={(e) => { setRemovePassword(e.target.value); setRemoveErrors({}); }}
+                  className={removeErrors.removePassword ? "border-destructive" : ""} placeholder="Enter your login password" />
+                <button type="button" onClick={() => setShowRemovePass(!showRemovePass)} className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground">
+                  {showRemovePass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {removeErrors.removePassword && <p className="text-xs text-destructive mt-1">{removeErrors.removePassword}</p>}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" className="flex-1" onClick={() => { setShowRemoveConfirm(false); setRemovePassword(""); setRemoveErrors({}); }}>Cancel</Button>
+              <Button type="button" variant="destructive" className="flex-1" onClick={handleVerifyPasswordForRemove} disabled={isLoading}>
+                {isLoading ? "Removing..." : "Confirm Remove"}
+              </Button>
+            </div>
           </div>
         )}
       </div>
