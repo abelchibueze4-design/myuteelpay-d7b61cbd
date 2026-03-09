@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { NetworkIcon } from "@/components/NetworkIcon";
-import { Smartphone, Check, Loader2, Star } from "lucide-react";
+import { Smartphone, Check, Loader2, Star, Contact } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useKvdata } from "@/hooks/useKvdata";
