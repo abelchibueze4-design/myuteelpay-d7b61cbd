@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Contact } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -77,7 +77,35 @@ const BulkSMS = () => {
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Recipients</label>
-            <Textarea value={recipients} onChange={(e) => setRecipients(e.target.value)} placeholder="Enter numbers separated by commas" rows={3} required />
+            <div className="relative">
+              <Textarea value={recipients} onChange={(e) => setRecipients(e.target.value)} placeholder="Enter numbers separated by commas" rows={3} required className="pr-12 placeholder:text-[10px] placeholder:font-normal" />
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    if ('contacts' in navigator && 'ContactsManager' in window) {
+                      const contacts = await (navigator as any).contacts.select(['tel'], { multiple: true });
+                      if (contacts?.length) {
+                        const numbers = contacts
+                          .flatMap((c: any) => c.tel || [])
+                          .map((t: string) => t.replace(/\D/g, ''))
+                          .filter(Boolean);
+                        if (numbers.length) {
+                          setRecipients(prev => prev ? `${prev}, ${numbers.join(', ')}` : numbers.join(', '));
+                        }
+                      }
+                    } else {
+                      const { toast } = await import('sonner');
+                      toast.info("Contact picker not supported on this device");
+                    }
+                  } catch {}
+                }}
+                className="absolute right-3 top-3 p-1.5 rounded-lg hover:bg-secondary/50 transition-colors"
+                title="Import from contacts"
+              >
+                <Contact className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
             <p className="text-xs text-muted-foreground">{recipientCount} recipient{recipientCount !== 1 ? "s" : ""}</p>
           </div>
           <div className="space-y-2">
