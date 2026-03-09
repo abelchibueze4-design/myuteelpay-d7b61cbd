@@ -124,7 +124,7 @@ const CableTV = () => {
                 value={smartcard} 
                 onChange={(e) => { setSmartcard(e.target.value); setCustomerName(""); }} 
                 placeholder="Enter number" 
-                className="h-14 rounded-2xl border-2 border-border/50 pl-12 focus-visible:ring-primary/20 bg-secondary/20 font-bold" 
+                className="h-14 rounded-2xl border-2 border-border/50 pl-12 focus-visible:ring-primary/20 bg-secondary/20 font-bold placeholder:text-[10px] placeholder:font-normal" 
                 required 
                 onBlur={handleValidateIUC} 
               />

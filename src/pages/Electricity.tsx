@@ -170,7 +170,7 @@ const Electricity = () => {
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Amount</label>
-            <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₦500 minimum" type="number" required />
+            <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₦500 minimum" type="number" required className="placeholder:text-[10px] placeholder:font-normal" />
           </div>
           <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
             {kvdata.isPending ? "Processing..." : "Pay Now"}

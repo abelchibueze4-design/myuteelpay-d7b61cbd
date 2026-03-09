@@ -197,7 +197,7 @@ const Airtime = () => {
                             value={amount} 
                             onChange={(e) => setAmount(e.target.value)} 
                             placeholder="₦100 - ₦50,000" 
-                            className="h-14 rounded-2xl border-2 border-border/50 px-6 focus-visible:ring-primary/20 bg-secondary/20 text-xl font-black" 
+                            className="h-14 rounded-2xl border-2 border-border/50 px-6 focus-visible:ring-primary/20 bg-secondary/20 text-xl font-black placeholder:text-[10px] placeholder:font-normal" 
                             type="number" 
                             required 
                         />
