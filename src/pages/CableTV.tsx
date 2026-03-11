@@ -22,6 +22,7 @@ const CableTV = () => {
   const [smartcard, setSmartcard] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [customerName, setCustomerName] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -43,6 +44,7 @@ const CableTV = () => {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setCustomerName("");
+    setCustomerAddress("");
     if (!smartcard || smartcard.length < 10 || !provider) return;
     setIsValidating(true);
     debounceRef.current = setTimeout(async () => {
@@ -54,8 +56,10 @@ const CableTV = () => {
           cable_name: provider.cable_name
         });
         setCustomerName(res?.Customer_Name || res?.name || "Validated");
+        setCustomerAddress(res?.Address || res?.address || "");
       } catch {
         setCustomerName("");
+        setCustomerAddress("");
       } finally {
         setIsValidating(false);
       }
@@ -77,12 +81,14 @@ const CableTV = () => {
     if (!selectedPlan || !provider) return false;
 
     try {
+      // Use the plan's own cable_name to prevent serviceID mismatch
+      const planCableName = selectedPlan?.raw?.cable_name || provider.cable_name;
       await kvdata.mutateAsync({
         action: "buy_cable",
         cable_id: provider.cable_id,
-        cable_name: provider.cable_name,
+        cable_name: planCableName,
         cableplan_id: selectedPlan.plan_id,
-        plan_label: `${provider.cable_name} ${selectedPlan.label}`,
+        plan_label: `${planCableName} ${selectedPlan.label}`,
         smart_card_number: smartcard,
         amount: selectedPlan.price,
       });
@@ -112,7 +118,7 @@ const CableTV = () => {
                     <button
                         key={p.cable_id}
                         type="button"
-                        onClick={() => { setProvider(p); setPlanId(""); setSelectedPlan(null); setCustomerName(""); }}
+                        onClick={() => { setProvider(p); setPlanId(""); setSelectedPlan(null); setCustomerName(""); setCustomerAddress(""); }}
                         className={`py-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 ${
                             provider?.cable_id === p.cable_id 
                             ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
@@ -140,7 +146,12 @@ const CableTV = () => {
               />
             </div>
             {isValidating && <p className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Validating...</p>}
-            {customerName && <p className="text-xs text-primary font-medium animate-fade-in">✓ {customerName}</p>}
+            {customerName && (
+              <div className="animate-fade-in space-y-0.5">
+                <p className="text-xs text-primary font-medium">✓ {customerName}</p>
+                {customerAddress && <p className="text-[11px] text-muted-foreground">{customerAddress}</p>}
+              </div>
+            )}
           </div>
 
           {/* Plan Selection */}

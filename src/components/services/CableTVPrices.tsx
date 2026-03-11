@@ -71,7 +71,7 @@ export const CableTVPrices = ({ cableId, onSelect, selectedPlanId }: CableTVPric
           label: formatLabel(p.cableplan_name || p.name),
           plan_id: String(p.cableplan_id || p.variation_code || p.id),
           price: Number(p.cableplan_amount || p.variation_amount || p.amount),
-          raw: p
+          raw: { ...p, cable_name: p.cable_name }
         }));
     }
 

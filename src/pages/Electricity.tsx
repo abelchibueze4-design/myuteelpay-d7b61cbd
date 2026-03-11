@@ -22,6 +22,7 @@ const Electricity = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [token, setToken] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
   const [discoDropdownOpen, setDiscoDropdownOpen] = useState(false);
@@ -55,6 +56,7 @@ const Electricity = () => {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setCustomerName("");
+    setCustomerAddress("");
     if (!meter || meter.length < 10 || !disco) return;
     setIsValidating(true);
     debounceRef.current = setTimeout(async () => {
@@ -68,8 +70,10 @@ const Electricity = () => {
           disco_label: selectedDisco?.disco_name
         });
         setCustomerName(res?.Customer_Name || res?.name || "Validated");
+        setCustomerAddress(res?.Address || res?.address || "");
       } catch {
         setCustomerName("");
+        setCustomerAddress("");
       } finally {
         setIsValidating(false);
       }
@@ -178,7 +182,12 @@ const Electricity = () => {
               <Input value={meter} onChange={(e) => { setMeter(e.target.value); }} placeholder="Enter meter number" className="pl-10 placeholder:text-[10px] placeholder:font-normal" required />
             </div>
             {isValidating && <p className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Validating...</p>}
-            {customerName && <p className="text-xs text-primary font-medium">✓ {customerName}</p>}
+            {customerName && (
+              <div className="animate-fade-in space-y-0.5">
+                <p className="text-xs text-primary font-medium">✓ {customerName}</p>
+                {customerAddress && <p className="text-[11px] text-muted-foreground">{customerAddress}</p>}
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Amount</label>
