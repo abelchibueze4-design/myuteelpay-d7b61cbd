@@ -43,6 +43,19 @@ Deno.serve(async (req: Request) => {
     } else if (provider === "kvdata") {
       eventType = "transaction_update";
       reference = payload.reference || payload.request_id;
+    } else if (provider === "vtpass") {
+      // VTPass sends webhook callbacks with transaction status updates
+      // Typical payload: { request_id, transaction_id, status, amount, ... }
+      eventType = payload.type || "transaction_update";
+      reference = payload.request_id || payload.requestId || payload.transaction_id || "";
+
+      // Optional: verify VTPass secret key header
+      const vtpassSecret = Deno.env.get("VTPASS_SECRET_KEY");
+      const headerSecret = req.headers.get("x-vtpass-secret") || req.headers.get("secret-key");
+      if (vtpassSecret && headerSecret && headerSecret !== vtpassSecret) {
+        console.warn("[webhook] VTPass signature mismatch");
+        return json({ error: "Invalid signature" }, 401);
+      }
     }
 
     // 2. INSERT INTO DB (Trigger will handle the business logic)
