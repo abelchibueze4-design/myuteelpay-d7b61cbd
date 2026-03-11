@@ -117,12 +117,20 @@ function AppSidebar() {
             <SidebarMenu>
               {serviceItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild onClick={() => handleItemClick()}>
-                    <NavLink to={item.url} end className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                  {item.disabled ? (
+                    <SidebarMenuButton className="opacity-50 cursor-not-allowed pointer-events-none">
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
+                      {!collapsed && <span className="ml-auto text-[9px] font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Soon</span>}
+                    </SidebarMenuButton>
+                  ) : (
+                    <SidebarMenuButton asChild onClick={() => handleItemClick()}>
+                      <NavLink to={item.url} end className="hover:bg-sidebar-accent/50" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
