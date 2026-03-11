@@ -43,11 +43,11 @@ const Signup = () => {
   };
 
   const fields = [
-    { key: "name", label: "Full Name", icon: User, type: "text", placeholder: "John Doe", required: true },
-    { key: "username", label: "Username", icon: AtSign, type: "text", placeholder: "johndoe", required: true },
-    { key: "email", label: "Email", icon: Mail, type: "email", placeholder: "you@example.com", required: true },
-    { key: "phone", label: "Phone", icon: Phone, type: "tel", placeholder: "+234 800 000 0000", required: true },
-    { key: "address", label: "Address", icon: MapPin, type: "text", placeholder: "Lagos, Nigeria", required: true },
+    { key: "name", label: "Full Name", icon: User, type: "text", placeholder: "John Doe", required: true, autoComplete: "name" },
+    { key: "username", label: "Username", icon: AtSign, type: "text", placeholder: "johndoe", required: true, autoComplete: "username" },
+    { key: "email", label: "Email", icon: Mail, type: "email", placeholder: "you@example.com", required: true, autoComplete: "email" },
+    { key: "phone", label: "Phone", icon: Phone, type: "tel", placeholder: "+234 800 000 0000", required: true, autoComplete: "tel" },
+    { key: "address", label: "Address", icon: MapPin, type: "text", placeholder: "Lagos, Nigeria", required: true, autoComplete: "street-address" },
   ];
 
   return (
@@ -71,6 +71,7 @@ const Signup = () => {
                   className="h-9 pl-9 text-sm placeholder:text-[10px]"
                   type={f.type}
                   required={f.required}
+                  autoComplete={f.autoComplete}
                 />
               </div>
               {f.key === "username" && form.username && (
@@ -93,6 +94,7 @@ const Signup = () => {
                 className="h-9 pl-9 pr-9 text-sm placeholder:text-[10px]"
                 type={showPassword ? "text" : "password"}
                 required
+                autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                 {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
