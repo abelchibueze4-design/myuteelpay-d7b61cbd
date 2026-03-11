@@ -1,83 +1,21 @@
 import { Link } from "react-router-dom";
 import { 
   Smartphone, Tv, Zap, MessageSquare, GraduationCap, 
-  CreditCard, ChevronRight, Globe, Shield
+  CreditCard, ChevronRight, Globe, Shield, Landmark
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const services = [
-  { 
-    icon: Smartphone, 
-    label: "Airtime", 
-    description: "Instant top-up for all networks",
-    path: "/services/airtime", 
-    color: "text-primary bg-primary/10", 
-    border: "border-primary/20" 
-  },
-  { 
-    icon: Smartphone, 
-    label: "Data Bundle", 
-    description: "Cheap data for all devices",
-    path: "/services/data", 
-    color: "text-blue-600 bg-blue-50", 
-    border: "border-blue-100" 
-  },
-  { 
-    icon: CreditCard, 
-    label: "Data Card", 
-    description: "Generate and print data PINs",
-    path: "/services/data-card", 
-    color: "text-purple-600 bg-purple-50", 
-    border: "border-purple-100" 
-  },
-  { 
-    icon: Tv, 
-    label: "Cable TV", 
-    description: "DSTV, GOTV & StarTimes",
-    path: "/services/cable", 
-    color: "text-orange-600 bg-orange-50", 
-    border: "border-orange-100" 
-  },
-  { 
-    icon: Zap, 
-    label: "Electricity", 
-    description: "Pay for prepaid & postpaid meters",
-    path: "/services/electricity", 
-    color: "text-accent-foreground bg-accent/15", 
-    border: "border-accent/20" 
-  },
-  { 
-    icon: MessageSquare, 
-    label: "Bulk SMS", 
-    description: "Send messages to multiple contacts",
-    path: "/services/sms", 
-    color: "text-pink-600 bg-pink-50", 
-    border: "border-pink-100" 
-  },
-  { 
-    icon: GraduationCap, 
-    label: "Edu Pins", 
-    description: "WAEC, NECO & JAMB pins",
-    path: "/services/edu", 
-    color: "text-emerald-600 bg-emerald-50", 
-    border: "border-emerald-100" 
-  },
-  { 
-    icon: Globe, 
-    label: "Int'l Airtime", 
-    description: "International top-up & data",
-    path: "/services/intl-airtime", 
-    color: "text-indigo-600 bg-indigo-50", 
-    border: "border-indigo-100" 
-  },
-  { 
-    icon: Shield, 
-    label: "Insurance", 
-    description: "Motor & personal accident cover",
-    path: "/services/insurance", 
-    color: "text-teal-600 bg-teal-50", 
-    border: "border-teal-100" 
-  },
+  { icon: Smartphone, label: "Airtime", description: "Instant top-up for all networks", path: "/services/airtime", color: "text-primary bg-primary/10", border: "border-primary/20" },
+  { icon: Smartphone, label: "Data Bundle", description: "Cheap data for all devices", path: "/services/data", color: "text-blue-600 bg-blue-50", border: "border-blue-100" },
+  { icon: CreditCard, label: "Data Card", description: "Generate and print data PINs", path: "/services/data-card", color: "text-purple-600 bg-purple-50", border: "border-purple-100" },
+  { icon: Tv, label: "Cable TV", description: "DSTV, GOTV & StarTimes", path: "/services/cable", color: "text-orange-600 bg-orange-50", border: "border-orange-100" },
+  { icon: Zap, label: "Electricity", description: "Pay for prepaid & postpaid meters", path: "/services/electricity", color: "text-accent-foreground bg-accent/15", border: "border-accent/20" },
+  { icon: Globe, label: "Int'l Airtime", description: "International top-up & data", path: "/services/intl-airtime", color: "text-indigo-600 bg-indigo-50", border: "border-indigo-100" },
+  { icon: Shield, label: "Insurance", description: "Motor & personal accident cover", path: "/services/insurance", color: "text-teal-600 bg-teal-50", border: "border-teal-100" },
+  { icon: MessageSquare, label: "Bulk SMS", description: "Send messages to multiple contacts", path: "/services/sms", color: "text-pink-600 bg-pink-50", border: "border-pink-100" },
+  { icon: GraduationCap, label: "Edu Pins", description: "WAEC, NECO & JAMB pins", path: "/services/edu", color: "text-emerald-600 bg-emerald-50", border: "border-emerald-100" },
+  { icon: Landmark, label: "Bank Transfer", description: "Send money to any bank", path: "#", color: "text-muted-foreground bg-muted/50", border: "border-muted", disabled: true },
 ];
 
 const Services = () => {
