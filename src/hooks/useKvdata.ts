@@ -18,6 +18,14 @@ const ACTION_PROVIDER_MAP: Record<string, keyof ReturnType<typeof usePlatformSet
   get_datacard_plans: "data_card_provider",
   buy_data_card: "data_card_provider",
   buy_bulk_sms: "bulk_sms_provider",
+  // International & Insurance always use vtpass
+  get_intl_countries: "airtime_provider",
+  get_intl_product_types: "airtime_provider",
+  get_intl_operators: "airtime_provider",
+  get_intl_variations: "airtime_provider",
+  buy_intl_airtime: "airtime_provider",
+  get_insurance_plans: "electricity_provider",
+  buy_insurance: "electricity_provider",
 };
 
 async function callProvider(body: Record<string, unknown>, provider: ApiProvider) {
