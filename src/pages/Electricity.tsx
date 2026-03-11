@@ -56,6 +56,7 @@ const Electricity = () => {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setCustomerName("");
+    setCustomerAddress("");
     if (!meter || meter.length < 10 || !disco) return;
     setIsValidating(true);
     debounceRef.current = setTimeout(async () => {
@@ -69,8 +70,10 @@ const Electricity = () => {
           disco_label: selectedDisco?.disco_name
         });
         setCustomerName(res?.Customer_Name || res?.name || "Validated");
+        setCustomerAddress(res?.Address || res?.address || "");
       } catch {
         setCustomerName("");
+        setCustomerAddress("");
       } finally {
         setIsValidating(false);
       }
