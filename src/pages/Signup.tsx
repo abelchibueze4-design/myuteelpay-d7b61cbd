@@ -94,6 +94,7 @@ const Signup = () => {
                 className="h-9 pl-9 pr-9 text-sm placeholder:text-[10px]"
                 type={showPassword ? "text" : "password"}
                 required
+                autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                 {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
