@@ -47,6 +47,7 @@ const serviceItems = [
   { title: "Insurance", url: "/services/insurance", icon: Shield },
   { title: "Bulk SMS", url: "/services/sms", icon: MessageSquare },
   { title: "Edu Pins", url: "/services/edu", icon: GraduationCap },
+  { title: "Bank Transfer", url: "#", icon: Landmark, disabled: true },
 ];
 
 const otherItems = [

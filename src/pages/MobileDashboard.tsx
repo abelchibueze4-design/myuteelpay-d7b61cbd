@@ -92,15 +92,25 @@ const QuickActionsGrid = () => (
     </div>
     <div className="grid grid-cols-3 gap-3">
       {quickActions.map((action, index) => (
-        <Link key={index} to={action.path}>
-          <div className="fintech-card p-4 tap-target hover:scale-105 transition-all hover:border-purple-200">
+        action.disabled ? (
+          <div key={index} className="fintech-card p-4 tap-target opacity-50 cursor-not-allowed">
             <div className={`w-12 h-12 rounded-xl ${action.color} flex items-center justify-center mb-3 mx-auto`}>
               <action.icon className="w-6 h-6" />
             </div>
             <p className="text-sm font-semibold text-gray-800 text-center mb-1">{action.label}</p>
-            <p className="text-xs text-gray-500 text-center">{action.desc}</p>
+            <p className="text-[10px] text-muted-foreground text-center font-semibold">Coming Soon</p>
           </div>
-        </Link>
+        ) : (
+          <Link key={index} to={action.path}>
+            <div className="fintech-card p-4 tap-target hover:scale-105 transition-all hover:border-purple-200">
+              <div className={`w-12 h-12 rounded-xl ${action.color} flex items-center justify-center mb-3 mx-auto`}>
+                <action.icon className="w-6 h-6" />
+              </div>
+              <p className="text-sm font-semibold text-gray-800 text-center mb-1">{action.label}</p>
+              <p className="text-xs text-gray-500 text-center">{action.desc}</p>
+            </div>
+          </Link>
+        )
       ))}
     </div>
   </div>

@@ -332,17 +332,27 @@ const Dashboard = () => {
           </div>
           <StaggerContainer className="grid grid-cols-3 gap-2.5">
             {quickActions.map((a) => (
-              <StaggerItem key={a.path}>
-                <Link to={a.path}>
-                  <ScaleTap>
-                    <div className="fintech-card p-3 tap-target text-center group">
-                      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-2 mx-auto border transition-transform group-hover:scale-110", a.color, a.border)}>
-                        <a.icon className="w-5 h-5" />
-                      </div>
-                      <p className="text-[11px] font-bold text-foreground">{a.label}</p>
+              <StaggerItem key={a.path + a.label}>
+                {a.disabled ? (
+                  <div className="fintech-card p-3 tap-target text-center opacity-50 cursor-not-allowed relative">
+                    <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-2 mx-auto border", a.color, a.border)}>
+                      <a.icon className="w-5 h-5" />
                     </div>
-                  </ScaleTap>
-                </Link>
+                    <p className="text-[11px] font-bold text-foreground">{a.label}</p>
+                    <span className="text-[8px] font-semibold text-muted-foreground">Coming Soon</span>
+                  </div>
+                ) : (
+                  <Link to={a.path}>
+                    <ScaleTap>
+                      <div className="fintech-card p-3 tap-target text-center group">
+                        <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-2 mx-auto border transition-transform group-hover:scale-110", a.color, a.border)}>
+                          <a.icon className="w-5 h-5" />
+                        </div>
+                        <p className="text-[11px] font-bold text-foreground">{a.label}</p>
+                      </div>
+                    </ScaleTap>
+                  </Link>
+                )}
               </StaggerItem>
             ))}
           </StaggerContainer>
