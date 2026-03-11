@@ -133,11 +133,11 @@ const CableTV = () => {
               <Tv className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 value={smartcard} 
-                onChange={(e) => { setSmartcard(e.target.value); setCustomerName(""); }} 
+                onChange={(e) => { setSmartcard(e.target.value); }} 
                 placeholder="Enter number" 
                 className="h-14 rounded-2xl border-2 border-border/50 pl-12 focus-visible:ring-primary/20 bg-secondary/20 font-bold placeholder:text-[10px] placeholder:font-normal" 
                 required 
-                onBlur={handleValidateIUC} 
+              />
               />
             </div>
             {customerName && <p className="text-xs text-primary font-medium animate-fade-in">✓ {customerName}</p>}
