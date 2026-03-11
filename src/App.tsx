@@ -166,6 +166,22 @@ function App() {
                 }
               />
               <Route
+                path="/services/intl-airtime"
+                element={
+                  <ProtectedWithLayout>
+                    <InternationalAirtime />
+                  </ProtectedWithLayout>
+                }
+              />
+              <Route
+                path="/services/insurance"
+                element={
+                  <ProtectedWithLayout>
+                    <Insurance />
+                  </ProtectedWithLayout>
+                }
+              />
+              <Route
                 path="/kyc"
                 element={
                   <ProtectedWithLayout>

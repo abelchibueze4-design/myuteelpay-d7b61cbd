@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { 
   Smartphone, Tv, Zap, MessageSquare, GraduationCap, 
-  CreditCard, ChevronRight 
+  CreditCard, ChevronRight, Globe, Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -61,6 +61,22 @@ const services = [
     path: "/services/edu", 
     color: "text-emerald-600 bg-emerald-50", 
     border: "border-emerald-100" 
+  },
+  { 
+    icon: Globe, 
+    label: "Int'l Airtime", 
+    description: "International top-up & data",
+    path: "/services/intl-airtime", 
+    color: "text-indigo-600 bg-indigo-50", 
+    border: "border-indigo-100" 
+  },
+  { 
+    icon: Shield, 
+    label: "Insurance", 
+    description: "Motor & personal accident cover",
+    path: "/services/insurance", 
+    color: "text-teal-600 bg-teal-50", 
+    border: "border-teal-100" 
   },
 ];
 
