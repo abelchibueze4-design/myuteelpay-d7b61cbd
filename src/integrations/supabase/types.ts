@@ -988,6 +988,10 @@ export type Database = {
         Args: { p_webhook_id: string }
         Returns: undefined
       }
+      handle_vtpass_webhook: {
+        Args: { p_webhook_id: string }
+        Returns: undefined
+      }
       make_admin: { Args: { user_id: string }; Returns: undefined }
       resolve_notification_audience: {
         Args: { p_audience: string; p_custom_ids?: string[] }
