@@ -104,10 +104,12 @@ const SidebarNavItem = ({
     item,
     collapsed,
     badges,
+    onItemClick,
 }: {
     item: NavItem;
     collapsed: boolean;
     badges: Record<string, number>;
+    onItemClick?: () => void;
 }) => {
     const location = useLocation();
     const [open, setOpen] = useState(() =>
