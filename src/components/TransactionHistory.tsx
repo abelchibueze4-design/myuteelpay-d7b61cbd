@@ -249,7 +249,7 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
   };
 
   const handleDownloadReceipt = (t: any) => {
-    const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
+    const tokenInfo = extractTokenOrPin(t);
     const qrData = JSON.stringify({ ref: t.reference || t.id, amount: t.amount, status: t.status, date: t.created_at });
     const receiptHtml = `
       <!DOCTYPE html>
