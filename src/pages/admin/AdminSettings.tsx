@@ -449,6 +449,7 @@ const AdminSettings = () => {
                     </CardContent>
                 </Card>
 
+                <div className="flex justify-end">
                     <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="min-w-[150px]">
                         {saveMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                         {saveMutation.isPending ? "Saving..." : "Save Changes"}
