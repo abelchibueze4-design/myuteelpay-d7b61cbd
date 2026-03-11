@@ -47,6 +47,8 @@ const EduPins = () => {
       const res = await kvdata.mutateAsync({
         action: "buy_edu_pin",
         exam_name: examName,
+        variation_code: selectedExam.id,
+        serviceID: selectedExam.raw?.serviceID || "waec",
         quantity: parseInt(quantity),
         amount: total,
       });

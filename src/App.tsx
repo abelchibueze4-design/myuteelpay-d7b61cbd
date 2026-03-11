@@ -27,6 +27,8 @@ import BulkSMS from "./pages/BulkSMS";
 import EduPins from "./pages/EduPins";
 import Referral from "./pages/Referral";
 import DataCard from "./pages/DataCard";
+import InternationalAirtime from "./pages/InternationalAirtime";
+import Insurance from "./pages/Insurance";
 import FAQs from "./pages/FAQs";
 import DebugKVData from "./pages/DebugKVData";
 import KycVerification from "./pages/KycVerification";
@@ -160,6 +162,22 @@ function App() {
                 element={
                   <ProtectedWithLayout>
                     <DataCard />
+                  </ProtectedWithLayout>
+                }
+              />
+              <Route
+                path="/services/intl-airtime"
+                element={
+                  <ProtectedWithLayout>
+                    <InternationalAirtime />
+                  </ProtectedWithLayout>
+                }
+              />
+              <Route
+                path="/services/insurance"
+                element={
+                  <ProtectedWithLayout>
+                    <Insurance />
                   </ProtectedWithLayout>
                 }
               />

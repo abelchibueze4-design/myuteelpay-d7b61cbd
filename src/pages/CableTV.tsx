@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tv, Check, Loader2 } from "lucide-react";
 import { CableIcon } from "@/components/CableIcon";
@@ -22,7 +22,9 @@ const CableTV = () => {
   const [smartcard, setSmartcard] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [customerName, setCustomerName] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
   
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
@@ -36,21 +38,30 @@ const CableTV = () => {
       return data;
     }
   });
-  
-  const handleValidateIUC = async () => {
-    if (!smartcard || !provider) return;
-    try {
-      const res = await kvdata.mutateAsync({
-        action: "validate_iuc",
-        smart_card_number: smartcard,
-        cablename: provider.cable_id,
-        cable_name: provider.cable_name
-      });
-      setCustomerName(res?.Customer_Name || res?.name || "Validated");
-    } catch {
-      setCustomerName("");
-    }
-  };
+
+  // Auto-validate IUC when smartcard number reaches valid length
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setCustomerName("");
+    if (!smartcard || smartcard.length < 10 || !provider) return;
+    setIsValidating(true);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await kvdata.mutateAsync({
+          action: "validate_iuc",
+          smart_card_number: smartcard,
+          cablename: provider.cable_id,
+          cable_name: provider.cable_name
+        });
+        setCustomerName(res?.Customer_Name || res?.name || "Validated");
+      } catch {
+        setCustomerName("");
+      } finally {
+        setIsValidating(false);
+      }
+    }, 800);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [smartcard, provider]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,13 +133,13 @@ const CableTV = () => {
               <Tv className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 value={smartcard} 
-                onChange={(e) => { setSmartcard(e.target.value); setCustomerName(""); }} 
+                onChange={(e) => { setSmartcard(e.target.value); }} 
                 placeholder="Enter number" 
                 className="h-14 rounded-2xl border-2 border-border/50 pl-12 focus-visible:ring-primary/20 bg-secondary/20 font-bold placeholder:text-[10px] placeholder:font-normal" 
                 required 
-                onBlur={handleValidateIUC} 
               />
             </div>
+            {isValidating && <p className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Validating...</p>}
             {customerName && <p className="text-xs text-primary font-medium animate-fade-in">✓ {customerName}</p>}
           </div>
 
