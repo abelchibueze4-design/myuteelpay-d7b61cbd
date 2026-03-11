@@ -43,11 +43,11 @@ const Signup = () => {
   };
 
   const fields = [
-    { key: "name", label: "Full Name", icon: User, type: "text", placeholder: "John Doe", required: true },
-    { key: "username", label: "Username", icon: AtSign, type: "text", placeholder: "johndoe", required: true },
-    { key: "email", label: "Email", icon: Mail, type: "email", placeholder: "you@example.com", required: true },
-    { key: "phone", label: "Phone", icon: Phone, type: "tel", placeholder: "+234 800 000 0000", required: true },
-    { key: "address", label: "Address", icon: MapPin, type: "text", placeholder: "Lagos, Nigeria", required: true },
+    { key: "name", label: "Full Name", icon: User, type: "text", placeholder: "John Doe", required: true, autoComplete: "name" },
+    { key: "username", label: "Username", icon: AtSign, type: "text", placeholder: "johndoe", required: true, autoComplete: "username" },
+    { key: "email", label: "Email", icon: Mail, type: "email", placeholder: "you@example.com", required: true, autoComplete: "email" },
+    { key: "phone", label: "Phone", icon: Phone, type: "tel", placeholder: "+234 800 000 0000", required: true, autoComplete: "tel" },
+    { key: "address", label: "Address", icon: MapPin, type: "text", placeholder: "Lagos, Nigeria", required: true, autoComplete: "street-address" },
   ];
 
   return (
