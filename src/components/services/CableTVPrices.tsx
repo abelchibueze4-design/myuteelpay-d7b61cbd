@@ -1,8 +1,17 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useKvdataQuery } from "@/hooks/useKvdata";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { PriceCard } from "../common/PriceCard";
 import { Loader2 } from "lucide-react";
+
+// Map cable_id to VTPass cable names
+const CABLE_ID_NAME_MAP: Record<number, string> = {
+  1: "DSTV",
+  2: "GOTV",
+  3: "STARTIMES",
+};
 
 interface CableTVPricesProps {
   cableId: number;
@@ -11,7 +20,18 @@ interface CableTVPricesProps {
 }
 
 export const CableTVPrices = ({ cableId, onSelect, selectedPlanId }: CableTVPricesProps) => {
-  const { data: dbPlans, isLoading, error } = useQuery({
+  const { settings } = usePlatformSettings();
+  const isVtpass = settings.cable_provider === "vtpass";
+  const cableName = CABLE_ID_NAME_MAP[cableId] || "";
+
+  // VTPass: fetch live plans from API
+  const { data: apiPlans, isLoading: apiLoading, error: apiError } = useKvdataQuery(
+    { action: "get_cable_plans" },
+    isVtpass && !!cableId
+  );
+
+  // KVData: fetch from database
+  const { data: dbPlans, isLoading: dbLoading, error: dbError } = useQuery({
     queryKey: ["cable_plans", cableId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -21,14 +41,15 @@ export const CableTVPrices = ({ cableId, onSelect, selectedPlanId }: CableTVPric
       if (error) throw error;
       return data || [];
     },
-    enabled: !!cableId
+    enabled: !isVtpass && !!cableId
   });
 
+  const isLoading = isVtpass ? apiLoading : dbLoading;
+  const error = isVtpass ? apiError : dbError;
+
   const formatLabel = (name: string) => {
-    // Split on " + " and rejoin with line breaks, max ~2 parts per line
     const parts = name.split(/\s*\+\s*/);
     if (parts.length <= 2) return name;
-    // Group into lines of 2 parts joined by " + "
     const lines: string[] = [];
     for (let i = 0; i < parts.length; i += 2) {
       const chunk = parts.slice(i, i + 2).join(" + ");
@@ -38,15 +59,31 @@ export const CableTVPrices = ({ cableId, onSelect, selectedPlanId }: CableTVPric
   };
 
   const filteredPlans = useMemo(() => {
+    if (isVtpass) {
+      if (!apiPlans) return [];
+      const plansArray = Array.isArray(apiPlans) ? apiPlans : (apiPlans.plans || []);
+      return plansArray
+        .filter((p: any) => {
+          const pCable = (p.cable_name || "").toUpperCase();
+          return pCable === cableName;
+        })
+        .map((p: any) => ({
+          label: formatLabel(p.cableplan_name || p.name),
+          plan_id: String(p.cableplan_id || p.variation_code || p.id),
+          price: Number(p.cableplan_amount || p.variation_amount || p.amount),
+          raw: p
+        }));
+    }
+
+    // KVData DB plans
     if (!dbPlans) return [];
-    
     return dbPlans.map((p) => ({
       label: formatLabel(p.cableplan_name),
       plan_id: String(p.cableplan_id),
       price: Number(p.cableplan_amount),
       raw: p
     }));
-  }, [dbPlans]);
+  }, [isVtpass, apiPlans, dbPlans, cableName]);
 
   if (isLoading) {
     return (
