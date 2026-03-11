@@ -79,6 +79,7 @@ const quickActions = [
   { icon: Shield, label: "Insurance", path: "/services/insurance", color: "bg-teal-100 text-teal-600", desc: "Motor & more" },
   { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "bg-pink-100 text-pink-600", desc: "Send SMS" },
   { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "bg-green-100 text-green-600", desc: "WAEC, NECO" },
+  { icon: Landmark, label: "Bank Transfer", path: "#", color: "bg-muted text-muted-foreground", desc: "Coming Soon", disabled: true },
 ];
 
 const QuickActionsGrid = () => (
