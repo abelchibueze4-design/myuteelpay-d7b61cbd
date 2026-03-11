@@ -308,7 +308,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
             {/* Nav */}
             <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
                 {navItems.map((item) => (
-                    <SidebarNavItem key={item.url} item={item} collapsed={collapsed && !mobile} badges={badgeCounts} />
+                    <SidebarNavItem key={item.url} item={item} collapsed={collapsed && !mobile} badges={badgeCounts} onItemClick={mobile ? () => setMobileOpen(false) : undefined} />
                 ))}
             </nav>
 
