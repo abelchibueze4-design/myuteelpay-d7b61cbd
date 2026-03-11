@@ -66,6 +66,48 @@ const STATUS_COLORS: Record<string, string> = {
 
 const WHATSAPP_NUMBER = "2349022334478";
 
+// Extract token/pin from transaction metadata
+function extractTokenOrPin(t: any): { label: string; value: string; serial?: string } | null {
+  const meta = t.metadata;
+  if (!meta) return null;
+
+  const response = meta.kvdata_response || meta.vtpass_response;
+  if (!response) return null;
+
+  // Electricity tokens
+  if (t.type === "electricity") {
+    const token =
+      response.token || response.Token ||
+      response.purchased_code || response.mainToken ||
+      response.content?.transactions?.purchased_code || 
+      meta.token || meta.Token || "";
+    if (token) return { label: "Electricity Token", value: String(token) };
+  }
+
+  // Edu pins
+  if (t.type === "edu_pin") {
+    const pin =
+      response.pin || response.Pin ||
+      response.purchased_code ||
+      response.content?.transactions?.purchased_code || "";
+    const serial = response.serial || response.Serial || 
+      response.content?.transactions?.unique_element || "";
+    if (pin) return { label: "PIN", value: String(pin), serial: serial ? String(serial) : undefined };
+  }
+
+  // Data card pins
+  if (t.type === "data_card") {
+    const pin =
+      response.pin || response.Pin ||
+      response.purchased_code ||
+      response.content?.transactions?.purchased_code || "";
+    const serial = response.serial || response.Serial || "";
+    if (pin) return { label: "Data Card PIN", value: String(pin), serial: serial ? String(serial) : undefined };
+  }
+
+  return null;
+}
+
 interface TransactionHistoryProps {
   defaultType?: string;
   filter?: "all" | "services" | "wallet";
@@ -182,8 +224,8 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
   };
 
   const handleShareReceipt = (t: any) => {
-    const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
-    const text = [
+    const tokenInfo = extractTokenOrPin(t);
+    const lines = [
       `UteelPay Receipt`,
       `Service: ${TYPE_LABELS[t.type] || t.type}`,
       `Amount: ${formatAmount(t.amount, t.type)}`,
@@ -191,8 +233,13 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       `Reference: ${t.reference || t.id}`,
       `Date: ${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")}`,
       `Description: ${t.description || "N/A"}`,
-      `\nPowered by UteelPay — www.uteelpay.com`,
-    ].join("\n");
+    ];
+    if (tokenInfo) {
+      lines.push(`${tokenInfo.label}: ${tokenInfo.value}`);
+      if (tokenInfo.serial) lines.push(`Serial: ${tokenInfo.serial}`);
+    }
+    lines.push(`\nPowered by UteelPay — www.uteelpay.com`);
+    const text = lines.join("\n");
     if (navigator.share) {
       navigator.share({ title: "UteelPay Receipt", text });
     } else {
@@ -203,6 +250,7 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
 
   const handleDownloadReceipt = (t: any) => {
     const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
+    const tokenInfo = extractTokenOrPin(t);
     const qrData = JSON.stringify({ ref: t.reference || t.id, amount: t.amount, status: t.status, date: t.created_at });
     const receiptHtml = `
       <!DOCTYPE html>
@@ -235,6 +283,10 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
           .row .value { color: #1e293b; font-size: 12px; font-weight: 600; text-align: right; max-width: 55%; word-break: break-all; }
           .qr-section { text-align: center; padding: 16px 24px 8px; border-top: 2px dashed #e2e8f0; }
           .qr-section p { font-size: 9px; color: #94a3b8; margin-top: 6px; }
+          .token-section { text-align: center; padding: 16px 24px; background: #f0fdf4; border-top: 2px dashed #e2e8f0; }
+          .token-section .token-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700; margin-bottom: 6px; }
+          .token-section .token-value { font-size: 20px; font-weight: 800; font-family: monospace; letter-spacing: 3px; color: #7c3aed; word-break: break-all; }
+          .token-section .token-serial { font-size: 11px; color: #64748b; margin-top: 4px; }
           .footer { text-align: center; padding: 16px 24px 24px; }
           .footer p { font-size: 10px; color: #94a3b8; }
           .footer .support { margin-top: 8px; font-size: 10px; color: #7c3aed; font-weight: 600; }
@@ -263,6 +315,13 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
             <div class="row"><span class="label">Date & Time</span><span class="value">${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm:ss")}</span></div>
             <div class="row"><span class="label">Payment Method</span><span class="value">Wallet Balance</span></div>
           </div>
+          ${tokenInfo ? `
+          <div class="token-section">
+            <p class="token-label">${tokenInfo.label}</p>
+            <p class="token-value">${tokenInfo.value}</p>
+            ${tokenInfo.serial ? `<p class="token-serial">Serial: ${tokenInfo.serial}</p>` : ''}
+          </div>
+          ` : ''}
           <div class="qr-section">
             <svg id="qr-placeholder" width="80" height="80"></svg>
             <p>Scan to verify this transaction</p>
@@ -517,6 +576,21 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                     {formatAmount(t.amount, t.type)}
                   </p>
                 </div>
+
+                 {/* Token/PIN display */}
+                {(() => {
+                  const tokenInfo = extractTokenOrPin(t);
+                  if (!tokenInfo) return null;
+                  return (
+                    <div className="mx-6 mt-4 mb-0 bg-secondary rounded-2xl p-4 border-2 border-primary/20">
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1">{tokenInfo.label}</p>
+                      <p className="text-lg font-mono font-black tracking-wider text-primary break-all">{tokenInfo.value}</p>
+                      {tokenInfo.serial && (
+                        <p className="text-xs text-muted-foreground mt-1">Serial: <span className="font-bold">{tokenInfo.serial}</span></p>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Details */}
                 <div className="px-6 py-4 space-y-0">
