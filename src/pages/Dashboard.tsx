@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import SettingsPage from "@/pages/SettingsPage";
 import {
-  Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap, Globe, Shield,
+  Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap, Globe, Shield, Landmark,
   Gift, ArrowRight, Mail, MessageCircle, Users, Eye, EyeOff,
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
   ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
@@ -47,6 +47,7 @@ const quickActions = [
   { icon: Shield, label: "Insurance", path: "/services/insurance", color: "text-teal-600 dark:text-teal-400 bg-teal-500/10", border: "border-teal-500/20" },
   { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "text-pink-600 dark:text-pink-400 bg-pink-500/10", border: "border-pink-500/20" },
   { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10", border: "border-emerald-500/20" },
+  { icon: Landmark, label: "Bank Transfer", path: "#", color: "text-muted-foreground bg-muted/50", border: "border-muted", disabled: true },
 ];
 
 const Dashboard = () => {
@@ -331,17 +332,27 @@ const Dashboard = () => {
           </div>
           <StaggerContainer className="grid grid-cols-3 gap-2.5">
             {quickActions.map((a) => (
-              <StaggerItem key={a.path}>
-                <Link to={a.path}>
-                  <ScaleTap>
-                    <div className="fintech-card p-3 tap-target text-center group">
-                      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-2 mx-auto border transition-transform group-hover:scale-110", a.color, a.border)}>
-                        <a.icon className="w-5 h-5" />
-                      </div>
-                      <p className="text-[11px] font-bold text-foreground">{a.label}</p>
+              <StaggerItem key={a.path + a.label}>
+                {a.disabled ? (
+                  <div className="fintech-card p-3 tap-target text-center opacity-50 cursor-not-allowed relative">
+                    <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-2 mx-auto border", a.color, a.border)}>
+                      <a.icon className="w-5 h-5" />
                     </div>
-                  </ScaleTap>
-                </Link>
+                    <p className="text-[11px] font-bold text-foreground">{a.label}</p>
+                    <span className="text-[8px] font-semibold text-muted-foreground">Coming Soon</span>
+                  </div>
+                ) : (
+                  <Link to={a.path}>
+                    <ScaleTap>
+                      <div className="fintech-card p-3 tap-target text-center group">
+                        <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-2 mx-auto border transition-transform group-hover:scale-110", a.color, a.border)}>
+                          <a.icon className="w-5 h-5" />
+                        </div>
+                        <p className="text-[11px] font-bold text-foreground">{a.label}</p>
+                      </div>
+                    </ScaleTap>
+                  </Link>
+                )}
               </StaggerItem>
             ))}
           </StaggerContainer>
