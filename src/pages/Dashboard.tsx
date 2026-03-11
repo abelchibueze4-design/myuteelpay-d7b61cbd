@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import SettingsPage from "@/pages/SettingsPage";
 import {
-  Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap, Globe, Shield,
+  Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap, Globe, Shield, Landmark,
   Gift, ArrowRight, Mail, MessageCircle, Users, Eye, EyeOff,
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
   ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
