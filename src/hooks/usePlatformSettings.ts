@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+export type ApiProvider = "kvdata" | "vtpass";
+
 export interface PlatformSettings {
   maintenance_mode: boolean;
   new_signups_enabled: boolean;
@@ -19,6 +21,14 @@ export interface PlatformSettings {
   service_status: "operational" | "degraded" | "outage";
   service_status_message: string;
   service_status_visible: boolean;
+  // Per-service API provider selection
+  airtime_provider: ApiProvider;
+  data_provider: ApiProvider;
+  cable_provider: ApiProvider;
+  electricity_provider: ApiProvider;
+  edu_pins_provider: ApiProvider;
+  data_card_provider: ApiProvider;
+  bulk_sms_provider: ApiProvider;
 }
 
 const defaults: PlatformSettings = {
@@ -39,6 +49,13 @@ const defaults: PlatformSettings = {
   service_status: "operational",
   service_status_message: "All services are running smoothly",
   service_status_visible: false,
+  airtime_provider: "vtpass",
+  data_provider: "vtpass",
+  cable_provider: "vtpass",
+  electricity_provider: "vtpass",
+  edu_pins_provider: "vtpass",
+  data_card_provider: "vtpass",
+  bulk_sms_provider: "vtpass",
 };
 
 export function usePlatformSettings() {
