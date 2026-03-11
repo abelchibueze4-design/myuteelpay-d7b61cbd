@@ -83,8 +83,8 @@ function AppSidebar() {
           {collapsed && <img src={logo} alt="U" className="h-10 w-auto" />}
         </div>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+        <SidebarGroup className="bg-sidebar-accent/30 rounded-lg mx-2 p-2">
+          <SidebarGroupLabel className="text-sidebar-primary font-semibold text-xs uppercase tracking-wider">Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
@@ -111,8 +111,8 @@ function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Services</SidebarGroupLabel>
+        <SidebarGroup className="bg-sidebar-accent/30 rounded-lg mx-2 p-2">
+          <SidebarGroupLabel className="text-sidebar-primary font-semibold text-xs uppercase tracking-wider">Services</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {serviceItems.map((item) => (
@@ -137,8 +137,8 @@ function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Support & More</SidebarGroupLabel>
+        <SidebarGroup className="bg-sidebar-accent/30 rounded-lg mx-2 p-2">
+          <SidebarGroupLabel className="text-sidebar-primary font-semibold text-xs uppercase tracking-wider">Support & More</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {otherItems.map((item) => (
