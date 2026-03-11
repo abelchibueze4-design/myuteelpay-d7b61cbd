@@ -71,6 +71,7 @@ const Signup = () => {
                   className="h-9 pl-9 text-sm placeholder:text-[10px]"
                   type={f.type}
                   required={f.required}
+                  autoComplete={f.autoComplete}
                 />
               </div>
               {f.key === "username" && form.username && (
