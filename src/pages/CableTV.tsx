@@ -22,6 +22,7 @@ const CableTV = () => {
   const [smartcard, setSmartcard] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [customerName, setCustomerName] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
