@@ -116,7 +116,7 @@ const CableTV = () => {
                     <button
                         key={p.cable_id}
                         type="button"
-                        onClick={() => { setProvider(p); setPlanId(""); setSelectedPlan(null); setCustomerName(""); }}
+                        onClick={() => { setProvider(p); setPlanId(""); setSelectedPlan(null); setCustomerName(""); setCustomerAddress(""); }}
                         className={`py-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5 ${
                             provider?.cable_id === p.cable_id 
                             ? "border-primary bg-primary/5 shadow-lg shadow-primary/10" 
