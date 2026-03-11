@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { SetupTransactionPinModal } from "@/components/SetupTransactionPinModal";
 import { useMaintenanceMode } from "@/hooks/useMaintenanceMode";
@@ -12,12 +12,13 @@ export const DashboardWrapper = ({ children }: DashboardWrapperProps) => {
   const { user, checkPinRequired } = useAuth();
   const [showPinSetup, setShowPinSetup] = useState(false);
   const [isCheckingPin, setIsCheckingPin] = useState(true);
+  const pinSetupCompleted = useRef(false);
   const { isMaintenanceMode, isLoading: maintenanceLoading } = useMaintenanceMode();
 
   useEffect(() => {
     let cancelled = false;
     const checkPin = async () => {
-      if (user?.id) {
+      if (user?.id && !pinSetupCompleted.current) {
         const pinRequired = await checkPinRequired();
         if (!cancelled) setShowPinSetup(pinRequired);
       }
@@ -28,6 +29,11 @@ export const DashboardWrapper = ({ children }: DashboardWrapperProps) => {
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  const handlePinComplete = () => {
+    pinSetupCompleted.current = true;
+    setShowPinSetup(false);
+  };
 
   if (isCheckingPin || maintenanceLoading) {
     return (
@@ -49,7 +55,7 @@ export const DashboardWrapper = ({ children }: DashboardWrapperProps) => {
       {children}
       <SetupTransactionPinModal
         open={showPinSetup}
-        onComplete={() => setShowPinSetup(false)}
+        onComplete={handlePinComplete}
         isRequired={true}
       />
     </>
