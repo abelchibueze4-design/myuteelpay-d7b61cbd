@@ -100,6 +100,13 @@ const AdminSettings = () => {
             setServiceStatus((d.service_status as "operational" | "degraded" | "outage") ?? "operational");
             setServiceStatusMessage(d.service_status_message as string ?? "All services are running smoothly");
             setServiceStatusVisible(d.service_status_visible as boolean ?? false);
+            setAirtimeProvider(d.airtime_provider as string ?? "vtpass");
+            setDataProvider(d.data_provider as string ?? "vtpass");
+            setCableProvider(d.cable_provider as string ?? "vtpass");
+            setElectricityProvider(d.electricity_provider as string ?? "vtpass");
+            setEduPinsProvider(d.edu_pins_provider as string ?? "vtpass");
+            setDataCardProvider(d.data_card_provider as string ?? "vtpass");
+            setBulkSmsProvider(d.bulk_sms_provider as string ?? "vtpass");
         }
     }, [config]);
 
