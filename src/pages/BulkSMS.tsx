@@ -83,8 +83,9 @@ const BulkSMS = () => {
                 type="button"
                 onClick={async () => {
                   try {
-                    if ('contacts' in navigator && 'ContactsManager' in window) {
-                      const contacts = await (navigator as any).contacts.select(['tel'], { multiple: true });
+                    const nav = navigator as any;
+                    if (nav.contacts?.select) {
+                      const contacts = await nav.contacts.select(['tel'], { multiple: true });
                       if (contacts?.length) {
                         const numbers = contacts
                           .flatMap((c: any) => c.tel || [])
@@ -96,9 +97,11 @@ const BulkSMS = () => {
                       }
                     } else {
                       const { toast } = await import('sonner');
-                      toast.info("Contact picker not supported on this device");
+                      toast.info("Tap the input field to type or paste phone numbers");
                     }
-                  } catch {}
+                  } catch (e) {
+                    console.warn('Contact picker error:', e);
+                  }
                 }}
                 className="absolute right-3 top-3 p-1.5 rounded-lg hover:bg-secondary/50 transition-colors"
                 title="Import from contacts"
