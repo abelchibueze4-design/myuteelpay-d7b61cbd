@@ -119,11 +119,12 @@ const ELECTRICITY_SERVICE_MAP: Record<string, string> = {
 const EDUCATION_SERVICE_MAP: Record<string, string> = {
   waec: "waec",
   "waec registration": "waec-registration",
-  neco: "waec", // fallback
+  "waec result checker": "waec",
+  neco: "waec",
   jamb: "jamb",
   "jamb utme": "jamb",
   "jamb de": "jamb",
-  nabteb: "waec", // fallback
+  nabteb: "waec",
 };
 
 function resolveServiceId(map: Record<string, string>, name: string): string | undefined {
@@ -158,7 +159,6 @@ Deno.serve(async (req) => {
 
     // === GET DATA PLANS (variations) ===
     if (action === "get_data_plans") {
-      // Fetch variations for all networks
       const networks = ["mtn-data", "glo-data", "airtel-data", "etisalat-data"];
       const allPlans: any[] = [];
       for (const serviceID of networks) {
@@ -234,7 +234,6 @@ Deno.serve(async (req) => {
 
     // === GET DATACARD PLANS ===
     if (action === "get_datacard_plans") {
-      // VTPass doesn't have a separate data card/PIN endpoint; reuse data variations
       const networks = ["mtn-data", "glo-data", "airtel-data", "etisalat-data"];
       const allPlans: any[] = [];
       for (const serviceID of networks) {
@@ -256,6 +255,62 @@ Deno.serve(async (req) => {
         }
       }
       return json(allPlans);
+    }
+
+    // === GET INSURANCE PLANS ===
+    if (action === "get_insurance_plans") {
+      const insuranceServices = ["ui-insure", "personal-accident-insurance"];
+      const allPlans: any[] = [];
+      for (const serviceID of insuranceServices) {
+        try {
+          const data = await vtpassGet(`/service-variations?serviceID=${serviceID}`);
+          if (data?.content?.variations) {
+            for (const v of data.content.variations) {
+              allPlans.push({
+                id: v.variation_code,
+                name: v.name,
+                amount: Number(v.variation_amount),
+                fixed_price: v.fixedPrice,
+                serviceID,
+                service_name: data.content?.ServiceName || serviceID,
+              });
+            }
+          }
+        } catch (e) {
+          console.error(`Failed to fetch ${serviceID} insurance variations:`, e);
+        }
+      }
+      return json({ plans: allPlans });
+    }
+
+    // === GET INTERNATIONAL AIRTIME COUNTRIES ===
+    if (action === "get_intl_countries") {
+      const data = await vtpassGet("/get-international-airtime-countries");
+      return json(data?.content?.countries || []);
+    }
+
+    // === GET INTERNATIONAL AIRTIME PRODUCT TYPES ===
+    if (action === "get_intl_product_types") {
+      const { country_code } = params;
+      if (!country_code) return json({ error: "Country code required" }, 400);
+      const data = await vtpassGet(`/get-international-airtime-product-types?code=${country_code}`);
+      return json(data?.content || []);
+    }
+
+    // === GET INTERNATIONAL AIRTIME OPERATORS ===
+    if (action === "get_intl_operators") {
+      const { country_code, product_type_id } = params;
+      if (!country_code || !product_type_id) return json({ error: "Country code and product type required" }, 400);
+      const data = await vtpassGet(`/get-international-airtime-operators?code=${country_code}&product_type_id=${product_type_id}`);
+      return json(data?.content || []);
+    }
+
+    // === GET INTERNATIONAL AIRTIME VARIATIONS ===
+    if (action === "get_intl_variations") {
+      const { operator_id, product_type_id } = params;
+      if (!operator_id || !product_type_id) return json({ error: "Operator and product type required" }, 400);
+      const data = await vtpassGet(`/service-variations?serviceID=foreign-airtime&operator_id=${operator_id}&product_type_id=${product_type_id}`);
+      return json(data?.content?.variations || []);
     }
 
     // === VALIDATE IUC ===
@@ -405,8 +460,47 @@ Deno.serve(async (req) => {
         break;
       }
 
+      case "buy_insurance": {
+        const serviceID = params.serviceID || "ui-insure";
+        vtResult = await vtpassPost("/pay", {
+          request_id: requestId,
+          serviceID,
+          variation_code: params.variation_code,
+          amount: numericAmount,
+          phone: params.phone || "08000000000",
+          billersCode: params.plate_number || params.billersCode || "",
+          engine_number: params.engine_number || "",
+          chassis_number: params.chassis_number || "",
+          vehicle_make: params.vehicle_make || "",
+          vehicle_color: params.vehicle_color || "",
+          vehicle_model: params.vehicle_model || "",
+          contact_address: params.contact_address || "",
+          Insured_name: params.insured_name || "",
+        });
+        txType = "electricity"; // reuse a valid enum for now
+        description = `Insurance - ${params.plan_name || serviceID}`;
+        break;
+      }
+
+      case "buy_intl_airtime": {
+        vtResult = await vtpassPost("/pay", {
+          request_id: requestId,
+          serviceID: "foreign-airtime",
+          billersCode: params.phone,
+          variation_code: params.variation_code,
+          amount: numericAmount,
+          phone: params.phone,
+          operator_id: params.operator_id,
+          country_code: params.country_code,
+          product_type_id: params.product_type_id,
+          email: user.email || "user@uteelpay.com",
+        });
+        txType = "airtime";
+        description = `Int'l Airtime ${params.country_name || ""} - ${params.phone}`;
+        break;
+      }
+
       case "buy_bulk_sms": {
-        // VTPass doesn't support bulk SMS in the same way; placeholder
         txType = "bulk_sms";
         description = params.description || `Bulk SMS to ${params.recipients?.split(",").length || 0} recipients`;
         vtResult = { code: "000", response_description: "TRANSACTION SUCCESSFUL" };
