@@ -327,7 +327,7 @@ const Dashboard = () => {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-extrabold text-foreground">Quick Actions</h2>
-            <Link to="/services/airtime" className="text-[11px] font-bold text-primary">View All</Link>
+            <Link to="/services" className="text-[11px] font-bold text-primary">View All</Link>
           </div>
           <StaggerContainer className="grid grid-cols-3 gap-2.5">
             {quickActions.map((a) => (
