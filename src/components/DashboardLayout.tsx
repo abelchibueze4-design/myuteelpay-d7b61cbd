@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Smartphone, Tv, Zap, MessageSquare, GraduationCap,
   Gift, LayoutDashboard, LogOut, History, Wallet, Menu, ShieldCheck,
-  HelpCircle, Settings, CreditCard, Coins, Plus, Globe, Shield
+  HelpCircle, Settings, CreditCard, Coins, Plus, Globe, Shield, Landmark
 } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "@/components/NavLink";
