@@ -138,7 +138,6 @@ const CableTV = () => {
                 className="h-14 rounded-2xl border-2 border-border/50 pl-12 focus-visible:ring-primary/20 bg-secondary/20 font-bold placeholder:text-[10px] placeholder:font-normal" 
                 required 
               />
-              />
             </div>
             {customerName && <p className="text-xs text-primary font-medium animate-fade-in">✓ {customerName}</p>}
           </div>
