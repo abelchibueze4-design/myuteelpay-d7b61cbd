@@ -154,6 +154,7 @@ const SidebarNavItem = ({
                                 <Link
                                     key={child.url}
                                     to={child.url}
+                                    onClick={onItemClick}
                                     className={cn(
                                         "flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium transition-all",
                                         location.pathname === child.url
