@@ -104,10 +104,12 @@ const SidebarNavItem = ({
     item,
     collapsed,
     badges,
+    onItemClick,
 }: {
     item: NavItem;
     collapsed: boolean;
     badges: Record<string, number>;
+    onItemClick?: () => void;
 }) => {
     const location = useLocation();
     const [open, setOpen] = useState(() =>
@@ -152,6 +154,7 @@ const SidebarNavItem = ({
                                 <Link
                                     key={child.url}
                                     to={child.url}
+                                    onClick={onItemClick}
                                     className={cn(
                                         "flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium transition-all",
                                         location.pathname === child.url
@@ -178,6 +181,7 @@ const SidebarNavItem = ({
     return (
         <Link
             to={item.url}
+            onClick={onItemClick}
             title={collapsed ? item.title : undefined}
             className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all relative group",
@@ -304,7 +308,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
             {/* Nav */}
             <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
                 {navItems.map((item) => (
-                    <SidebarNavItem key={item.url} item={item} collapsed={collapsed && !mobile} badges={badgeCounts} />
+                    <SidebarNavItem key={item.url} item={item} collapsed={collapsed && !mobile} badges={badgeCounts} onItemClick={mobile ? () => setMobileOpen(false) : undefined} />
                 ))}
             </nav>
 
