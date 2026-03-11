@@ -414,7 +414,41 @@ const AdminSettings = () => {
                     </CardContent>
                 </Card>
 
-                <div className="flex justify-end">
+                {/* API Provider Selection */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Server className="w-5 h-5 text-primary" />
+                            API Provider Configuration
+                        </CardTitle>
+                        <CardDescription>Select which API provider to use for each service (KVData or VTPass)</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {[
+                            { label: "Airtime", value: airtimeProvider, setter: setAirtimeProvider },
+                            { label: "Data", value: dataProvider, setter: setDataProvider },
+                            { label: "Cable TV", value: cableProvider, setter: setCableProvider },
+                            { label: "Electricity", value: electricityProvider, setter: setElectricityProvider },
+                            { label: "Education Pins", value: eduPinsProvider, setter: setEduPinsProvider },
+                            { label: "Data Cards", value: dataCardProvider, setter: setDataCardProvider },
+                            { label: "Bulk SMS", value: bulkSmsProvider, setter: setBulkSmsProvider },
+                        ].map(({ label, value, setter }) => (
+                            <div key={label} className="flex items-center justify-between">
+                                <Label>{label}</Label>
+                                <Select value={value} onValueChange={setter}>
+                                    <SelectTrigger className="w-32 text-xs">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="vtpass">VTPass</SelectItem>
+                                        <SelectItem value="kvdata">KVData</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+
                     <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="min-w-[150px]">
                         {saveMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                         {saveMutation.isPending ? "Saving..." : "Save Changes"}
