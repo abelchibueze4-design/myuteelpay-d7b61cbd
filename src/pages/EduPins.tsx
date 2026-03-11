@@ -139,12 +139,28 @@ const EduPins = () => {
           <h2 className="text-xl font-bold">Pin Generated!</h2>
           <p className="text-sm text-muted-foreground mb-2">Your {examName} pin has been generated.</p>
           {pinData && (
-            <div className="bg-secondary rounded-lg p-3">
-              <p className="text-xs text-muted-foreground">PIN</p>
-              <p className="text-lg font-mono font-bold tracking-wider">{pinData.pin || pinData.Pin || JSON.stringify(pinData)}</p>
-              {(pinData.serial || pinData.Serial) && (
-                <p className="text-xs text-muted-foreground mt-1">Serial: {pinData.serial || pinData.Serial}</p>
-              )}
+            <div className="space-y-2">
+              {pinData.cards && pinData.cards.length > 0 ? (
+                pinData.cards.map((card: any, idx: number) => (
+                  <div key={idx} className="bg-secondary rounded-lg p-3 text-left">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Pin {pinData.cards.length > 1 ? `#${idx + 1}` : ""}</p>
+                    <p className="text-lg font-mono font-bold tracking-wider text-primary break-all">{card.Pin || card.pin}</p>
+                    {(card.Serial || card.serial) && (
+                      <p className="text-xs text-muted-foreground mt-1">Serial: {card.Serial || card.serial}</p>
+                    )}
+                  </div>
+                ))
+              ) : pinData.purchased_code ? (
+                <div className="bg-secondary rounded-lg p-3 text-left">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Pin</p>
+                  <p className="text-sm font-mono font-bold tracking-wider text-primary break-all">{pinData.purchased_code}</p>
+                </div>
+              ) : (pinData.token || pinData.Token) ? (
+                <div className="bg-secondary rounded-lg p-3 text-left">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Pin</p>
+                  <p className="text-sm font-mono font-bold tracking-wider text-primary break-all">{pinData.token || pinData.Token}</p>
+                </div>
+              ) : null}
             </div>
           )}
           <div className="flex gap-3 mt-4">
