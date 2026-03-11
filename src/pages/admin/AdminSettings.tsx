@@ -26,6 +26,7 @@ import {
     Eye,
     DollarSign,
     Activity,
+    Server,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -57,6 +58,14 @@ const AdminSettings = () => {
     const [serviceStatusMessage, setServiceStatusMessage] = useState("All services are running smoothly");
     const [serviceStatusVisible, setServiceStatusVisible] = useState(false);
 
+    // API Provider settings
+    const [airtimeProvider, setAirtimeProvider] = useState("vtpass");
+    const [dataProvider, setDataProvider] = useState("vtpass");
+    const [cableProvider, setCableProvider] = useState("vtpass");
+    const [electricityProvider, setElectricityProvider] = useState("vtpass");
+    const [eduPinsProvider, setEduPinsProvider] = useState("vtpass");
+    const [dataCardProvider, setDataCardProvider] = useState("vtpass");
+    const [bulkSmsProvider, setBulkSmsProvider] = useState("vtpass");
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
         queryKey: ["admin_site_config"],
@@ -91,6 +100,13 @@ const AdminSettings = () => {
             setServiceStatus((d.service_status as "operational" | "degraded" | "outage") ?? "operational");
             setServiceStatusMessage(d.service_status_message as string ?? "All services are running smoothly");
             setServiceStatusVisible(d.service_status_visible as boolean ?? false);
+            setAirtimeProvider(d.airtime_provider as string ?? "vtpass");
+            setDataProvider(d.data_provider as string ?? "vtpass");
+            setCableProvider(d.cable_provider as string ?? "vtpass");
+            setElectricityProvider(d.electricity_provider as string ?? "vtpass");
+            setEduPinsProvider(d.edu_pins_provider as string ?? "vtpass");
+            setDataCardProvider(d.data_card_provider as string ?? "vtpass");
+            setBulkSmsProvider(d.bulk_sms_provider as string ?? "vtpass");
         }
     }, [config]);
 
@@ -114,6 +130,13 @@ const AdminSettings = () => {
                 service_status: serviceStatus,
                 service_status_message: serviceStatusMessage,
                 service_status_visible: serviceStatusVisible,
+                airtime_provider: airtimeProvider,
+                data_provider: dataProvider,
+                cable_provider: cableProvider,
+                electricity_provider: electricityProvider,
+                edu_pins_provider: eduPinsProvider,
+                data_card_provider: dataCardProvider,
+                bulk_sms_provider: bulkSmsProvider,
             };
 
             if (config?.id) {
@@ -388,6 +411,41 @@ const AdminSettings = () => {
                                 onChange={(e) => setMinWalletFund(e.target.value)}
                             />
                         </div>
+                    </CardContent>
+                </Card>
+
+                {/* API Provider Selection */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Server className="w-5 h-5 text-primary" />
+                            API Provider Configuration
+                        </CardTitle>
+                        <CardDescription>Select which API provider to use for each service (KVData or VTPass)</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {[
+                            { label: "Airtime", value: airtimeProvider, setter: setAirtimeProvider },
+                            { label: "Data", value: dataProvider, setter: setDataProvider },
+                            { label: "Cable TV", value: cableProvider, setter: setCableProvider },
+                            { label: "Electricity", value: electricityProvider, setter: setElectricityProvider },
+                            { label: "Education Pins", value: eduPinsProvider, setter: setEduPinsProvider },
+                            { label: "Data Cards", value: dataCardProvider, setter: setDataCardProvider },
+                            { label: "Bulk SMS", value: bulkSmsProvider, setter: setBulkSmsProvider },
+                        ].map(({ label, value, setter }) => (
+                            <div key={label} className="flex items-center justify-between">
+                                <Label>{label}</Label>
+                                <Select value={value} onValueChange={setter}>
+                                    <SelectTrigger className="w-32 text-xs">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="vtpass">VTPass</SelectItem>
+                                        <SelectItem value="kvdata">KVData</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        ))}
                     </CardContent>
                 </Card>
 
