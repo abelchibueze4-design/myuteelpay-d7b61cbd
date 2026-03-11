@@ -181,6 +181,7 @@ const SidebarNavItem = ({
     return (
         <Link
             to={item.url}
+            onClick={onItemClick}
             title={collapsed ? item.title : undefined}
             className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all relative group",
