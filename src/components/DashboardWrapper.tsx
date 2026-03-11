@@ -15,16 +15,19 @@ export const DashboardWrapper = ({ children }: DashboardWrapperProps) => {
   const { isMaintenanceMode, isLoading: maintenanceLoading } = useMaintenanceMode();
 
   useEffect(() => {
+    let cancelled = false;
     const checkPin = async () => {
       if (user?.id) {
         const pinRequired = await checkPinRequired();
-        setShowPinSetup(pinRequired);
+        if (!cancelled) setShowPinSetup(pinRequired);
       }
-      setIsCheckingPin(false);
+      if (!cancelled) setIsCheckingPin(false);
     };
 
     checkPin();
-  }, [user?.id, checkPinRequired]);
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   if (isCheckingPin || maintenanceLoading) {
     return (
