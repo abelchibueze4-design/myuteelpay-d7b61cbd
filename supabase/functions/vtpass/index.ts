@@ -371,11 +371,11 @@ Deno.serve(async (req) => {
       }
 
       case "buy_edu_pin": {
-        const serviceID = resolveServiceId(EDUCATION_SERVICE_MAP, params.exam_name || "");
+        // Use serviceID directly from the plan if provided, otherwise resolve from name
+        const serviceID = params.serviceID || resolveServiceId(EDUCATION_SERVICE_MAP, params.exam_name || "");
         if (!serviceID) return json({ error: "Unsupported exam" }, 400);
 
-        // Get variations to find correct code
-        let variationCode = params.variation_code || serviceID;
+        const variationCode = params.variation_code || serviceID;
         vtResult = await vtpassPost("/pay", {
           request_id: requestId,
           serviceID,
