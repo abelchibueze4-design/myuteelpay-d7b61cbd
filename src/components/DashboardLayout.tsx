@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Smartphone, Tv, Zap, MessageSquare, GraduationCap,
   Gift, LayoutDashboard, LogOut, History, Wallet, Menu, ShieldCheck,
-  HelpCircle, Settings, CreditCard, Coins, Plus
+  HelpCircle, Settings, CreditCard, Coins, Plus, Globe, Shield
 } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "@/components/NavLink";
@@ -43,6 +43,8 @@ const serviceItems = [
   { title: "Data Card", url: "/services/data-card", icon: CreditCard },
   { title: "Cable TV", url: "/services/cable", icon: Tv },
   { title: "Electricity", url: "/services/electricity", icon: Zap },
+  { title: "Int'l Airtime", url: "/services/intl-airtime", icon: Globe },
+  { title: "Insurance", url: "/services/insurance", icon: Shield },
   { title: "Bulk SMS", url: "/services/sms", icon: MessageSquare },
   { title: "Edu Pins", url: "/services/edu", icon: GraduationCap },
 ];

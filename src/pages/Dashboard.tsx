@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import SettingsPage from "@/pages/SettingsPage";
 import {
-  Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap,
+  Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap, Globe, Shield,
   Gift, ArrowRight, Mail, MessageCircle, Users, Eye, EyeOff,
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
   ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
@@ -43,6 +43,8 @@ const quickActions = [
   { icon: Smartphone, label: "Data", path: "/services/data", color: "text-blue-600 dark:text-blue-400 bg-blue-500/10", border: "border-blue-500/20" },
   { icon: Tv, label: "Cable TV", path: "/services/cable", color: "text-orange-600 dark:text-orange-400 bg-orange-500/10", border: "border-orange-500/20" },
   { icon: Zap, label: "Electricity", path: "/services/electricity", color: "text-accent-foreground bg-accent/15", border: "border-accent/20" },
+  { icon: Globe, label: "Int'l Airtime", path: "/services/intl-airtime", color: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10", border: "border-indigo-500/20" },
+  { icon: Shield, label: "Insurance", path: "/services/insurance", color: "text-teal-600 dark:text-teal-400 bg-teal-500/10", border: "border-teal-500/20" },
   { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "text-pink-600 dark:text-pink-400 bg-pink-500/10", border: "border-pink-500/20" },
   { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10", border: "border-emerald-500/20" },
 ];
@@ -325,7 +327,7 @@ const Dashboard = () => {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-extrabold text-foreground">Quick Actions</h2>
-            <Link to="/services/airtime" className="text-[11px] font-bold text-primary">View All</Link>
+            <Link to="/services" className="text-[11px] font-bold text-primary">View All</Link>
           </div>
           <StaggerContainer className="grid grid-cols-3 gap-2.5">
             {quickActions.map((a) => (
