@@ -43,6 +43,8 @@ const quickActions = [
   { icon: Smartphone, label: "Data", path: "/services/data", color: "text-blue-600 dark:text-blue-400 bg-blue-500/10", border: "border-blue-500/20" },
   { icon: Tv, label: "Cable TV", path: "/services/cable", color: "text-orange-600 dark:text-orange-400 bg-orange-500/10", border: "border-orange-500/20" },
   { icon: Zap, label: "Electricity", path: "/services/electricity", color: "text-accent-foreground bg-accent/15", border: "border-accent/20" },
+  { icon: Globe, label: "Int'l Airtime", path: "/services/intl-airtime", color: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10", border: "border-indigo-500/20" },
+  { icon: Shield, label: "Insurance", path: "/services/insurance", color: "text-teal-600 dark:text-teal-400 bg-teal-500/10", border: "border-teal-500/20" },
   { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "text-pink-600 dark:text-pink-400 bg-pink-500/10", border: "border-pink-500/20" },
   { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10", border: "border-emerald-500/20" },
 ];
