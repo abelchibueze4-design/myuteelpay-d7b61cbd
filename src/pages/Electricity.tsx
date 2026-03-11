@@ -22,9 +22,11 @@ const Electricity = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [token, setToken] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
   const [discoDropdownOpen, setDiscoDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
   
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
@@ -49,22 +51,31 @@ const Electricity = () => {
     }
   });
 
-  const handleValidateMeter = async () => {
-    if (!meter || !disco) return;
-    try {
-      const selectedDisco = discos?.find(d => String(d.disco_id) === disco);
-      const res = await kvdata.mutateAsync({
-        action: "validate_meter",
-        meter_number: meter,
-        disco_id: Number(disco),
-        meter_type: type,
-        disco_label: selectedDisco?.disco_name
-      });
-      setCustomerName(res?.Customer_Name || res?.name || "Validated");
-    } catch {
-      setCustomerName("");
-    }
-  };
+  // Auto-validate meter when number reaches valid length
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setCustomerName("");
+    if (!meter || meter.length < 10 || !disco) return;
+    setIsValidating(true);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const selectedDisco = discos?.find(d => String(d.disco_id) === disco);
+        const res = await kvdata.mutateAsync({
+          action: "validate_meter",
+          meter_number: meter,
+          disco_id: Number(disco),
+          meter_type: type,
+          disco_label: selectedDisco?.disco_name
+        });
+        setCustomerName(res?.Customer_Name || res?.name || "Validated");
+      } catch {
+        setCustomerName("");
+      } finally {
+        setIsValidating(false);
+      }
+    }, 800);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [meter, disco, type]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
