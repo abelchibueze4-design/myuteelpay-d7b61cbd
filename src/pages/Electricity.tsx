@@ -175,8 +175,9 @@ const Electricity = () => {
             <label className="text-sm font-medium">Meter Number</label>
             <div className="relative">
               <Zap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input value={meter} onChange={(e) => { setMeter(e.target.value); setCustomerName(""); }} placeholder="Enter meter number" className="pl-10 placeholder:text-[10px] placeholder:font-normal" required onBlur={handleValidateMeter} />
+              <Input value={meter} onChange={(e) => { setMeter(e.target.value); }} placeholder="Enter meter number" className="pl-10 placeholder:text-[10px] placeholder:font-normal" required />
             </div>
+            {isValidating && <p className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Validating...</p>}
             {customerName && <p className="text-xs text-primary font-medium">✓ {customerName}</p>}
           </div>
           <div className="space-y-2">
