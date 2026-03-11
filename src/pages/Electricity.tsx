@@ -22,6 +22,7 @@ const Electricity = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [token, setToken] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
   const [discoDropdownOpen, setDiscoDropdownOpen] = useState(false);
