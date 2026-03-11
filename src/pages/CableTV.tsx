@@ -139,6 +139,7 @@ const CableTV = () => {
                 required 
               />
             </div>
+            {isValidating && <p className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Validating...</p>}
             {customerName && <p className="text-xs text-primary font-medium animate-fade-in">✓ {customerName}</p>}
           </div>
 
