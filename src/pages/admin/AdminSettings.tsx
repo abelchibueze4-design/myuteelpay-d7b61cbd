@@ -58,6 +58,14 @@ const AdminSettings = () => {
     const [serviceStatusMessage, setServiceStatusMessage] = useState("All services are running smoothly");
     const [serviceStatusVisible, setServiceStatusVisible] = useState(false);
 
+    // API Provider settings
+    const [airtimeProvider, setAirtimeProvider] = useState("vtpass");
+    const [dataProvider, setDataProvider] = useState("vtpass");
+    const [cableProvider, setCableProvider] = useState("vtpass");
+    const [electricityProvider, setElectricityProvider] = useState("vtpass");
+    const [eduPinsProvider, setEduPinsProvider] = useState("vtpass");
+    const [dataCardProvider, setDataCardProvider] = useState("vtpass");
+    const [bulkSmsProvider, setBulkSmsProvider] = useState("vtpass");
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
         queryKey: ["admin_site_config"],
