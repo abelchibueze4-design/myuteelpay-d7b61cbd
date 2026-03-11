@@ -81,12 +81,14 @@ const CableTV = () => {
     if (!selectedPlan || !provider) return false;
 
     try {
+      // Use the plan's own cable_name to prevent serviceID mismatch
+      const planCableName = selectedPlan?.raw?.cable_name || provider.cable_name;
       await kvdata.mutateAsync({
         action: "buy_cable",
         cable_id: provider.cable_id,
-        cable_name: provider.cable_name,
+        cable_name: planCableName,
         cableplan_id: selectedPlan.plan_id,
-        plan_label: `${provider.cable_name} ${selectedPlan.label}`,
+        plan_label: `${planCableName} ${selectedPlan.label}`,
         smart_card_number: smartcard,
         amount: selectedPlan.price,
       });

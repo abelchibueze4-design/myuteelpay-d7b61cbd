@@ -182,7 +182,12 @@ const Electricity = () => {
               <Input value={meter} onChange={(e) => { setMeter(e.target.value); }} placeholder="Enter meter number" className="pl-10 placeholder:text-[10px] placeholder:font-normal" required />
             </div>
             {isValidating && <p className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Validating...</p>}
-            {customerName && <p className="text-xs text-primary font-medium">✓ {customerName}</p>}
+            {customerName && (
+              <div className="animate-fade-in space-y-0.5">
+                <p className="text-xs text-primary font-medium">✓ {customerName}</p>
+                {customerAddress && <p className="text-[11px] text-muted-foreground">{customerAddress}</p>}
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Amount</label>
