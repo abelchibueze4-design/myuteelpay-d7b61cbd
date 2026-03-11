@@ -47,6 +47,7 @@ const quickActions = [
   { icon: Shield, label: "Insurance", path: "/services/insurance", color: "text-teal-600 dark:text-teal-400 bg-teal-500/10", border: "border-teal-500/20" },
   { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "text-pink-600 dark:text-pink-400 bg-pink-500/10", border: "border-pink-500/20" },
   { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10", border: "border-emerald-500/20" },
+  { icon: Landmark, label: "Bank Transfer", path: "#", color: "text-muted-foreground bg-muted/50", border: "border-muted", disabled: true },
 ];
 
 const Dashboard = () => {
