@@ -130,6 +130,13 @@ const AdminSettings = () => {
                 service_status: serviceStatus,
                 service_status_message: serviceStatusMessage,
                 service_status_visible: serviceStatusVisible,
+                airtime_provider: airtimeProvider,
+                data_provider: dataProvider,
+                cable_provider: cableProvider,
+                electricity_provider: electricityProvider,
+                edu_pins_provider: eduPinsProvider,
+                data_card_provider: dataCardProvider,
+                bulk_sms_provider: bulkSmsProvider,
             };
 
             if (config?.id) {
