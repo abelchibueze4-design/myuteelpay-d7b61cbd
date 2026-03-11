@@ -182,16 +182,30 @@ const Data = () => {
                                     type="button"
                                     onClick={async () => {
                                         try {
-                                            if ('contacts' in navigator && 'ContactsManager' in window) {
-                                                const contacts = await (navigator as any).contacts.select(['tel'], { multiple: false });
+                                            const nav = navigator as any;
+                                            if (nav.contacts?.select) {
+                                                const contacts = await nav.contacts.select(['tel'], { multiple: false });
                                                 if (contacts?.length && contacts[0].tel?.length) {
                                                     setPhone(contacts[0].tel[0].replace(/\D/g, ''));
                                                 }
                                             } else {
-                                                const { toast } = await import('sonner');
-                                                toast.info("Contact picker not supported on this device");
+                                                const input = document.createElement('input');
+                                                input.type = 'tel';
+                                                input.style.position = 'fixed';
+                                                input.style.top = '-9999px';
+                                                document.body.appendChild(input);
+                                                input.focus();
+                                                input.addEventListener('change', () => {
+                                                    if (input.value) setPhone(input.value.replace(/\D/g, ''));
+                                                    document.body.removeChild(input);
+                                                });
+                                                input.addEventListener('blur', () => {
+                                                    setTimeout(() => { if (document.body.contains(input)) document.body.removeChild(input); }, 300);
+                                                });
                                             }
-                                        } catch {}
+                                        } catch (e) {
+                                            console.warn('Contact picker error:', e);
+                                        }
                                     }}
                                     className="p-1.5 rounded-lg hover:bg-secondary/50 transition-colors"
                                     title="Import from contacts"
