@@ -283,6 +283,10 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
           .row .value { color: #1e293b; font-size: 12px; font-weight: 600; text-align: right; max-width: 55%; word-break: break-all; }
           .qr-section { text-align: center; padding: 16px 24px 8px; border-top: 2px dashed #e2e8f0; }
           .qr-section p { font-size: 9px; color: #94a3b8; margin-top: 6px; }
+          .token-section { text-align: center; padding: 16px 24px; background: #f0fdf4; border-top: 2px dashed #e2e8f0; }
+          .token-section .token-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700; margin-bottom: 6px; }
+          .token-section .token-value { font-size: 20px; font-weight: 800; font-family: monospace; letter-spacing: 3px; color: #7c3aed; word-break: break-all; }
+          .token-section .token-serial { font-size: 11px; color: #64748b; margin-top: 4px; }
           .footer { text-align: center; padding: 16px 24px 24px; }
           .footer p { font-size: 10px; color: #94a3b8; }
           .footer .support { margin-top: 8px; font-size: 10px; color: #7c3aed; font-weight: 600; }
