@@ -8,8 +8,8 @@ import { Loader2 } from "lucide-react";
 
 // Map cable_id to VTPass cable names
 const CABLE_ID_NAME_MAP: Record<number, string> = {
-  1: "DSTV",
-  2: "GOTV",
+  1: "GOTV",
+  2: "DSTV",
   3: "STARTIMES",
 };
 
