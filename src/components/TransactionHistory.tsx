@@ -224,8 +224,8 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
   };
 
   const handleShareReceipt = (t: any) => {
-    const isCredit = t.type === "wallet_fund" || t.type === "referral_bonus" || t.type === "refund";
-    const text = [
+    const tokenInfo = extractTokenOrPin(t);
+    const lines = [
       `UteelPay Receipt`,
       `Service: ${TYPE_LABELS[t.type] || t.type}`,
       `Amount: ${formatAmount(t.amount, t.type)}`,
@@ -233,8 +233,13 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       `Reference: ${t.reference || t.id}`,
       `Date: ${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")}`,
       `Description: ${t.description || "N/A"}`,
-      `\nPowered by UteelPay — www.uteelpay.com`,
-    ].join("\n");
+    ];
+    if (tokenInfo) {
+      lines.push(`${tokenInfo.label}: ${tokenInfo.value}`);
+      if (tokenInfo.serial) lines.push(`Serial: ${tokenInfo.serial}`);
+    }
+    lines.push(`\nPowered by UteelPay — www.uteelpay.com`);
+    const text = lines.join("\n");
     if (navigator.share) {
       navigator.share({ title: "UteelPay Receipt", text });
     } else {
