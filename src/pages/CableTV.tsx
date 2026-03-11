@@ -44,6 +44,7 @@ const CableTV = () => {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setCustomerName("");
+    setCustomerAddress("");
     if (!smartcard || smartcard.length < 10 || !provider) return;
     setIsValidating(true);
     debounceRef.current = setTimeout(async () => {
@@ -55,8 +56,10 @@ const CableTV = () => {
           cable_name: provider.cable_name
         });
         setCustomerName(res?.Customer_Name || res?.name || "Validated");
+        setCustomerAddress(res?.Address || res?.address || "");
       } catch {
         setCustomerName("");
+        setCustomerAddress("");
       } finally {
         setIsValidating(false);
       }
