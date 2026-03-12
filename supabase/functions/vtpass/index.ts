@@ -15,7 +15,7 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-const VTPASS_BASE = "https://api-service.vtpass.com/api";
+const VTPASS_BASE = "https://vtpass.com/api";
 
 function generateRequestId() {
   const now = new Date();
