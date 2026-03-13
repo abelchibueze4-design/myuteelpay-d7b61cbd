@@ -6,8 +6,8 @@ import heroBillPayment2 from "@/assets/hero-bill-payment-2.jpg";
 import appMockup from "@/assets/app-mockup.png";
 import {
   Zap, Shield, Clock, Star, Smartphone, Tv, GraduationCap,
-  MessageSquare, Users, ArrowRight, Phone, Gift, HelpCircle, CheckCircle,
-  TrendingDown, Percent, BadgeDollarSign, Download, Quote
+  Users, ArrowRight, Phone, Gift, HelpCircle, CheckCircle,
+  TrendingDown, Percent, BadgeDollarSign, Download, Quote, Globe, CreditCard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
