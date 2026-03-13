@@ -28,7 +28,7 @@ export interface PlatformSettings {
   electricity_provider: ApiProvider;
   edu_pins_provider: ApiProvider;
   data_card_provider: ApiProvider;
-  bulk_sms_provider: ApiProvider;
+  
 }
 
 const defaults: PlatformSettings = {
