@@ -38,8 +38,8 @@ export function useFundWallet() {
       // Redirect to Paystack checkout
       window.location.href = data.authorization_url;
     },
-    onError: (err: Error) => {
-      toast.error(err.message);
+    onError: () => {
+      toast.error("Unable to initialize payment. Please check your details and try again.");
     },
   });
 
@@ -57,8 +57,8 @@ export function useFundWallet() {
       queryClient.invalidateQueries({ queryKey: ["wallet"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
-    onError: (err: Error) => {
-      toast.error(err.message);
+    onError: () => {
+      toast.error("Payment verification failed. If you were charged, your wallet will be updated shortly.");
     },
   });
 
