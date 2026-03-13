@@ -1,0 +1,1 @@
+ALTER TABLE public.notification_preferences DROP COLUMN IF EXISTS bulk_sms_enabled;
