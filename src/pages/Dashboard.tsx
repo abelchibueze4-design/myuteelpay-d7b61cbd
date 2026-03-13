@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { PageTransition, StaggerContainer, StaggerItem, ScaleTap } from "@/components/PageTransition";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
-import { OnboardingTour } from "@/components/OnboardingTour";
+
 import TransactionHistory from "@/components/TransactionHistory";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
@@ -158,7 +158,7 @@ const Dashboard = () => {
 
   return (
     <PageTransition className="min-h-screen bg-background relative">
-      <OnboardingTour />
+      
       <div className="hidden">
         <AccountSettings 
           open={settingsOpen} 
