@@ -114,9 +114,17 @@ const Signup = () => {
                 />
               </div>
               {f.key === "username" && form.username && (
-                <p className={`text-[10px] ${validateUsername(form.username) ? "text-green-600" : "text-destructive"}`}>
-                  {validateUsername(form.username) ? "Username available format" : "3-20 chars, starts with letter, letters/numbers/_ only"}
-                </p>
+                <div className="flex items-center gap-1 text-[10px]">
+                  {!validateUsername(form.username) ? (
+                    <p className="text-destructive">3-20 chars, starts with letter, letters/numbers/_ only</p>
+                  ) : checkingUsername ? (
+                    <p className="text-muted-foreground flex items-center gap-1"><Loader2 className="w-2.5 h-2.5 animate-spin" /> Checking...</p>
+                  ) : usernameAvailable === false ? (
+                    <p className="text-destructive flex items-center gap-1"><X className="w-2.5 h-2.5" /> Username is taken</p>
+                  ) : usernameAvailable === true ? (
+                    <p className="text-green-600 flex items-center gap-1"><Check className="w-2.5 h-2.5" /> Username available</p>
+                  ) : null}
+                </div>
               )}
             </div>
           ))}
