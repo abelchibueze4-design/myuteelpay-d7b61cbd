@@ -35,7 +35,19 @@ const Signup = () => {
     const { error } = await signUp(form.email, form.password, form.name, form.phone, form.username, form.address, form.referralCode);
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      // Show user-friendly messages instead of raw backend errors
+      const msg = error.message?.toLowerCase() || "";
+      if (msg.includes("already registered") || msg.includes("already exists")) {
+        toast.error("An account with this email already exists. Please sign in instead.");
+      } else if (msg.includes("duplicate") || msg.includes("unique constraint") || msg.includes("username")) {
+        toast.error("This username is already taken. Please choose a different one.");
+      } else if (msg.includes("password")) {
+        toast.error("Password does not meet the requirements. Please try again.");
+      } else if (msg.includes("email")) {
+        toast.error("Please enter a valid email address.");
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
     } else {
       toast.success("Account created successfully!");
       navigate("/login");
