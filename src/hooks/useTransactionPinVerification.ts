@@ -40,9 +40,7 @@ export const useTransactionPinVerification = () => {
 
       return true;
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to verify PIN";
-      setError(message);
+      setError("Unable to verify PIN. Please try again.");
       return false;
     } finally {
       setIsLoading(false);

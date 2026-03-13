@@ -78,8 +78,8 @@ const Referral = () => {
       setShowTransferSuccess(true);
       toast.success("Bonus transferred to wallet!");
     },
-    onError: (error: any) => {
-      toast.error("Transfer failed: " + error.message);
+    onError: () => {
+      toast.error("Transfer failed. Please try again later.");
     }
   });
 
