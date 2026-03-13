@@ -17,8 +17,30 @@ const Signup = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
+
+  // Check username availability with debounce
+  useEffect(() => {
+    const username = form.username;
+    if (!username || !validateUsername(username)) {
+      setUsernameAvailable(null);
+      return;
+    }
+    setCheckingUsername(true);
+    const timeout = setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", username)
+        .maybeSingle();
+      setUsernameAvailable(!data);
+      setCheckingUsername(false);
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [form.username]);
 
   const update = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
