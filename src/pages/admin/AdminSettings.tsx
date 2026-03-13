@@ -106,7 +106,7 @@ const AdminSettings = () => {
             setElectricityProvider(d.electricity_provider as string ?? "vtpass");
             setEduPinsProvider(d.edu_pins_provider as string ?? "vtpass");
             setDataCardProvider(d.data_card_provider as string ?? "vtpass");
-            setBulkSmsProvider(d.bulk_sms_provider as string ?? "vtpass");
+            
         }
     }, [config]);
 
