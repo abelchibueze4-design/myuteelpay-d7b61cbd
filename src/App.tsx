@@ -132,14 +132,6 @@ function App() {
                 }
               />
               <Route
-                path="/services/sms"
-                element={
-                  <ProtectedWithLayout>
-                    <BulkSMS />
-                  </ProtectedWithLayout>
-                }
-              />
-              <Route
                 path="/services/edu"
                 element={
                   <ProtectedWithLayout>
