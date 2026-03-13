@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import SettingsPage from "@/pages/SettingsPage";
 import {
-  Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap, Globe, Shield, Landmark,
+  Wallet, Smartphone, Tv, Zap, GraduationCap, Globe, Landmark,
   Gift, ArrowRight, Mail, MessageCircle, Users, Eye, EyeOff,
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
   ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
-  Moon, Sun,
+  Moon, Sun, Plane, Building, CreditCard,
 } from "lucide-react";
 import { PageTransition, StaggerContainer, StaggerItem, ScaleTap } from "@/components/PageTransition";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
@@ -41,12 +41,13 @@ import { useTheme } from "next-themes";
 const quickActions = [
   { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "text-primary bg-primary/10", border: "border-primary/20" },
   { icon: Smartphone, label: "Data", path: "/services/data", color: "text-blue-600 dark:text-blue-400 bg-blue-500/10", border: "border-blue-500/20" },
+  { icon: CreditCard, label: "Data Card", path: "/services/data-card", color: "text-purple-600 dark:text-purple-400 bg-purple-500/10", border: "border-purple-500/20" },
   { icon: Tv, label: "Cable TV", path: "/services/cable", color: "text-orange-600 dark:text-orange-400 bg-orange-500/10", border: "border-orange-500/20" },
   { icon: Zap, label: "Electricity", path: "/services/electricity", color: "text-accent-foreground bg-accent/15", border: "border-accent/20" },
   { icon: Globe, label: "Int'l Airtime", path: "/services/intl-airtime", color: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10", border: "border-indigo-500/20" },
-  { icon: Shield, label: "Insurance", path: "/services/insurance", color: "text-teal-600 dark:text-teal-400 bg-teal-500/10", border: "border-teal-500/20" },
-  { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "text-pink-600 dark:text-pink-400 bg-pink-500/10", border: "border-pink-500/20" },
   { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10", border: "border-emerald-500/20" },
+  { icon: Plane, label: "Flights", path: "#", color: "text-muted-foreground bg-muted/50", border: "border-muted", disabled: true },
+  { icon: Building, label: "Hotels", path: "#", color: "text-muted-foreground bg-muted/50", border: "border-muted", disabled: true },
   { icon: Landmark, label: "Bank Transfer", path: "#", color: "text-muted-foreground bg-muted/50", border: "border-muted", disabled: true },
 ];
 
