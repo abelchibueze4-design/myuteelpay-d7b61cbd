@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Mail, Lock, Phone, User, ArrowRight, MapPin, AtSign, Eye, EyeOff, Check, X } from "lucide-react";
+import { Mail, Lock, Phone, User, ArrowRight, MapPin, AtSign, Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { passwordRules, validatePassword, validateUsername } from "@/lib/passwordValidation";
 import logo from "@/assets/logo.png";
 
