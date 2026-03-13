@@ -164,14 +164,6 @@ function App() {
                 }
               />
               <Route
-                path="/services/insurance"
-                element={
-                  <ProtectedWithLayout>
-                    <Insurance />
-                  </ProtectedWithLayout>
-                }
-              />
-              <Route
                 path="/kyc"
                 element={
                   <ProtectedWithLayout>
