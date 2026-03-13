@@ -65,7 +65,7 @@ const AdminSettings = () => {
     const [electricityProvider, setElectricityProvider] = useState("vtpass");
     const [eduPinsProvider, setEduPinsProvider] = useState("vtpass");
     const [dataCardProvider, setDataCardProvider] = useState("vtpass");
-    const [bulkSmsProvider, setBulkSmsProvider] = useState("vtpass");
+    
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
         queryKey: ["admin_site_config"],
