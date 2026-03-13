@@ -3,9 +3,9 @@ import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import {
-  Smartphone, Tv, Zap, MessageSquare, GraduationCap,
+  Smartphone, Tv, Zap, GraduationCap,
   Gift, LayoutDashboard, LogOut, History, Wallet, Menu, ShieldCheck,
-  HelpCircle, Settings, CreditCard, Coins, Plus, Globe, Shield, Landmark
+  HelpCircle, Settings, CreditCard, Coins, Plus, Globe, Landmark, Plane, Building
 } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "@/components/NavLink";
