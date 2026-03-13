@@ -113,6 +113,16 @@ const InternationalAirtime = () => {
         <div className="container mx-auto flex items-center gap-3">
           <PageBackButton />
           <h1 className="text-lg font-bold text-primary-foreground">International Airtime</h1>
+          {exchangeRates && (
+            <button
+              type="button"
+              onClick={() => refetchRates()}
+              className="ml-auto flex items-center gap-1 text-[9px] text-primary-foreground/70 hover:text-primary-foreground"
+            >
+              <RefreshCw className={`w-3 h-3 ${loadingRates ? "animate-spin" : ""}`} />
+              Live Rates
+            </button>
+          )}
         </div>
       </div>
 
