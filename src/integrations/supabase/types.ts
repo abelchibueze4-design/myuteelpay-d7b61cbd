@@ -337,7 +337,6 @@ export type Database = {
       notification_preferences: {
         Row: {
           airtime_enabled: boolean
-          bulk_sms_enabled: boolean
           cable_tv_enabled: boolean
           created_at: string
           data_enabled: boolean
@@ -355,7 +354,6 @@ export type Database = {
         }
         Insert: {
           airtime_enabled?: boolean
-          bulk_sms_enabled?: boolean
           cable_tv_enabled?: boolean
           created_at?: string
           data_enabled?: boolean
@@ -373,7 +371,6 @@ export type Database = {
         }
         Update: {
           airtime_enabled?: boolean
-          bulk_sms_enabled?: boolean
           cable_tv_enabled?: boolean
           created_at?: string
           data_enabled?: boolean

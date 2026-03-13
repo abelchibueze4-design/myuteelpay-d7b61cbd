@@ -5,9 +5,9 @@ import heroBillPayment from "@/assets/hero-bill-payment.jpg";
 import heroBillPayment2 from "@/assets/hero-bill-payment-2.jpg";
 import appMockup from "@/assets/app-mockup.png";
 import {
-  Zap, Shield, Clock, Star, Smartphone, Tv, GraduationCap,
-  MessageSquare, Users, ArrowRight, Phone, Gift, HelpCircle, CheckCircle,
-  TrendingDown, Percent, BadgeDollarSign, Download, Quote
+  Zap, Shield, Clock, Star, Smartphone, Tv, GraduationCap, MessageSquare,
+  Users, ArrowRight, Phone, Gift, HelpCircle, CheckCircle,
+  TrendingDown, Percent, BadgeDollarSign, Download, Quote, Globe, CreditCard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -67,9 +67,10 @@ const Navbar = () => (
 const services = [
   { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "bg-primary/10 text-primary" },
   { icon: Smartphone, label: "Data", path: "/services/data", color: "bg-blue-100 text-blue-600" },
+  { icon: CreditCard, label: "Data Card", path: "/services/data-card", color: "bg-purple-100 text-purple-600" },
   { icon: Tv, label: "Cable TV", path: "/services/cable", color: "bg-orange-100 text-orange-600" },
   { icon: Zap, label: "Electricity", path: "/services/electricity", color: "bg-accent/15 text-accent-foreground" },
-  { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "bg-pink-100 text-pink-600" },
+  { icon: Globe, label: "Int'l Airtime", path: "/services/intl-airtime", color: "bg-indigo-100 text-indigo-600" },
   { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "bg-emerald-100 text-emerald-600" },
 ];
 
@@ -368,8 +369,8 @@ const pricingData = [
   { name: "Data", price: "From ₦200", desc: "All networks, best rates" },
   { name: "Cable TV", price: "From ₦1,300", desc: "DSTV, GOtv, StarTimes" },
   { name: "Electricity", price: "From ₦500", desc: "All DISCOs" },
-  { name: "Bulk SMS", price: "₦2.5/SMS", desc: "Send to thousands" },
   { name: "Edu Pins", price: "From ₦1,800", desc: "WAEC & NECO" },
+  { name: "Int'l Airtime", price: "From ₦500", desc: "Global top-up" },
 ];
 
 const PricingSection = () => (

@@ -65,7 +65,7 @@ const AdminSettings = () => {
     const [electricityProvider, setElectricityProvider] = useState("vtpass");
     const [eduPinsProvider, setEduPinsProvider] = useState("vtpass");
     const [dataCardProvider, setDataCardProvider] = useState("vtpass");
-    const [bulkSmsProvider, setBulkSmsProvider] = useState("vtpass");
+    
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
         queryKey: ["admin_site_config"],
@@ -106,7 +106,7 @@ const AdminSettings = () => {
             setElectricityProvider(d.electricity_provider as string ?? "vtpass");
             setEduPinsProvider(d.edu_pins_provider as string ?? "vtpass");
             setDataCardProvider(d.data_card_provider as string ?? "vtpass");
-            setBulkSmsProvider(d.bulk_sms_provider as string ?? "vtpass");
+            
         }
     }, [config]);
 
@@ -136,7 +136,7 @@ const AdminSettings = () => {
                 electricity_provider: electricityProvider,
                 edu_pins_provider: eduPinsProvider,
                 data_card_provider: dataCardProvider,
-                bulk_sms_provider: bulkSmsProvider,
+                
             };
 
             if (config?.id) {
@@ -431,7 +431,7 @@ const AdminSettings = () => {
                             { label: "Electricity", value: electricityProvider, setter: setElectricityProvider },
                             { label: "Education Pins", value: eduPinsProvider, setter: setEduPinsProvider },
                             { label: "Data Cards", value: dataCardProvider, setter: setDataCardProvider },
-                            { label: "Bulk SMS", value: bulkSmsProvider, setter: setBulkSmsProvider },
+                            
                         ].map(({ label, value, setter }) => (
                             <div key={label} className="flex items-center justify-between">
                                 <Label>{label}</Label>

@@ -9,7 +9,6 @@ import { toast } from "sonner";
 const otherServiceTypes = [
   { id: "cable_tv_enabled", label: "Cable TV", icon: Bell },
   { id: "electricity_enabled", label: "Electricity", icon: Smartphone },
-  { id: "bulk_sms_enabled", label: "Bulk SMS", icon: MessageSquare },
   { id: "edu_pins_enabled", label: "Education Pins", icon: Bell },
 ];
 

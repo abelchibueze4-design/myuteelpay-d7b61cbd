@@ -28,7 +28,7 @@ export interface PlatformSettings {
   electricity_provider: ApiProvider;
   edu_pins_provider: ApiProvider;
   data_card_provider: ApiProvider;
-  bulk_sms_provider: ApiProvider;
+  
 }
 
 const defaults: PlatformSettings = {
@@ -55,7 +55,7 @@ const defaults: PlatformSettings = {
   electricity_provider: "vtpass",
   edu_pins_provider: "vtpass",
   data_card_provider: "vtpass",
-  bulk_sms_provider: "vtpass",
+  
 };
 
 export function usePlatformSettings() {
