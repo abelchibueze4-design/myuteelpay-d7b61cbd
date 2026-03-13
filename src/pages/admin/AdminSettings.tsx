@@ -136,7 +136,7 @@ const AdminSettings = () => {
                 electricity_provider: electricityProvider,
                 edu_pins_provider: eduPinsProvider,
                 data_card_provider: dataCardProvider,
-                bulk_sms_provider: bulkSmsProvider,
+                
             };
 
             if (config?.id) {
