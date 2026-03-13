@@ -158,7 +158,7 @@ const Dashboard = () => {
 
   return (
     <PageTransition className="min-h-screen bg-background relative">
-      <OnboardingTour />
+      
       <div className="hidden">
         <AccountSettings 
           open={settingsOpen} 
