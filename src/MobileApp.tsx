@@ -48,7 +48,6 @@ const MobileAppWrapper = () => {
           <Route path="/services/data" element={<MobileServicePage serviceType="data" title="Buy Data" />} />
           <Route path="/services/cable" element={<MobileServicePage serviceType="cable" title="Cable TV" />} />
           <Route path="/services/electricity" element={<MobileServicePage serviceType="electricity" title="Pay Electricity" />} />
-          <Route path="/services/sms" element={<MobileServicePage serviceType="sms" title="Bulk SMS" />} />
           <Route path="/services/edu" element={<MobileServicePage serviceType="edu" title="Education Pins" />} />
           <Route path="/referral" element={<MobileServicePage serviceType="referral" title="Refer & Earn" />} />
           

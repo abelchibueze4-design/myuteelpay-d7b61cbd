@@ -23,12 +23,10 @@ import Data from "./pages/Data";
 import Services from "./pages/Services";
 import CableTV from "./pages/CableTV";
 import Electricity from "./pages/Electricity";
-import BulkSMS from "./pages/BulkSMS";
 import EduPins from "./pages/EduPins";
 import Referral from "./pages/Referral";
 import DataCard from "./pages/DataCard";
 import InternationalAirtime from "./pages/InternationalAirtime";
-import Insurance from "./pages/Insurance";
 import FAQs from "./pages/FAQs";
 import DebugKVData from "./pages/DebugKVData";
 import KycVerification from "./pages/KycVerification";
@@ -134,14 +132,6 @@ function App() {
                 }
               />
               <Route
-                path="/services/sms"
-                element={
-                  <ProtectedWithLayout>
-                    <BulkSMS />
-                  </ProtectedWithLayout>
-                }
-              />
-              <Route
                 path="/services/edu"
                 element={
                   <ProtectedWithLayout>
@@ -170,14 +160,6 @@ function App() {
                 element={
                   <ProtectedWithLayout>
                     <InternationalAirtime />
-                  </ProtectedWithLayout>
-                }
-              />
-              <Route
-                path="/services/insurance"
-                element={
-                  <ProtectedWithLayout>
-                    <Insurance />
                   </ProtectedWithLayout>
                 }
               />

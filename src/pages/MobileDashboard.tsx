@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
-  Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap, Gift, Globe, Shield, Landmark,
+  Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap, Gift, Globe, Landmark, Plane, Building,
   ArrowRight, Eye, EyeOff, Plus, History, TrendingUp, ArrowDownLeft, ArrowUpRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -76,9 +76,9 @@ const quickActions = [
   { icon: Tv, label: "Cable TV", path: "/services/cable", color: "bg-orange-100 text-orange-600", desc: "DSTV, GOtv" },
   { icon: Zap, label: "Electricity", path: "/services/electricity", color: "bg-yellow-100 text-yellow-600", desc: "Pay bills" },
   { icon: Globe, label: "Int'l Airtime", path: "/services/intl-airtime", color: "bg-indigo-100 text-indigo-600", desc: "Global top-up" },
-  { icon: Shield, label: "Insurance", path: "/services/insurance", color: "bg-teal-100 text-teal-600", desc: "Motor & more" },
-  { icon: MessageSquare, label: "Bulk SMS", path: "/services/sms", color: "bg-pink-100 text-pink-600", desc: "Send SMS" },
   { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "bg-green-100 text-green-600", desc: "WAEC, NECO" },
+  { icon: Plane, label: "Flights", path: "#", color: "bg-muted text-muted-foreground", desc: "Coming Soon", disabled: true },
+  { icon: Building, label: "Hotels", path: "#", color: "bg-muted text-muted-foreground", desc: "Coming Soon", disabled: true },
   { icon: Landmark, label: "Bank Transfer", path: "#", color: "bg-muted text-muted-foreground", desc: "Coming Soon", disabled: true },
 ];
 

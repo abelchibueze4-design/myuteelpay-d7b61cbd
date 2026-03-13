@@ -3,9 +3,9 @@ import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import {
-  Smartphone, Tv, Zap, MessageSquare, GraduationCap,
+  Smartphone, Tv, Zap, GraduationCap,
   Gift, LayoutDashboard, LogOut, History, Wallet, Menu, ShieldCheck,
-  HelpCircle, Settings, CreditCard, Coins, Plus, Globe, Shield, Landmark
+  HelpCircle, Settings, CreditCard, Coins, Plus, Globe, Landmark, Plane, Building
 } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "@/components/NavLink";
@@ -44,9 +44,9 @@ const serviceItems = [
   { title: "Cable TV", url: "/services/cable", icon: Tv },
   { title: "Electricity", url: "/services/electricity", icon: Zap },
   { title: "Int'l Airtime", url: "/services/intl-airtime", icon: Globe },
-  { title: "Insurance", url: "/services/insurance", icon: Shield },
-  { title: "Bulk SMS", url: "/services/sms", icon: MessageSquare },
   { title: "Edu Pins", url: "/services/edu", icon: GraduationCap },
+  { title: "Flights", url: "#", icon: Plane, disabled: true },
+  { title: "Hotels", url: "#", icon: Building, disabled: true },
   { title: "Bank Transfer", url: "#", icon: Landmark, disabled: true },
 ];
 
