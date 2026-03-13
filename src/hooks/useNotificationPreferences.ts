@@ -10,7 +10,7 @@ export interface NotificationPreferences {
   data_enabled: boolean;
   cable_tv_enabled: boolean;
   electricity_enabled: boolean;
-  bulk_sms_enabled: boolean;
+  
   edu_pins_enabled: boolean;
   // Channels
   email_enabled: boolean;
