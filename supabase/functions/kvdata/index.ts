@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
 
     // === GET DATACARD PLANS ===
     if (action === "get_datacard_plans") {
-      const data = await kvdataRequest("/data_pin/", "GET");
+      const data = await kvdataRequest("/datapin/", "GET");
       return json(data);
     }
 
