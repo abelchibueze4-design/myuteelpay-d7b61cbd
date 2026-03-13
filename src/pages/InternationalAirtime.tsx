@@ -58,10 +58,24 @@ const InternationalAirtime = () => {
   const variationsList = Array.isArray(variations) ? variations : [];
 
   const selectedCountry = countriesList.find((c: any) => c.code === countryCode);
+  
+  // Detect the currency from the selected country or variation
+  const detectedCurrency = useMemo(() => {
+    if (selectedVariation?.currency) return selectedVariation.currency;
+    if (selectedCountry?.currency) return selectedCountry.currency;
+    return "USD"; // fallback
+  }, [selectedVariation, selectedCountry]);
 
   const totalAmount = selectedVariation
     ? Number(selectedVariation.variation_amount) || Number(amount) || 0
     : Number(amount) || 0;
+
+  const ngnEquivalent = useMemo(() => {
+    if (totalAmount <= 0 || !exchangeRates) return null;
+    // If already NGN, no conversion needed
+    if (detectedCurrency === "NGN") return totalAmount;
+    return convertToNgn(totalAmount, detectedCurrency, exchangeRates);
+  }, [totalAmount, detectedCurrency, exchangeRates]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
