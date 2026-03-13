@@ -26,6 +26,7 @@ const InternationalAirtime = () => {
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
   const { guardTransaction } = useTransactionGuard();
+  const { data: exchangeRates, isLoading: loadingRates, refetch: refetchRates } = useAllExchangeRates();
 
   // Step 1: Countries
   const { data: countries, isLoading: loadingCountries } = useKvdataQuery(
