@@ -325,9 +325,19 @@ const InternationalAirtime = () => {
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total</p>
-                      <p className="text-xl font-black text-primary">₦{totalAmount.toLocaleString()}</p>
+                      {detectedCurrency !== "NGN" && ngnEquivalent ? (
+                        <>
+                          <p className="text-sm text-muted-foreground font-bold">
+                            {detectedCurrency} {totalAmount.toLocaleString()}
+                          </p>
+                          <p className="text-xl font-black text-primary">≈ ₦{ngnEquivalent.toLocaleString()}</p>
+                        </>
+                      ) : (
+                        <p className="text-xl font-black text-primary">₦{totalAmount.toLocaleString()}</p>
+                      )}
                     </div>
                   </div>
+                  {loadingRates && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
                 </div>
               )}
             </>
