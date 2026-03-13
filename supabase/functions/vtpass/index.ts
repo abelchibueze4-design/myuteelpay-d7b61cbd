@@ -187,7 +187,7 @@ Deno.serve(async (req) => {
 
     // === GET CABLE PLANS ===
     if (action === "get_cable_plans") {
-      const cables = ["dstv", "gotv", "startimes"];
+      const cables = ["dstv", "gotv", "startimes", "showmax"];
       const allPlans: any[] = [];
       for (const serviceID of cables) {
         try {

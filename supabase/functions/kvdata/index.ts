@@ -197,9 +197,9 @@ Deno.serve(async (req) => {
       }
 
       case "buy_data_card": {
-        kvResult = await kvdataRequest("/data_pin/", "POST", {
+        kvResult = await kvdataRequest("/datapin/", "POST", {
           network: params.network_id,
-          plan: params.plan_id,
+          data_plan: params.plan_id,
           quantity: String(params.quantity || 1),
         });
         txType = "data_card";

@@ -1,0 +1,1 @@
+INSERT INTO public.cables (cable_id, cable_name) VALUES (4, 'SHOWMAX') ON CONFLICT (cable_id) DO NOTHING;
