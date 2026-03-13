@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Mail, Lock, Phone, User, ArrowRight, MapPin, AtSign, Eye, EyeOff, Check, X } from "lucide-react";
+import { Mail, Lock, Phone, User, ArrowRight, MapPin, AtSign, Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { passwordRules, validatePassword, validateUsername } from "@/lib/passwordValidation";
 import logo from "@/assets/logo.png";
 
@@ -16,8 +17,30 @@ const Signup = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
+
+  // Check username availability with debounce
+  useEffect(() => {
+    const username = form.username;
+    if (!username || !validateUsername(username)) {
+      setUsernameAvailable(null);
+      return;
+    }
+    setCheckingUsername(true);
+    const timeout = setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", username)
+        .maybeSingle();
+      setUsernameAvailable(!data);
+      setCheckingUsername(false);
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [form.username]);
 
   const update = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -29,6 +52,10 @@ const Signup = () => {
     }
     if (!validateUsername(form.username)) {
       toast.error("Username must be 3-20 characters, start with a letter, and contain only letters, numbers, or underscores");
+      return;
+    }
+    if (usernameAvailable === false) {
+      toast.error("This username is already taken. Please choose a different one.");
       return;
     }
     setLoading(true);
@@ -87,9 +114,17 @@ const Signup = () => {
                 />
               </div>
               {f.key === "username" && form.username && (
-                <p className={`text-[10px] ${validateUsername(form.username) ? "text-green-600" : "text-destructive"}`}>
-                  {validateUsername(form.username) ? "Username available format" : "3-20 chars, starts with letter, letters/numbers/_ only"}
-                </p>
+                <div className="flex items-center gap-1 text-[10px]">
+                  {!validateUsername(form.username) ? (
+                    <p className="text-destructive">3-20 chars, starts with letter, letters/numbers/_ only</p>
+                  ) : checkingUsername ? (
+                    <p className="text-muted-foreground flex items-center gap-1"><Loader2 className="w-2.5 h-2.5 animate-spin" /> Checking...</p>
+                  ) : usernameAvailable === false ? (
+                    <p className="text-destructive flex items-center gap-1"><X className="w-2.5 h-2.5" /> Username is taken</p>
+                  ) : usernameAvailable === true ? (
+                    <p className="text-green-600 flex items-center gap-1"><Check className="w-2.5 h-2.5" /> Username available</p>
+                  ) : null}
+                </div>
               )}
             </div>
           ))}
