@@ -54,6 +54,10 @@ const Signup = () => {
       toast.error("Username must be 3-20 characters, start with a letter, and contain only letters, numbers, or underscores");
       return;
     }
+    if (usernameAvailable === false) {
+      toast.error("This username is already taken. Please choose a different one.");
+      return;
+    }
     setLoading(true);
     const { error } = await signUp(form.email, form.password, form.name, form.phone, form.username, form.address, form.referralCode);
     setLoading(false);
