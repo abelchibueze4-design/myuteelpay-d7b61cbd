@@ -51,7 +51,6 @@ const TYPE_LABELS: Record<string, string> = {
   data: "Data",
   cable_tv: "Cable TV",
   electricity: "Electricity",
-  bulk_sms: "Bulk SMS",
   edu_pin: "Edu Pin",
   referral_bonus: "Referral Bonus",
   data_card: "Data Card",
