@@ -11,6 +11,7 @@ const CABLE_ID_NAME_MAP: Record<number, string> = {
   1: "GOTV",
   2: "DSTV",
   3: "STARTIMES",
+  4: "SHOWMAX",
 };
 
 interface CableTVPricesProps {

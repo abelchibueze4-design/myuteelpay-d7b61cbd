@@ -1,6 +1,7 @@
 import dstvLogo from "@/assets/dstv-logo.png";
 import gotvLogo from "@/assets/gotv-logo.png";
 import startimesLogo from "@/assets/startimes-logo.png";
+import showmaxLogo from "@/assets/showmax-logo.png";
 import { cn } from "@/lib/utils";
 import { Tv } from "lucide-react";
 
@@ -13,6 +14,7 @@ const cableLogos: Record<string, { src: string; bg: string }> = {
   DSTV: { src: dstvLogo, bg: "bg-blue-50" },
   GOTV: { src: gotvLogo, bg: "bg-orange-50" },
   STARTIMES: { src: startimesLogo, bg: "bg-red-50" },
+  SHOWMAX: { src: showmaxLogo, bg: "bg-teal-50" },
 };
 
 export const CableIcon = ({ cableName, className }: CableIconProps) => {

@@ -86,6 +86,7 @@ const CABLE_SERVICE_MAP: Record<string, string> = {
   dstv: "dstv",
   gotv: "gotv",
   startimes: "startimes",
+  showmax: "showmax",
 };
 
 // Map disco names to VTPass serviceIDs
@@ -186,7 +187,7 @@ Deno.serve(async (req) => {
 
     // === GET CABLE PLANS ===
     if (action === "get_cable_plans") {
-      const cables = ["dstv", "gotv", "startimes"];
+      const cables = ["dstv", "gotv", "startimes", "showmax"];
       const allPlans: any[] = [];
       for (const serviceID of cables) {
         try {
