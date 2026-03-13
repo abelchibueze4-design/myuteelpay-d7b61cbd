@@ -86,6 +86,7 @@ const CABLE_SERVICE_MAP: Record<string, string> = {
   dstv: "dstv",
   gotv: "gotv",
   startimes: "startimes",
+  showmax: "showmax",
 };
 
 // Map disco names to VTPass serviceIDs
