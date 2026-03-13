@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Globe, Check, Loader2, ChevronRight } from "lucide-react";
+import { Globe, Check, Loader2, ChevronRight, RefreshCw } from "lucide-react";
+import { useAllExchangeRates, convertToNgn } from "@/hooks/useExchangeRate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
