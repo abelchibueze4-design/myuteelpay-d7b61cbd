@@ -117,7 +117,6 @@ const SERVICE_ROUTES: Record<string, string> = {
   data: "/services/data",
   cable_tv: "/services/cable",
   electricity: "/services/electricity",
-  bulk_sms: "/services/sms",
   edu_pin: "/services/edu",
   data_card: "/services/data-card",
 };

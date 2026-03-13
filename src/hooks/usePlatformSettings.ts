@@ -55,7 +55,7 @@ const defaults: PlatformSettings = {
   electricity_provider: "vtpass",
   edu_pins_provider: "vtpass",
   data_card_provider: "vtpass",
-  bulk_sms_provider: "vtpass",
+  
 };
 
 export function usePlatformSettings() {

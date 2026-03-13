@@ -431,7 +431,7 @@ const AdminSettings = () => {
                             { label: "Electricity", value: electricityProvider, setter: setElectricityProvider },
                             { label: "Education Pins", value: eduPinsProvider, setter: setEduPinsProvider },
                             { label: "Data Cards", value: dataCardProvider, setter: setDataCardProvider },
-                            { label: "Bulk SMS", value: bulkSmsProvider, setter: setBulkSmsProvider },
+                            
                         ].map(({ label, value, setter }) => (
                             <div key={label} className="flex items-center justify-between">
                                 <Label>{label}</Label>

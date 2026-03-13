@@ -2,8 +2,8 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { StatCard } from "@/components/admin/StatCard";
 import { Badge } from "@/components/ui/badge";
 import {
-    Smartphone, Tv, Zap, MessageSquare, GraduationCap, Package,
-    Wallet, Activity,
+    Smartphone, Tv, Zap, GraduationCap, Package,
+    Wallet, Activity, CreditCard,
 } from "lucide-react";
 import { useAdminTransactions } from "@/hooks/useAdminTransactions";
 
@@ -12,10 +12,10 @@ const SERVICE_ICONS: Record<string, any> = {
     data: Smartphone,
     cable_tv: Tv,
     electricity: Zap,
-    bulk_sms: MessageSquare,
     edu_pin: GraduationCap,
     wallet_fund: Wallet,
     referral_bonus: Activity,
+    data_card: CreditCard,
 };
 
 const ServiceManagement = () => {

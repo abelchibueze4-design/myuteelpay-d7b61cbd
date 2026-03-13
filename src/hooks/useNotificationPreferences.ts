@@ -27,7 +27,7 @@ const DEFAULT_PREFERENCES: NotificationPreferences = {
   data_enabled: true,
   cable_tv_enabled: true,
   electricity_enabled: true,
-  bulk_sms_enabled: true,
+  
   edu_pins_enabled: true,
   email_enabled: true,
   sms_enabled: false,

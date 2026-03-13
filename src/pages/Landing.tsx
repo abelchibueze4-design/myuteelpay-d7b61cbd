@@ -369,8 +369,8 @@ const pricingData = [
   { name: "Data", price: "From ₦200", desc: "All networks, best rates" },
   { name: "Cable TV", price: "From ₦1,300", desc: "DSTV, GOtv, StarTimes" },
   { name: "Electricity", price: "From ₦500", desc: "All DISCOs" },
-  { name: "Bulk SMS", price: "₦2.5/SMS", desc: "Send to thousands" },
   { name: "Edu Pins", price: "From ₦1,800", desc: "WAEC & NECO" },
+  { name: "Int'l Airtime", price: "From ₦500", desc: "Global top-up" },
 ];
 
 const PricingSection = () => (
