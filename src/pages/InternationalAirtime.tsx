@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Globe, Check, Loader2, ChevronRight } from "lucide-react";
+import { Globe, Check, Loader2, ChevronRight, RefreshCw } from "lucide-react";
+import { useAllExchangeRates, convertToNgn } from "@/hooks/useExchangeRate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -25,6 +26,7 @@ const InternationalAirtime = () => {
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
   const { guardTransaction } = useTransactionGuard();
+  const { data: exchangeRates, isLoading: loadingRates, refetch: refetchRates } = useAllExchangeRates();
 
   // Step 1: Countries
   const { data: countries, isLoading: loadingCountries } = useKvdataQuery(
@@ -56,10 +58,24 @@ const InternationalAirtime = () => {
   const variationsList = Array.isArray(variations) ? variations : [];
 
   const selectedCountry = countriesList.find((c: any) => c.code === countryCode);
+  
+  // Detect the currency from the selected country or variation
+  const detectedCurrency = useMemo(() => {
+    if (selectedVariation?.currency) return selectedVariation.currency;
+    if (selectedCountry?.currency) return selectedCountry.currency;
+    return "USD"; // fallback
+  }, [selectedVariation, selectedCountry]);
 
   const totalAmount = selectedVariation
     ? Number(selectedVariation.variation_amount) || Number(amount) || 0
     : Number(amount) || 0;
+
+  const ngnEquivalent = useMemo(() => {
+    if (totalAmount <= 0 || !exchangeRates) return null;
+    // If already NGN, no conversion needed
+    if (detectedCurrency === "NGN") return totalAmount;
+    return convertToNgn(totalAmount, detectedCurrency, exchangeRates);
+  }, [totalAmount, detectedCurrency, exchangeRates]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +113,16 @@ const InternationalAirtime = () => {
         <div className="container mx-auto flex items-center gap-3">
           <PageBackButton />
           <h1 className="text-lg font-bold text-primary-foreground">International Airtime</h1>
+          {exchangeRates && (
+            <button
+              type="button"
+              onClick={() => refetchRates()}
+              className="ml-auto flex items-center gap-1 text-[9px] text-primary-foreground/70 hover:text-primary-foreground"
+            >
+              <RefreshCw className={`w-3 h-3 ${loadingRates ? "animate-spin" : ""}`} />
+              Live Rates
+            </button>
+          )}
         </div>
       </div>
 
@@ -236,7 +262,19 @@ const InternationalAirtime = () => {
                     >
                       <p className="text-xs font-bold break-words">{v.name}</p>
                       {Number(v.variation_amount) > 0 && (
-                        <p className="text-xs text-primary font-black mt-1">₦{Number(v.variation_amount).toLocaleString()}</p>
+                        <>
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            {v.currency || detectedCurrency} {Number(v.variation_amount).toLocaleString()}
+                          </p>
+                          {exchangeRates && (v.currency || detectedCurrency) !== "NGN" && (
+                            <p className="text-xs text-primary font-black">
+                              ≈ ₦{(convertToNgn(Number(v.variation_amount), v.currency || detectedCurrency, exchangeRates) || 0).toLocaleString()}
+                            </p>
+                          )}
+                          {(v.currency || detectedCurrency) === "NGN" && (
+                            <p className="text-xs text-primary font-black">₦{Number(v.variation_amount).toLocaleString()}</p>
+                          )}
+                        </>
                       )}
                     </button>
                   ))}
@@ -287,9 +325,19 @@ const InternationalAirtime = () => {
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total</p>
-                      <p className="text-xl font-black text-primary">₦{totalAmount.toLocaleString()}</p>
+                      {detectedCurrency !== "NGN" && ngnEquivalent ? (
+                        <>
+                          <p className="text-sm text-muted-foreground font-bold">
+                            {detectedCurrency} {totalAmount.toLocaleString()}
+                          </p>
+                          <p className="text-xl font-black text-primary">≈ ₦{ngnEquivalent.toLocaleString()}</p>
+                        </>
+                      ) : (
+                        <p className="text-xl font-black text-primary">₦{totalAmount.toLocaleString()}</p>
+                      )}
                     </div>
                   </div>
+                  {loadingRates && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
                 </div>
               )}
             </>
