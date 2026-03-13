@@ -262,7 +262,19 @@ const InternationalAirtime = () => {
                     >
                       <p className="text-xs font-bold break-words">{v.name}</p>
                       {Number(v.variation_amount) > 0 && (
-                        <p className="text-xs text-primary font-black mt-1">₦{Number(v.variation_amount).toLocaleString()}</p>
+                        <>
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            {v.currency || detectedCurrency} {Number(v.variation_amount).toLocaleString()}
+                          </p>
+                          {exchangeRates && (v.currency || detectedCurrency) !== "NGN" && (
+                            <p className="text-xs text-primary font-black">
+                              ≈ ₦{(convertToNgn(Number(v.variation_amount), v.currency || detectedCurrency, exchangeRates) || 0).toLocaleString()}
+                            </p>
+                          )}
+                          {(v.currency || detectedCurrency) === "NGN" && (
+                            <p className="text-xs text-primary font-black">₦{Number(v.variation_amount).toLocaleString()}</p>
+                          )}
+                        </>
                       )}
                     </button>
                   ))}
