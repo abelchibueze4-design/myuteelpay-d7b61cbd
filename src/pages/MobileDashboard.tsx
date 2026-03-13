@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
-  Wallet, Smartphone, Tv, Zap, MessageSquare, GraduationCap, Gift, Globe, Shield, Landmark,
+  Wallet, Smartphone, Tv, Zap, GraduationCap, Gift, Globe, Landmark, Plane, Building,
   ArrowRight, Eye, EyeOff, Plus, History, TrendingUp, ArrowDownLeft, ArrowUpRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
