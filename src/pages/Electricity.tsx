@@ -199,6 +199,11 @@ const Electricity = () => {
           <div className="space-y-2">
             <label className="text-sm font-medium">Amount</label>
             <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₦500 minimum" type="number" required className="placeholder:text-[10px] placeholder:font-normal" />
+            {markup > 0 && amount && (
+              <p className="text-xs text-muted-foreground">
+                You'll be charged <span className="font-bold text-primary">₦{applyMarkup(Number(amount), markup).toLocaleString()}</span> ({markup}% service fee included)
+              </p>
+            )}
           </div>
           <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
             {kvdata.isPending ? "Processing..." : "Pay Now"}
