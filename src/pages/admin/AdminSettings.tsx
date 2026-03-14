@@ -108,7 +108,8 @@ const AdminSettings = () => {
             setElectricityProvider(d.electricity_provider as string ?? "vtpass");
             setEduPinsProvider(d.edu_pins_provider as string ?? "vtpass");
             setDataCardProvider(d.data_card_provider as string ?? "vtpass");
-            
+            setExchangeRateMarkup(String(d.exchange_rate_markup ?? "0"));
+            setWalletFundingFee(String(d.wallet_funding_fee ?? "50"));
         }
     }, [config]);
 
