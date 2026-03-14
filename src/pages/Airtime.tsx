@@ -31,6 +31,8 @@ const Airtime = () => {
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
     const { guardTransaction } = useTransactionGuard();
     const { favorites, addFavorite, removeFavorite, isFavorited } = useFavorites("airtime");
+    const { settings } = usePlatformSettings();
+    const markup = settings.airtime_markup || 0;
 
     const { data: networks, isLoading: networksLoading } = useQuery({
         queryKey: ["networks"],
