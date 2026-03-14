@@ -162,17 +162,18 @@ Deno.serve(async (req) => {
 
     // === GET DATA PLANS (variations) ===
     if (action === "get_data_plans") {
-      const networks = ["mtn-data", "glo-data", "airtel-data", "etisalat-data"];
+      const networks = ["mtn-data", "glo-data", "airtel-data", "etisalat-data", "smile-direct"];
       const allPlans: any[] = [];
       for (const serviceID of networks) {
         try {
           const data = await vtpassGet(`/service-variations?serviceID=${serviceID}`);
-          const networkName = serviceID.replace("-data", "").toUpperCase();
+          let networkName = serviceID.replace("-data", "").replace("-direct", "").toUpperCase();
+          if (networkName === "ETISALAT") networkName = "9MOBILE";
           if (data?.content?.variations) {
             for (const v of data.content.variations) {
               allPlans.push({
                 plan_id: v.variation_code,
-                network_name: networkName === "ETISALAT" ? "9MOBILE" : networkName,
+                network_name: networkName,
                 plan_type: v.name?.includes("SME") ? "SME" : (v.name?.includes("Corporate") ? "CORPORATE" : "GIFTING"),
                 size: v.name,
                 amount: Number(v.variation_amount),
