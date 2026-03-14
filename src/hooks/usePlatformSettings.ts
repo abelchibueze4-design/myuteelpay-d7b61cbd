@@ -58,7 +58,8 @@ const defaults: PlatformSettings = {
   electricity_provider: "vtpass",
   edu_pins_provider: "vtpass",
   data_card_provider: "vtpass",
-  
+  exchange_rate_markup: 0,
+  wallet_funding_fee: 50,
 };
 
 export function usePlatformSettings() {
