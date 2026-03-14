@@ -10,6 +10,7 @@ import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerifica
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 import { PageBackButton } from "@/components/PageBackButton";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 
 const InternationalAirtime = () => {
   const navigate = useNavigate();
