@@ -141,6 +141,41 @@ const Dashboard = () => {
   if (isLoading) return <DashboardSkeleton />;
 
 
+  // Load Paystack inline script
+  useEffect(() => {
+    if (!document.getElementById("paystack-script")) {
+      const script = document.createElement("script");
+      script.id = "paystack-script";
+      script.src = "https://js.paystack.co/v1/inline.js";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  // Fetch Paystack public key
+  const { data: paystackConfig } = useQuery({
+    queryKey: ["paystack-public-key"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/paystack?action=public_key`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
+      const data = await res.json();
+      return data;
+    },
+    staleTime: Infinity,
+  });
+
+  const fundingFee = platformSettings.wallet_funding_fee || 50;
+
   const handleFund = () => {
     const val = Number(amount);
     const minFund = platformSettings.min_wallet_fund || 100;
@@ -152,8 +187,13 @@ const Dashboard = () => {
         return;
       }
     }
+    const totalWithFee = val + fundingFee;
+    if (!paystackConfig?.public_key) {
+      toast.error("Payment system is not configured. Please try again later.");
+      return;
+    }
     setFundOpen(false);
-    initializePayment(val);
+    initializePayment(totalWithFee, paystackConfig.public_key);
   };
 
   return (
