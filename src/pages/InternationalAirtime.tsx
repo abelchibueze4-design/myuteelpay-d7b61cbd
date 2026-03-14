@@ -75,10 +75,9 @@ const InternationalAirtime = () => {
 
   const ngnEquivalent = useMemo(() => {
     if (totalAmount <= 0 || !exchangeRates) return null;
-    // If already NGN, no conversion needed
     if (detectedCurrency === "NGN") return totalAmount;
-    return convertToNgn(totalAmount, detectedCurrency, exchangeRates);
-  }, [totalAmount, detectedCurrency, exchangeRates]);
+    return convertToNgn(totalAmount, detectedCurrency, exchangeRates, markup);
+  }, [totalAmount, detectedCurrency, exchangeRates, markup]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
