@@ -418,6 +418,43 @@ const AdminSettings = () => {
                     </CardContent>
                 </Card>
 
+                {/* Exchange Rate & Fees */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Globe className="w-5 h-5 text-indigo-500" />
+                            Exchange Rate & Fees
+                        </CardTitle>
+                        <CardDescription>Configure exchange rate markup and wallet funding fees</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Exchange Rate Markup (%)</Label>
+                            <p className="text-xs text-muted-foreground">Percentage added on top of live exchange rates for international airtime</p>
+                            <Input
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                max="100"
+                                value={exchangeRateMarkup}
+                                onChange={(e) => setExchangeRateMarkup(e.target.value)}
+                                placeholder="e.g. 10"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Wallet Funding Fee (₦)</Label>
+                            <p className="text-xs text-muted-foreground">Flat fee charged when users fund their wallet via Paystack</p>
+                            <Input
+                                type="number"
+                                min="0"
+                                value={walletFundingFee}
+                                onChange={(e) => setWalletFundingFee(e.target.value)}
+                                placeholder="e.g. 50"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
                 {/* API Provider Selection */}
                 <Card>
                     <CardHeader>

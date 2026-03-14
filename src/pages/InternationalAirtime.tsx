@@ -270,7 +270,7 @@ const InternationalAirtime = () => {
                           </p>
                           {exchangeRates && (v.currency || detectedCurrency) !== "NGN" && (
                             <p className="text-xs text-primary font-black">
-                              ≈ ₦{(convertToNgn(Number(v.variation_amount), v.currency || detectedCurrency, exchangeRates) || 0).toLocaleString()}
+                              ≈ ₦{(convertToNgn(Number(v.variation_amount), v.currency || detectedCurrency, exchangeRates, markup) || 0).toLocaleString()}
                             </p>
                           )}
                           {(v.currency || detectedCurrency) === "NGN" && (
