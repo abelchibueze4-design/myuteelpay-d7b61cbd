@@ -98,6 +98,8 @@ const Electricity = () => {
     const isValid = await verifyPin(pin);
     if (!isValid) return false;
 
+    const chargeAmount = applyMarkup(Number(amount), markup);
+
     try {
       const selectedDisco = discos?.find(d => String(d.disco_id) === disco);
       const res = await kvdata.mutateAsync({
@@ -105,7 +107,7 @@ const Electricity = () => {
         disco_id: Number(disco),
         meter_number: meter,
         meter_type: type,
-        amount: Number(amount),
+        amount: chargeAmount,
         disco_label: selectedDisco?.disco_name
       });
       setToken(res?.kvdata?.token || res?.kvdata?.Token || "");
