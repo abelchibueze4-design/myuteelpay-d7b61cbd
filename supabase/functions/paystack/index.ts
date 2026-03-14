@@ -56,6 +56,12 @@ Deno.serve(async (req) => {
   const action = url.searchParams.get("action");
 
   try {
+    // ─── GET PUBLIC KEY ──────────────────────────────────────
+    if (action === "public_key" && req.method === "GET") {
+      const pk = Deno.env.get("PAYSTACK_PUBLIC_KEY");
+      if (!pk) return json({ error: "Paystack public key not configured" }, 500);
+      return json({ public_key: pk });
+    }
     // ─── INITIALIZE ───────────────────────────────────────
     if (action === "initialize" && req.method === "POST") {
       const { amount, callback_url } = await req.json();

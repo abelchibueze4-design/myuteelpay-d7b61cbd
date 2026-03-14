@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useCallback, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 async function callPaystack(action: string, body: Record<string, unknown>) {
   const { data: { session } } = await supabase.auth.getSession();
@@ -28,18 +29,43 @@ async function callPaystack(action: string, body: Record<string, unknown>) {
 export function useFundWallet() {
   const queryClient = useQueryClient();
   const verifiedRefs = useRef(new Set<string>());
+  const { user } = useAuth();
 
   const initMutation = useMutation({
-    mutationFn: async (amount: number) => {
-      const callback_url = `${window.location.origin}/dashboard`;
-      return callPaystack("initialize", { amount, callback_url });
+    mutationFn: async ({ amount, publicKey }: { amount: number; publicKey: string }) => {
+      // Use Paystack Inline Popup
+      return new Promise<{ reference: string }>((resolve, reject) => {
+        const handler = (window as any).PaystackPop.setup({
+          key: publicKey,
+          email: user?.email || "",
+          amount: Math.round(amount * 100), // kobo
+          currency: "NGN",
+          metadata: { user_id: user?.id },
+          callback: (response: { reference: string }) => {
+            resolve(response);
+          },
+          onClose: () => {
+            reject(new Error("Payment cancelled"));
+          },
+        });
+        handler.openIframe();
+      });
     },
-    onSuccess: (data) => {
-      // Redirect to Paystack checkout
-      window.location.href = data.authorization_url;
+    onSuccess: async (data) => {
+      // Verify the payment server-side
+      try {
+        const result = await callPaystack("verify", { reference: data.reference });
+        toast.success(`Wallet funded! New balance: ₦${Number(result.balance).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`);
+        queryClient.invalidateQueries({ queryKey: ["wallet"] });
+        queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      } catch {
+        toast.error("Payment verification failed. If you were charged, your wallet will be updated shortly.");
+      }
     },
-    onError: () => {
-      toast.error("Unable to initialize payment. Please check your details and try again.");
+    onError: (err: Error) => {
+      if (err.message !== "Payment cancelled") {
+        toast.error("Unable to initialize payment. Please try again.");
+      }
     },
   });
 
@@ -62,8 +88,12 @@ export function useFundWallet() {
     },
   });
 
+  const initializePayment = useCallback((amount: number, publicKey: string) => {
+    initMutation.mutate({ amount, publicKey });
+  }, [initMutation]);
+
   return {
-    initializePayment: initMutation.mutate,
+    initializePayment,
     verifyPayment: useCallback((ref: string) => verifyMutation.mutate(ref), [verifyMutation]),
     isInitializing: initMutation.isPending,
     isVerifying: verifyMutation.isPending,

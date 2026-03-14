@@ -131,6 +131,41 @@ const Dashboard = () => {
     }
   }, [searchParams, setSearchParams]);
 
+  // Load Paystack inline script
+  useEffect(() => {
+    if (!document.getElementById("paystack-script")) {
+      const script = document.createElement("script");
+      script.id = "paystack-script";
+      script.src = "https://js.paystack.co/v1/inline.js";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  // Fetch Paystack public key
+  const { data: paystackConfig } = useQuery({
+    queryKey: ["paystack-public-key"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return null;
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/paystack?action=public_key`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
+      const data = await res.json();
+      return data;
+    },
+    staleTime: Infinity,
+  });
+
+  const fundingFee = platformSettings.wallet_funding_fee || 50;
+
   const isLoading = !user;
 
   if (activeTab === "transactions") return <TransactionHistory filter="services" />;
@@ -139,7 +174,6 @@ const Dashboard = () => {
   if (activeTab === "settings") return <SettingsPage />;
 
   if (isLoading) return <DashboardSkeleton />;
-
 
   const handleFund = () => {
     const val = Number(amount);
@@ -152,8 +186,13 @@ const Dashboard = () => {
         return;
       }
     }
+    const totalWithFee = val + fundingFee;
+    if (!paystackConfig?.public_key) {
+      toast.error("Payment system is not configured. Please try again later.");
+      return;
+    }
     setFundOpen(false);
-    initializePayment(val);
+    initializePayment(totalWithFee, paystackConfig.public_key);
   };
 
   return (
@@ -257,7 +296,7 @@ const Dashboard = () => {
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-lg text-foreground">₦</span>
                         <Input type="number" placeholder="0.00" min={100} value={amount} onChange={(e) => setAmount(e.target.value)} className="pl-9 h-14 text-xl font-black rounded-2xl border-2 focus-visible:ring-primary/20 bg-secondary/30" />
                       </div>
-                      <p className="text-[10px] text-muted-foreground ml-1">Min: ₦100 · Instant Crediting</p>
+                      <p className="text-[10px] text-muted-foreground ml-1">Min: ₦100 · Fee: ₦{fundingFee} · Instant Crediting</p>
                     </div>
                     <div className="grid grid-cols-4 gap-2">
                       {[500, 1000, 2000, 5000].map((v) => (
