@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { useKvdataQuery } from "@/hooks/useKvdata";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import { applyMarkup } from "@/lib/applyMarkup";
 import { PriceCard } from "../common/PriceCard";
 import { Loader2 } from "lucide-react";
 
@@ -10,6 +12,8 @@ interface DataCardPricesProps {
 }
 
 export const DataCardPrices = ({ networkId, onSelect, selectedPlanId }: DataCardPricesProps) => {
+  const { settings } = usePlatformSettings();
+  const markup = settings.data_card_markup || 0;
   const { data: apiPlans, isLoading, error } = useKvdataQuery({ action: "get_datacard_plans" });
 
   const filteredPlans = useMemo(() => {
@@ -17,13 +21,17 @@ export const DataCardPrices = ({ networkId, onSelect, selectedPlanId }: DataCard
     const plansArray = Array.isArray(apiPlans) ? apiPlans : (apiPlans.plans || []);
     return plansArray
       .filter((p: any) => p.network === networkId)
-      .map((p: any) => ({
-        label: p.plan_name || p.name || `${p.plan_type} ${p.plan_size}`,
-        plan_id: String(p.id || p.plan_id),
-        price: Number(p.plan_amount || p.amount || p.price),
-        raw: p
-      }));
-  }, [apiPlans, networkId]);
+      .map((p: any) => {
+        const basePrice = Number(p.plan_amount || p.amount || p.price);
+        return {
+          label: p.plan_name || p.name || `${p.plan_type} ${p.plan_size}`,
+          plan_id: String(p.id || p.plan_id),
+          price: applyMarkup(basePrice, markup),
+          basePrice,
+          raw: p
+        };
+      });
+  }, [apiPlans, networkId, markup]);
 
   if (isLoading) {
     return (

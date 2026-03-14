@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useKvdataQuery } from "@/hooks/useKvdata";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import { applyMarkup } from "@/lib/applyMarkup";
 import { PriceCard } from "../common/PriceCard";
 import { Loader2 } from "lucide-react";
 
@@ -16,14 +17,13 @@ interface DataPricesProps {
 export const DataPrices = ({ networkName, category, onSelect, selectedPlanId }: DataPricesProps) => {
   const { settings } = usePlatformSettings();
   const isVtpass = settings.data_provider === "vtpass";
+  const markup = settings.data_markup || 0;
 
-  // VTPass: fetch live plans from API
   const { data: apiPlans, isLoading: apiLoading, error: apiError } = useKvdataQuery(
     { action: "get_data_plans" },
     isVtpass && !!networkName
   );
 
-  // KVData: fetch from database
   const { data: dbPlans, isLoading: dbLoading, error: dbError } = useQuery({
     queryKey: ["data_plans", networkName],
     queryFn: async () => {
@@ -51,27 +51,34 @@ export const DataPrices = ({ networkName, category, onSelect, selectedPlanId }: 
           return pNetwork === target;
         })
         .filter((p: any) => !category || (p.plan_type || "").toUpperCase() === category.toUpperCase())
-        .map((p: any) => ({
-          label: p.size || p.name || `${p.plan_type} ${p.plan_size}`,
-          plan_id: String(p.plan_id || p.variation_code || p.id),
-          price: Number(p.amount || p.variation_amount || p.price),
-          type: p.plan_type,
-          raw: p
-        }));
+        .map((p: any) => {
+          const basePrice = Number(p.amount || p.variation_amount || p.price);
+          return {
+            label: p.size || p.name || `${p.plan_type} ${p.plan_size}`,
+            plan_id: String(p.plan_id || p.variation_code || p.id),
+            price: applyMarkup(basePrice, markup),
+            basePrice,
+            type: p.plan_type,
+            raw: p
+          };
+        });
     }
 
-    // KVData DB plans
     if (!dbPlans) return [];
     return dbPlans
       .filter((p) => !category || p.plan_type === category)
-      .map((p) => ({
-        label: `${p.size} - ${p.validity}`,
-        plan_id: String(p.plan_id),
-        price: Number(p.amount),
-        type: p.plan_type,
-        raw: p
-      }));
-  }, [isVtpass, apiPlans, dbPlans, networkName, category]);
+      .map((p) => {
+        const basePrice = Number(p.amount);
+        return {
+          label: `${p.size} - ${p.validity}`,
+          plan_id: String(p.plan_id),
+          price: applyMarkup(basePrice, markup),
+          basePrice,
+          type: p.plan_type,
+          raw: p
+        };
+      });
+  }, [isVtpass, apiPlans, dbPlans, networkName, category, markup]);
 
   if (isLoading) {
     return (

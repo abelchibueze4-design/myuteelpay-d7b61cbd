@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useKvdataQuery } from "@/hooks/useKvdata";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import { applyMarkup } from "@/lib/applyMarkup";
 import { PriceCard } from "../common/PriceCard";
 import { Loader2 } from "lucide-react";
 
-// Map cable_id to VTPass cable names
 const CABLE_ID_NAME_MAP: Record<number, string> = {
   1: "GOTV",
   2: "DSTV",
@@ -24,14 +24,13 @@ export const CableTVPrices = ({ cableId, onSelect, selectedPlanId }: CableTVPric
   const { settings } = usePlatformSettings();
   const isVtpass = settings.cable_provider === "vtpass";
   const cableName = CABLE_ID_NAME_MAP[cableId] || "";
+  const markup = settings.cable_markup || 0;
 
-  // VTPass: fetch live plans from API
   const { data: apiPlans, isLoading: apiLoading, error: apiError } = useKvdataQuery(
     { action: "get_cable_plans" },
     isVtpass && !!cableId
   );
 
-  // KVData: fetch from database
   const { data: dbPlans, isLoading: dbLoading, error: dbError } = useQuery({
     queryKey: ["cable_plans", cableId],
     queryFn: async () => {
@@ -68,23 +67,30 @@ export const CableTVPrices = ({ cableId, onSelect, selectedPlanId }: CableTVPric
           const pCable = (p.cable_name || "").toUpperCase();
           return pCable === cableName;
         })
-        .map((p: any) => ({
-          label: formatLabel(p.cableplan_name || p.name),
-          plan_id: String(p.cableplan_id || p.variation_code || p.id),
-          price: Number(p.cableplan_amount || p.variation_amount || p.amount),
-          raw: { ...p, cable_name: p.cable_name }
-        }));
+        .map((p: any) => {
+          const basePrice = Number(p.cableplan_amount || p.variation_amount || p.amount);
+          return {
+            label: formatLabel(p.cableplan_name || p.name),
+            plan_id: String(p.cableplan_id || p.variation_code || p.id),
+            price: applyMarkup(basePrice, markup),
+            basePrice,
+            raw: { ...p, cable_name: p.cable_name }
+          };
+        });
     }
 
-    // KVData DB plans
     if (!dbPlans) return [];
-    return dbPlans.map((p) => ({
-      label: formatLabel(p.cableplan_name),
-      plan_id: String(p.cableplan_id),
-      price: Number(p.cableplan_amount),
-      raw: p
-    }));
-  }, [isVtpass, apiPlans, dbPlans, cableName]);
+    return dbPlans.map((p) => {
+      const basePrice = Number(p.cableplan_amount);
+      return {
+        label: formatLabel(p.cableplan_name),
+        plan_id: String(p.cableplan_id),
+        price: applyMarkup(basePrice, markup),
+        basePrice,
+        raw: p
+      };
+    });
+  }, [isVtpass, apiPlans, dbPlans, cableName, markup]);
 
   if (isLoading) {
     return (
