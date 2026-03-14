@@ -131,16 +131,6 @@ const Dashboard = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  const isLoading = !user;
-
-  if (activeTab === "transactions") return <TransactionHistory filter="services" />;
-  if (activeTab === "history") return <TransactionHistory filter="all" />;
-  if (activeTab === "wallet") return <TransactionHistory filter="wallet" />;
-  if (activeTab === "settings") return <SettingsPage />;
-
-  if (isLoading) return <DashboardSkeleton />;
-
-
   // Load Paystack inline script
   useEffect(() => {
     if (!document.getElementById("paystack-script")) {
@@ -175,6 +165,15 @@ const Dashboard = () => {
   });
 
   const fundingFee = platformSettings.wallet_funding_fee || 50;
+
+  const isLoading = !user;
+
+  if (activeTab === "transactions") return <TransactionHistory filter="services" />;
+  if (activeTab === "history") return <TransactionHistory filter="all" />;
+  if (activeTab === "wallet") return <TransactionHistory filter="wallet" />;
+  if (activeTab === "settings") return <SettingsPage />;
+
+  if (isLoading) return <DashboardSkeleton />;
 
   const handleFund = () => {
     const val = Number(amount);
