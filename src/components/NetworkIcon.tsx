@@ -2,6 +2,7 @@ import mtnLogo from "@/assets/mtn-logo.png";
 import gloLogo from "@/assets/glo-logo.png";
 import airtelLogo from "@/assets/airtel-logo.png";
 import nineMobileLogo from "@/assets/9mobile-logo.png";
+import smileLogo from "@/assets/smile-logo.png";
 import { cn } from "@/lib/utils";
 
 interface NetworkIconProps {
@@ -14,6 +15,7 @@ const networkLogos: Record<string, { src: string; bg: string }> = {
   GLO: { src: gloLogo, bg: "bg-green-50" },
   AIRTEL: { src: airtelLogo, bg: "bg-red-50" },
   "9MOBILE": { src: nineMobileLogo, bg: "bg-emerald-50" },
+  SMILE: { src: smileLogo, bg: "bg-purple-50" },
 };
 
 export const NetworkIcon = ({ networkName, className }: NetworkIconProps) => {
