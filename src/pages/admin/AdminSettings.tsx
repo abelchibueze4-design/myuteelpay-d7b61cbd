@@ -475,6 +475,46 @@ const AdminSettings = () => {
                     </CardContent>
                 </Card>
 
+                {/* Service Price Markup */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <DollarSign className="w-5 h-5 text-emerald-500" />
+                            Service Price Markup
+                        </CardTitle>
+                        <CardDescription>Add a percentage markup to each service's prices. Users pay the marked-up price; the base cost goes to the API provider.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {[
+                            { label: "Airtime", value: airtimeMarkup, setter: setAirtimeMarkup },
+                            { label: "Data", value: dataMarkup, setter: setDataMarkup },
+                            { label: "Cable TV", value: cableMarkup, setter: setCableMarkup },
+                            { label: "Electricity", value: electricityMarkup, setter: setElectricityMarkup },
+                            { label: "Education Pins", value: eduPinsMarkup, setter: setEduPinsMarkup },
+                            { label: "Data Cards", value: dataCardMarkup, setter: setDataCardMarkup },
+                        ].map(({ label, value, setter }) => (
+                            <div key={label} className="flex items-center justify-between gap-4">
+                                <div className="space-y-0.5">
+                                    <Label>{label}</Label>
+                                    <p className="text-xs text-muted-foreground">{value && parseFloat(value) > 0 ? `+${value}% on all ${label.toLowerCase()} prices` : "No markup"}</p>
+                                </div>
+                                <div className="relative w-24">
+                                    <Input
+                                        type="number"
+                                        step="0.5"
+                                        min="0"
+                                        max="100"
+                                        value={value}
+                                        onChange={(e) => setter(e.target.value)}
+                                        className="text-xs pr-6"
+                                    />
+                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+                                </div>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+
                 {/* API Provider Selection */}
                 <Card>
                     <CardHeader>

@@ -67,6 +67,12 @@ const defaults: PlatformSettings = {
   data_card_provider: "vtpass",
   exchange_rate_markup: 0,
   wallet_funding_fee: 50,
+  airtime_markup: 0,
+  data_markup: 0,
+  cable_markup: 0,
+  electricity_markup: 0,
+  edu_pins_markup: 0,
+  data_card_markup: 0,
 };
 
 export function usePlatformSettings() {
