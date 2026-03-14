@@ -223,6 +223,11 @@ const Airtime = () => {
                             type="number" 
                             required 
                         />
+                        {markup > 0 && amount && (
+                            <p className="text-xs text-muted-foreground ml-1">
+                                You'll be charged <span className="font-bold text-primary">₦{applyMarkup(Number(amount), markup).toLocaleString()}</span> ({markup}% service fee included)
+                            </p>
+                        )}
                     </div>
 
                     <Button 
