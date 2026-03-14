@@ -75,10 +75,12 @@ export const useAllExchangeRates = () => {
 export const convertToNgn = (
   amount: number,
   currency: string,
-  rates: Record<string, number> | undefined
+  rates: Record<string, number> | undefined,
+  markupPercent: number = 0
 ): number | null => {
   if (!rates || !currency) return null;
   const rate = rates[currency.toUpperCase()];
   if (!rate) return null;
-  return Math.round(amount * rate * 100) / 100;
+  const markedUpRate = rate * (1 + markupPercent / 100);
+  return Math.round(amount * markedUpRate * 100) / 100;
 };

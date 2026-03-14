@@ -28,7 +28,10 @@ export interface PlatformSettings {
   electricity_provider: ApiProvider;
   edu_pins_provider: ApiProvider;
   data_card_provider: ApiProvider;
-  
+  // Exchange rate markup percentage
+  exchange_rate_markup: number;
+  // Wallet funding fee
+  wallet_funding_fee: number;
 }
 
 const defaults: PlatformSettings = {
@@ -55,7 +58,8 @@ const defaults: PlatformSettings = {
   electricity_provider: "vtpass",
   edu_pins_provider: "vtpass",
   data_card_provider: "vtpass",
-  
+  exchange_rate_markup: 0,
+  wallet_funding_fee: 50,
 };
 
 export function usePlatformSettings() {

@@ -10,6 +10,7 @@ import { useTransactionPinVerification } from "@/hooks/useTransactionPinVerifica
 import { PinVerificationDialog } from "@/components/PinVerificationDialog";
 import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 import { PageBackButton } from "@/components/PageBackButton";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 
 const InternationalAirtime = () => {
   const navigate = useNavigate();
@@ -27,6 +28,8 @@ const InternationalAirtime = () => {
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
   const { guardTransaction } = useTransactionGuard();
   const { data: exchangeRates, isLoading: loadingRates, refetch: refetchRates } = useAllExchangeRates();
+  const { settings: platformSettings } = usePlatformSettings();
+  const markup = platformSettings.exchange_rate_markup || 0;
 
   // Step 1: Countries
   const { data: countries, isLoading: loadingCountries } = useKvdataQuery(
@@ -72,10 +75,9 @@ const InternationalAirtime = () => {
 
   const ngnEquivalent = useMemo(() => {
     if (totalAmount <= 0 || !exchangeRates) return null;
-    // If already NGN, no conversion needed
     if (detectedCurrency === "NGN") return totalAmount;
-    return convertToNgn(totalAmount, detectedCurrency, exchangeRates);
-  }, [totalAmount, detectedCurrency, exchangeRates]);
+    return convertToNgn(totalAmount, detectedCurrency, exchangeRates, markup);
+  }, [totalAmount, detectedCurrency, exchangeRates, markup]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -268,7 +270,7 @@ const InternationalAirtime = () => {
                           </p>
                           {exchangeRates && (v.currency || detectedCurrency) !== "NGN" && (
                             <p className="text-xs text-primary font-black">
-                              ≈ ₦{(convertToNgn(Number(v.variation_amount), v.currency || detectedCurrency, exchangeRates) || 0).toLocaleString()}
+                              ≈ ₦{(convertToNgn(Number(v.variation_amount), v.currency || detectedCurrency, exchangeRates, markup) || 0).toLocaleString()}
                             </p>
                           )}
                           {(v.currency || detectedCurrency) === "NGN" && (

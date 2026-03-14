@@ -65,6 +65,8 @@ const AdminSettings = () => {
     const [electricityProvider, setElectricityProvider] = useState("vtpass");
     const [eduPinsProvider, setEduPinsProvider] = useState("vtpass");
     const [dataCardProvider, setDataCardProvider] = useState("vtpass");
+    const [exchangeRateMarkup, setExchangeRateMarkup] = useState("0");
+    const [walletFundingFee, setWalletFundingFee] = useState("50");
     
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
@@ -106,7 +108,8 @@ const AdminSettings = () => {
             setElectricityProvider(d.electricity_provider as string ?? "vtpass");
             setEduPinsProvider(d.edu_pins_provider as string ?? "vtpass");
             setDataCardProvider(d.data_card_provider as string ?? "vtpass");
-            
+            setExchangeRateMarkup(String(d.exchange_rate_markup ?? "0"));
+            setWalletFundingFee(String(d.wallet_funding_fee ?? "50"));
         }
     }, [config]);
 
@@ -136,7 +139,8 @@ const AdminSettings = () => {
                 electricity_provider: electricityProvider,
                 edu_pins_provider: eduPinsProvider,
                 data_card_provider: dataCardProvider,
-                
+                exchange_rate_markup: parseFloat(exchangeRateMarkup) || 0,
+                wallet_funding_fee: parseFloat(walletFundingFee) || 50,
             };
 
             if (config?.id) {
@@ -409,6 +413,43 @@ const AdminSettings = () => {
                                 type="number"
                                 value={minWalletFund}
                                 onChange={(e) => setMinWalletFund(e.target.value)}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Exchange Rate & Fees */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Globe className="w-5 h-5 text-indigo-500" />
+                            Exchange Rate & Fees
+                        </CardTitle>
+                        <CardDescription>Configure exchange rate markup and wallet funding fees</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Exchange Rate Markup (%)</Label>
+                            <p className="text-xs text-muted-foreground">Percentage added on top of live exchange rates for international airtime</p>
+                            <Input
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                max="100"
+                                value={exchangeRateMarkup}
+                                onChange={(e) => setExchangeRateMarkup(e.target.value)}
+                                placeholder="e.g. 10"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Wallet Funding Fee (₦)</Label>
+                            <p className="text-xs text-muted-foreground">Flat fee charged when users fund their wallet via Paystack</p>
+                            <Input
+                                type="number"
+                                min="0"
+                                value={walletFundingFee}
+                                onChange={(e) => setWalletFundingFee(e.target.value)}
+                                placeholder="e.g. 50"
                             />
                         </div>
                     </CardContent>
