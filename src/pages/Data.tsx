@@ -111,7 +111,7 @@ const Data = () => {
                     {/* Network Selection */}
                     <div className="space-y-3">
                         <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Select Network</label>
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-5 gap-2">
                             {networks?.map((n) => (
                                 <button
                                     key={n.network_id}
