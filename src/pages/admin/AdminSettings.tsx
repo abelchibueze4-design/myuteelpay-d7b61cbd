@@ -68,6 +68,14 @@ const AdminSettings = () => {
     const [exchangeRateMarkup, setExchangeRateMarkup] = useState("0");
     const [walletFundingFee, setWalletFundingFee] = useState("50");
     
+    // Per-service markup
+    const [airtimeMarkup, setAirtimeMarkup] = useState("0");
+    const [dataMarkup, setDataMarkup] = useState("0");
+    const [cableMarkup, setCableMarkup] = useState("0");
+    const [electricityMarkup, setElectricityMarkup] = useState("0");
+    const [eduPinsMarkup, setEduPinsMarkup] = useState("0");
+    const [dataCardMarkup, setDataCardMarkup] = useState("0");
+    
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
         queryKey: ["admin_site_config"],
