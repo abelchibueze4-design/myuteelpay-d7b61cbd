@@ -72,6 +72,7 @@ const AIRTIME_SERVICE_MAP: Record<string, string> = {
   airtel: "airtel",
   "9mobile": "etisalat",
   etisalat: "etisalat",
+  smile: "smile-direct",
 };
 
 const DATA_SERVICE_MAP: Record<string, string> = {
@@ -80,6 +81,7 @@ const DATA_SERVICE_MAP: Record<string, string> = {
   airtel: "airtel-data",
   "9mobile": "etisalat-data",
   etisalat: "etisalat-data",
+  smile: "smile-direct",
 };
 
 const CABLE_SERVICE_MAP: Record<string, string> = {
