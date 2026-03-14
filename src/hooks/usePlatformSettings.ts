@@ -32,6 +32,13 @@ export interface PlatformSettings {
   exchange_rate_markup: number;
   // Wallet funding fee
   wallet_funding_fee: number;
+  // Per-service markup percentages
+  airtime_markup: number;
+  data_markup: number;
+  cable_markup: number;
+  electricity_markup: number;
+  edu_pins_markup: number;
+  data_card_markup: number;
 }
 
 const defaults: PlatformSettings = {
