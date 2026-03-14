@@ -34,6 +34,8 @@ const Electricity = () => {
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
   const { guardTransaction } = useTransactionGuard();
+  const { settings } = usePlatformSettings();
+  const markup = settings.electricity_markup || 0;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
