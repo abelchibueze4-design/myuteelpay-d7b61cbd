@@ -17,6 +17,8 @@ import { ServicePageSkeleton } from "@/components/DashboardSkeleton";
 import { TransactionResultScreen } from "@/components/TransactionResultScreen";
 import { useSmartNetworkDefault } from "@/hooks/useSmartNetworkDefault";
 import { PageBackButton } from "@/components/PageBackButton";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import { applyMarkup } from "@/lib/applyMarkup";
 
 const Airtime = () => {
     const navigate = useNavigate();
