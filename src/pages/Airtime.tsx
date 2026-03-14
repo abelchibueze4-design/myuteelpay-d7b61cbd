@@ -17,6 +17,8 @@ import { ServicePageSkeleton } from "@/components/DashboardSkeleton";
 import { TransactionResultScreen } from "@/components/TransactionResultScreen";
 import { useSmartNetworkDefault } from "@/hooks/useSmartNetworkDefault";
 import { PageBackButton } from "@/components/PageBackButton";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import { applyMarkup } from "@/lib/applyMarkup";
 
 const Airtime = () => {
     const navigate = useNavigate();
@@ -29,6 +31,8 @@ const Airtime = () => {
     const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
     const { guardTransaction } = useTransactionGuard();
     const { favorites, addFavorite, removeFavorite, isFavorited } = useFavorites("airtime");
+    const { settings } = usePlatformSettings();
+    const markup = settings.airtime_markup || 0;
 
     const { data: networks, isLoading: networksLoading } = useQuery({
         queryKey: ["networks"],
@@ -53,7 +57,8 @@ const Airtime = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!network || !phone || !amount) return;
-        const { allowed } = guardTransaction(Number(amount));
+        const chargeAmount = applyMarkup(Number(amount), markup);
+        const { allowed } = guardTransaction(chargeAmount);
         if (!allowed) return;
         setPinOpen(true);
     };
@@ -62,13 +67,15 @@ const Airtime = () => {
         const isValid = await verifyPin(pin);
         if (!isValid) return false;
 
+        const chargeAmount = applyMarkup(Number(amount), markup);
+
         try {
             await kvdata.mutateAsync({
                 action: "buy_airtime",
                 network_id: network!.network_id,
                 network_name: network!.network_name,
                 phone,
-                amount: Number(amount),
+                amount: chargeAmount,
             });
             setShowSuccess(true);
             return true;
@@ -216,6 +223,11 @@ const Airtime = () => {
                             type="number" 
                             required 
                         />
+                        {markup > 0 && amount && (
+                            <p className="text-xs text-muted-foreground ml-1">
+                                You'll be charged <span className="font-bold text-primary">₦{applyMarkup(Number(amount), markup).toLocaleString()}</span> ({markup}% service fee included)
+                            </p>
+                        )}
                     </div>
 
                     <Button 

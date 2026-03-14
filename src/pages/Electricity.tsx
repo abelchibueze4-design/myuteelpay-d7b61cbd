@@ -12,6 +12,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTransactionGuard } from "@/hooks/useTransactionGuard";
 import { PageBackButton } from "@/components/PageBackButton";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import { applyMarkup } from "@/lib/applyMarkup";
 
 const Electricity = () => {
   const navigate = useNavigate();
@@ -32,6 +34,8 @@ const Electricity = () => {
   const kvdata = useKvdata();
   const { verifyPin, isLoading: isVerifying } = useTransactionPinVerification();
   const { guardTransaction } = useTransactionGuard();
+  const { settings } = usePlatformSettings();
+  const markup = settings.electricity_markup || 0;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -84,7 +88,8 @@ const Electricity = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!disco || !meter || !amount) return;
-    const { allowed } = guardTransaction(Number(amount));
+    const chargeAmount = applyMarkup(Number(amount), markup);
+    const { allowed } = guardTransaction(chargeAmount);
     if (!allowed) return;
     setPinOpen(true);
   };
@@ -93,6 +98,8 @@ const Electricity = () => {
     const isValid = await verifyPin(pin);
     if (!isValid) return false;
 
+    const chargeAmount = applyMarkup(Number(amount), markup);
+
     try {
       const selectedDisco = discos?.find(d => String(d.disco_id) === disco);
       const res = await kvdata.mutateAsync({
@@ -100,7 +107,7 @@ const Electricity = () => {
         disco_id: Number(disco),
         meter_number: meter,
         meter_type: type,
-        amount: Number(amount),
+        amount: chargeAmount,
         disco_label: selectedDisco?.disco_name
       });
       setToken(res?.kvdata?.token || res?.kvdata?.Token || "");
@@ -192,6 +199,11 @@ const Electricity = () => {
           <div className="space-y-2">
             <label className="text-sm font-medium">Amount</label>
             <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="₦500 minimum" type="number" required className="placeholder:text-[10px] placeholder:font-normal" />
+            {markup > 0 && amount && (
+              <p className="text-xs text-muted-foreground">
+                You'll be charged <span className="font-bold text-primary">₦{applyMarkup(Number(amount), markup).toLocaleString()}</span> ({markup}% service fee included)
+              </p>
+            )}
           </div>
           <Button type="submit" variant="hero" className="w-full" disabled={kvdata.isPending}>
             {kvdata.isPending ? "Processing..." : "Pay Now"}
