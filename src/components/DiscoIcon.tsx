@@ -9,6 +9,7 @@ import kaedcoLogo from "@/assets/kaedco-logo.png";
 import eedcLogo from "@/assets/eedc-logo.png";
 import bedcLogo from "@/assets/bedc-logo.png";
 import yedcLogo from "@/assets/yedc-logo.png";
+import abaElectricLogo from "@/assets/aba-electric-logo.png";
 import { cn } from "@/lib/utils";
 import { Zap } from "lucide-react";
 
@@ -42,6 +43,8 @@ const discoLogos: Record<string, { src: string; bg: string }> = {
   YEDC: { src: yedcLogo, bg: "bg-green-50" },
   "YOLA ELECTRIC": { src: yedcLogo, bg: "bg-green-50" },
   "YOLA ELECTRICITY": { src: yedcLogo, bg: "bg-green-50" },
+  "ABA ELECTRIC": { src: abaElectricLogo, bg: "bg-yellow-50" },
+  "ABA-ELECTRIC": { src: abaElectricLogo, bg: "bg-yellow-50" },
 };
 
 function findLogo(name: string) {
