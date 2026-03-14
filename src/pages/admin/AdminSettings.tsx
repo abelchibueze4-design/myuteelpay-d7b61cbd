@@ -139,7 +139,8 @@ const AdminSettings = () => {
                 electricity_provider: electricityProvider,
                 edu_pins_provider: eduPinsProvider,
                 data_card_provider: dataCardProvider,
-                
+                exchange_rate_markup: parseFloat(exchangeRateMarkup) || 0,
+                wallet_funding_fee: parseFloat(walletFundingFee) || 50,
             };
 
             if (config?.id) {
