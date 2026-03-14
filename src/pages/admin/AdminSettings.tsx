@@ -65,6 +65,8 @@ const AdminSettings = () => {
     const [electricityProvider, setElectricityProvider] = useState("vtpass");
     const [eduPinsProvider, setEduPinsProvider] = useState("vtpass");
     const [dataCardProvider, setDataCardProvider] = useState("vtpass");
+    const [exchangeRateMarkup, setExchangeRateMarkup] = useState("0");
+    const [walletFundingFee, setWalletFundingFee] = useState("50");
     
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
