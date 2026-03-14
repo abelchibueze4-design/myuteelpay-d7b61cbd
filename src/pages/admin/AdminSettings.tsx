@@ -68,14 +68,6 @@ const AdminSettings = () => {
     const [exchangeRateMarkup, setExchangeRateMarkup] = useState("0");
     const [walletFundingFee, setWalletFundingFee] = useState("50");
     
-    // Per-service markup
-    const [airtimeMarkup, setAirtimeMarkup] = useState("0");
-    const [dataMarkup, setDataMarkup] = useState("0");
-    const [cableMarkup, setCableMarkup] = useState("0");
-    const [electricityMarkup, setElectricityMarkup] = useState("0");
-    const [eduPinsMarkup, setEduPinsMarkup] = useState("0");
-    const [dataCardMarkup, setDataCardMarkup] = useState("0");
-    
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
         queryKey: ["admin_site_config"],
@@ -118,12 +110,6 @@ const AdminSettings = () => {
             setDataCardProvider(d.data_card_provider as string ?? "vtpass");
             setExchangeRateMarkup(String(d.exchange_rate_markup ?? "0"));
             setWalletFundingFee(String(d.wallet_funding_fee ?? "50"));
-            setAirtimeMarkup(String(d.airtime_markup ?? "0"));
-            setDataMarkup(String(d.data_markup ?? "0"));
-            setCableMarkup(String(d.cable_markup ?? "0"));
-            setElectricityMarkup(String(d.electricity_markup ?? "0"));
-            setEduPinsMarkup(String(d.edu_pins_markup ?? "0"));
-            setDataCardMarkup(String(d.data_card_markup ?? "0"));
         }
     }, [config]);
 
@@ -155,12 +141,6 @@ const AdminSettings = () => {
                 data_card_provider: dataCardProvider,
                 exchange_rate_markup: parseFloat(exchangeRateMarkup) || 0,
                 wallet_funding_fee: parseFloat(walletFundingFee) || 50,
-                airtime_markup: parseFloat(airtimeMarkup) || 0,
-                data_markup: parseFloat(dataMarkup) || 0,
-                cable_markup: parseFloat(cableMarkup) || 0,
-                electricity_markup: parseFloat(electricityMarkup) || 0,
-                edu_pins_markup: parseFloat(eduPinsMarkup) || 0,
-                data_card_markup: parseFloat(dataCardMarkup) || 0,
             };
 
             if (config?.id) {
@@ -472,46 +452,6 @@ const AdminSettings = () => {
                                 placeholder="e.g. 50"
                             />
                         </div>
-                    </CardContent>
-                </Card>
-
-                {/* Service Price Markup */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <DollarSign className="w-5 h-5 text-emerald-500" />
-                            Service Price Markup
-                        </CardTitle>
-                        <CardDescription>Add a percentage markup to each service's prices. Users pay the marked-up price; the base cost goes to the API provider.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {[
-                            { label: "Airtime", value: airtimeMarkup, setter: setAirtimeMarkup },
-                            { label: "Data", value: dataMarkup, setter: setDataMarkup },
-                            { label: "Cable TV", value: cableMarkup, setter: setCableMarkup },
-                            { label: "Electricity", value: electricityMarkup, setter: setElectricityMarkup },
-                            { label: "Education Pins", value: eduPinsMarkup, setter: setEduPinsMarkup },
-                            { label: "Data Cards", value: dataCardMarkup, setter: setDataCardMarkup },
-                        ].map(({ label, value, setter }) => (
-                            <div key={label} className="flex items-center justify-between gap-4">
-                                <div className="space-y-0.5">
-                                    <Label>{label}</Label>
-                                    <p className="text-xs text-muted-foreground">{value && parseFloat(value) > 0 ? `+${value}% on all ${label.toLowerCase()} prices` : "No markup"}</p>
-                                </div>
-                                <div className="relative w-24">
-                                    <Input
-                                        type="number"
-                                        step="0.5"
-                                        min="0"
-                                        max="100"
-                                        value={value}
-                                        onChange={(e) => setter(e.target.value)}
-                                        className="text-xs pr-6"
-                                    />
-                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
-                                </div>
-                            </div>
-                        ))}
                     </CardContent>
                 </Card>
 

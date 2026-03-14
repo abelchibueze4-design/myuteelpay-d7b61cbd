@@ -1,7 +1,5 @@
 import { useMemo } from "react";
 import { useKvdataQuery } from "@/hooks/useKvdata";
-import { usePlatformSettings } from "@/hooks/usePlatformSettings";
-import { applyMarkup } from "@/lib/applyMarkup";
 import { PriceCard } from "../common/PriceCard";
 import { Loader2 } from "lucide-react";
 
@@ -11,24 +9,18 @@ interface EduPinsPricesProps {
 }
 
 export const EduPinsPrices = ({ onSelect, selectedExamName }: EduPinsPricesProps) => {
-  const { settings } = usePlatformSettings();
-  const markup = settings.edu_pins_markup || 0;
   const { data: apiPlans, isLoading, error } = useKvdataQuery({ action: "get_edu_plans" });
 
   const exams = useMemo(() => {
     if (!apiPlans) return [];
     const plansArray = Array.isArray(apiPlans) ? apiPlans : (apiPlans.plans || []);
-    return plansArray.map((p: any) => {
-      const basePrice = Number(p.plan_amount || p.amount || p.price);
-      return {
+    return plansArray.map((p: any) => ({
         name: p.exam_name || p.name,
         id: String(p.id || p.plan_id),
-        price: applyMarkup(basePrice, markup),
-        basePrice,
+        price: Number(p.plan_amount || p.amount || p.price),
         raw: p
-      };
-    });
-  }, [apiPlans, markup]);
+    }));
+  }, [apiPlans]);
 
   if (isLoading) {
     return (
