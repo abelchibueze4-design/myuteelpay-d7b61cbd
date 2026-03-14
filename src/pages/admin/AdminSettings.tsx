@@ -155,6 +155,12 @@ const AdminSettings = () => {
                 data_card_provider: dataCardProvider,
                 exchange_rate_markup: parseFloat(exchangeRateMarkup) || 0,
                 wallet_funding_fee: parseFloat(walletFundingFee) || 50,
+                airtime_markup: parseFloat(airtimeMarkup) || 0,
+                data_markup: parseFloat(dataMarkup) || 0,
+                cable_markup: parseFloat(cableMarkup) || 0,
+                electricity_markup: parseFloat(electricityMarkup) || 0,
+                edu_pins_markup: parseFloat(eduPinsMarkup) || 0,
+                data_card_markup: parseFloat(dataCardMarkup) || 0,
             };
 
             if (config?.id) {
