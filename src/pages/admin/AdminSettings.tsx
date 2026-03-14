@@ -118,6 +118,12 @@ const AdminSettings = () => {
             setDataCardProvider(d.data_card_provider as string ?? "vtpass");
             setExchangeRateMarkup(String(d.exchange_rate_markup ?? "0"));
             setWalletFundingFee(String(d.wallet_funding_fee ?? "50"));
+            setAirtimeMarkup(String(d.airtime_markup ?? "0"));
+            setDataMarkup(String(d.data_markup ?? "0"));
+            setCableMarkup(String(d.cable_markup ?? "0"));
+            setElectricityMarkup(String(d.electricity_markup ?? "0"));
+            setEduPinsMarkup(String(d.edu_pins_markup ?? "0"));
+            setDataCardMarkup(String(d.data_card_markup ?? "0"));
         }
     }, [config]);
 
