@@ -67,13 +67,15 @@ const Airtime = () => {
         const isValid = await verifyPin(pin);
         if (!isValid) return false;
 
+        const chargeAmount = applyMarkup(Number(amount), markup);
+
         try {
             await kvdata.mutateAsync({
                 action: "buy_airtime",
                 network_id: network!.network_id,
                 network_name: network!.network_name,
                 phone,
-                amount: Number(amount),
+                amount: chargeAmount,
             });
             setShowSuccess(true);
             return true;
