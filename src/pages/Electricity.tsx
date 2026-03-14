@@ -88,7 +88,8 @@ const Electricity = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!disco || !meter || !amount) return;
-    const { allowed } = guardTransaction(Number(amount));
+    const chargeAmount = applyMarkup(Number(amount), markup);
+    const { allowed } = guardTransaction(chargeAmount);
     if (!allowed) return;
     setPinOpen(true);
   };
