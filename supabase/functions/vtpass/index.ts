@@ -344,12 +344,18 @@ Deno.serve(async (req) => {
       case "buy_airtime": {
         const serviceID = resolveServiceId(AIRTIME_SERVICE_MAP, params.network_name || "");
         if (!serviceID) return json({ error: "Unsupported network" }, 400);
-        vtResult = await vtpassPost("/pay", {
+        const payBody: any = {
           request_id: requestId,
           serviceID,
           amount: numericAmount,
           phone: params.phone,
-        });
+        };
+        // Smile requires billersCode (account email/phone)
+        if (serviceID === "smile-direct") {
+          payBody.billersCode = params.phone;
+          payBody.variation_code = "airtime";
+        }
+        vtResult = await vtpassPost("/pay", payBody);
         txType = "airtime";
         description = `${params.network_name || "Airtime"} ₦${numericAmount} - ${params.phone}`;
         break;
