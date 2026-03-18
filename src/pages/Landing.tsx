@@ -65,13 +65,13 @@ const Navbar = () => (
 
 /* ---------------- Hero Section ---------------- */
 const services = [
-  { icon: Smartphone, label: "Airtime", path: "/services/airtime", color: "bg-primary/10 text-primary" },
-  { icon: Smartphone, label: "Data", path: "/services/data", color: "bg-blue-100 text-blue-600" },
-  { icon: CreditCard, label: "Data Card", path: "/services/data-card", color: "bg-purple-100 text-purple-600" },
-  { icon: Tv, label: "Cable TV", path: "/services/cable", color: "bg-orange-100 text-orange-600" },
-  { icon: Zap, label: "Electricity", path: "/services/electricity", color: "bg-accent/15 text-accent-foreground" },
-  { icon: Globe, label: "Int'l Airtime", path: "/services/intl-airtime", color: "bg-indigo-100 text-indigo-600" },
-  { icon: GraduationCap, label: "Edu Pins", path: "/services/edu", color: "bg-emerald-100 text-emerald-600" },
+  { icon: Smartphone, label: "Airtime", path: "/login", color: "bg-primary/10 text-primary" },
+  { icon: Smartphone, label: "Data", path: "/login", color: "bg-blue-100 text-blue-600" },
+  { icon: CreditCard, label: "Data Card", path: "/login", color: "bg-purple-100 text-purple-600" },
+  { icon: Tv, label: "Cable TV", path: "/login", color: "bg-orange-100 text-orange-600" },
+  { icon: Zap, label: "Electricity", path: "/login", color: "bg-accent/15 text-accent-foreground" },
+  { icon: Globe, label: "Int'l Airtime", path: "/login", color: "bg-indigo-100 text-indigo-600" },
+  { icon: GraduationCap, label: "Edu Pins", path: "/login", color: "bg-emerald-100 text-emerald-600" },
 ];
 
 const HeroSection = () => (
