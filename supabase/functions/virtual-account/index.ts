@@ -124,8 +124,9 @@ Deno.serve(async (req) => {
       } else if (gateway === "xixapay") {
         const XX_SECRET = Deno.env.get("XIXAPAY_SECRET_KEY");
         const XX_API_KEY = Deno.env.get("XIXAPAY_API_KEY");
+        const XX_BUSINESS_ID = Deno.env.get("XIXAPAY_BUSINESS_ID");
 
-        if (!XX_SECRET || !XX_API_KEY) {
+        if (!XX_SECRET || !XX_API_KEY || !XX_BUSINESS_ID) {
           return json({ error: "XixaPay is not configured" }, 500);
         }
 
@@ -144,7 +145,7 @@ Deno.serve(async (req) => {
             name: customerName,
             phoneNumber: customerPhone,
             bankCode: ["20867"],
-            businessId: XX_API_KEY,
+            businessId: XX_BUSINESS_ID,
             accountType: "dynamic",
             amount: amount,
             externalReference: externalRef,
