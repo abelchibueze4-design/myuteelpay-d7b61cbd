@@ -187,12 +187,19 @@ const Dashboard = () => {
       }
     }
     const totalWithFee = val + fundingFee;
-    if (!paystackConfig?.public_key) {
-      toast.error("Payment system is not configured. Please try again later.");
-      return;
+    const gateway = platformSettings.payment_gateway || "paystack";
+
+    if (gateway === "paystack") {
+      if (!paystackConfig?.public_key) {
+        toast.error("Payment system is not configured. Please try again later.");
+        return;
+      }
+      setFundOpen(false);
+      initializePayment(totalWithFee, paystackConfig.public_key);
+    } else {
+      // PaymentPoint or XixaPay — virtual account flow
+      initializeVirtualAccount(totalWithFee, gateway);
     }
-    setFundOpen(false);
-    initializePayment(totalWithFee, paystackConfig.public_key);
   };
 
   return (
