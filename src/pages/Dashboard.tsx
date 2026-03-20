@@ -57,7 +57,7 @@ const Dashboard = () => {
   const { data: isKycVerified } = useKycVerified();
   const { data: wallet } = useWallet();
   const { data: transactions } = useTransactions(5);
-  const { initializePayment, verifyPayment, isInitializing } = useFundWallet();
+  const { initializePayment, initializeVirtualAccount, clearVirtualAccount, virtualAccountData, verifyPayment, isInitializing } = useFundWallet();
   const { settings, isSettingsLoading } = useSecuritySettings();
   const { settings: platformSettings } = usePlatformSettings();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -187,12 +187,19 @@ const Dashboard = () => {
       }
     }
     const totalWithFee = val + fundingFee;
-    if (!paystackConfig?.public_key) {
-      toast.error("Payment system is not configured. Please try again later.");
-      return;
+    const gateway = platformSettings.payment_gateway || "paystack";
+
+    if (gateway === "paystack") {
+      if (!paystackConfig?.public_key) {
+        toast.error("Payment system is not configured. Please try again later.");
+        return;
+      }
+      setFundOpen(false);
+      initializePayment(totalWithFee, paystackConfig.public_key);
+    } else {
+      // PaymentPoint or XixaPay — virtual account flow
+      initializeVirtualAccount(totalWithFee, gateway);
     }
-    setFundOpen(false);
-    initializePayment(totalWithFee, paystackConfig.public_key);
   };
 
   return (
@@ -309,6 +316,61 @@ const Dashboard = () => {
                       {isInitializing ? "Processing..." : "Continue to Payment"}
                     </Button>
                   </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* Virtual Account Bank Details Dialog */}
+              <Dialog open={!!virtualAccountData} onOpenChange={(open) => { if (!open) clearVirtualAccount(); }}>
+                <DialogContent className="rounded-3xl border-none shadow-2xl max-w-[400px] mx-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-lg font-bold flex items-center gap-2">
+                      <Landmark className="w-5 h-5 text-primary" /> Bank Transfer Details
+                    </DialogTitle>
+                  </DialogHeader>
+                  {virtualAccountData && (
+                    <div className="space-y-4 pt-2">
+                      <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 text-center">
+                        <p className="text-xs text-muted-foreground font-medium mb-1">Transfer exactly</p>
+                        <p className="text-2xl font-black text-foreground">₦{Number(virtualAccountData.amount).toLocaleString("en-NG", { minimumFractionDigits: 2 })}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground text-center">to any of the accounts below:</p>
+                      <div className="space-y-3">
+                        {virtualAccountData.bankAccounts.map((acc, i) => (
+                          <div key={i} className="border border-border rounded-2xl p-4 space-y-2 bg-secondary/30">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Bank</span>
+                              <span className="text-sm font-bold text-foreground">{acc.bankName}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Account No.</span>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(acc.accountNumber);
+                                  toast.success("Account number copied!");
+                                }}
+                                className="text-sm font-black text-primary flex items-center gap-1.5 tap-target"
+                              >
+                                {acc.accountNumber}
+                                <Share2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Account Name</span>
+                              <span className="text-xs font-semibold text-foreground">{acc.accountName}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
+                        <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                          ⏱ This account expires in {virtualAccountData.expiresIn}. Your wallet will be credited automatically once payment is confirmed.
+                        </p>
+                      </div>
+                      <Button variant="outline" className="w-full h-11 rounded-2xl text-sm font-bold" onClick={() => clearVirtualAccount()}>
+                        Done
+                      </Button>
+                    </div>
+                  )}
                 </DialogContent>
               </Dialog>
 

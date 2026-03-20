@@ -67,6 +67,7 @@ const AdminSettings = () => {
     const [dataCardProvider, setDataCardProvider] = useState("vtpass");
     const [exchangeRateMarkup, setExchangeRateMarkup] = useState("0");
     const [walletFundingFee, setWalletFundingFee] = useState("50");
+    const [paymentGateway, setPaymentGateway] = useState("paystack");
     
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
@@ -110,6 +111,7 @@ const AdminSettings = () => {
             setDataCardProvider(d.data_card_provider as string ?? "vtpass");
             setExchangeRateMarkup(String(d.exchange_rate_markup ?? "0"));
             setWalletFundingFee(String(d.wallet_funding_fee ?? "50"));
+            setPaymentGateway(d.payment_gateway as string ?? "paystack");
         }
     }, [config]);
 
@@ -141,6 +143,7 @@ const AdminSettings = () => {
                 data_card_provider: dataCardProvider,
                 exchange_rate_markup: parseFloat(exchangeRateMarkup) || 0,
                 wallet_funding_fee: parseFloat(walletFundingFee) || 50,
+                payment_gateway: paymentGateway,
             };
 
             if (config?.id) {
@@ -443,7 +446,7 @@ const AdminSettings = () => {
                         </div>
                         <div className="space-y-2">
                             <Label>Wallet Funding Fee (₦)</Label>
-                            <p className="text-xs text-muted-foreground">Flat fee charged when users fund their wallet via Paystack</p>
+                            <p className="text-xs text-muted-foreground">Flat fee charged when users fund their wallet</p>
                             <Input
                                 type="number"
                                 min="0"
@@ -451,6 +454,20 @@ const AdminSettings = () => {
                                 onChange={(e) => setWalletFundingFee(e.target.value)}
                                 placeholder="e.g. 50"
                             />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Payment Gateway</Label>
+                            <p className="text-xs text-muted-foreground">Select which payment provider users use to fund their wallet</p>
+                            <Select value={paymentGateway} onValueChange={setPaymentGateway}>
+                                <SelectTrigger className="w-48 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="paystack">Paystack (Card/Bank)</SelectItem>
+                                    <SelectItem value="paymentpoint">PaymentPoint (Bank Transfer)</SelectItem>
+                                    <SelectItem value="xixapay">XixaPay (Bank Transfer)</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </CardContent>
                 </Card>
