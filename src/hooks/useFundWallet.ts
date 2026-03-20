@@ -1,8 +1,23 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+
+interface BankAccount {
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+}
+
+interface VirtualAccountResult {
+  gateway: string;
+  reference: string;
+  amount: number;
+  bankAccounts: BankAccount[];
+  message: string;
+  expiresIn: string;
+}
 
 async function callPaystack(action: string, body: Record<string, unknown>) {
   const { data: { session } } = await supabase.auth.getSession();
@@ -26,19 +41,41 @@ async function callPaystack(action: string, body: Record<string, unknown>) {
   return data;
 }
 
+async function callVirtualAccount(amount: number, gateway: string) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error("Not authenticated");
+
+  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+  const res = await fetch(
+    `https://${projectId}.supabase.co/functions/v1/virtual-account?action=create`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({ amount, gateway }),
+    }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to create payment account");
+  return data as VirtualAccountResult;
+}
+
 export function useFundWallet() {
   const queryClient = useQueryClient();
   const verifiedRefs = useRef(new Set<string>());
   const { user } = useAuth();
+  const [virtualAccountData, setVirtualAccountData] = useState<VirtualAccountResult | null>(null);
 
   const initMutation = useMutation({
     mutationFn: async ({ amount, publicKey }: { amount: number; publicKey: string }) => {
-      // Use Paystack Inline Popup
       return new Promise<{ reference: string }>((resolve, reject) => {
         const handler = (window as any).PaystackPop.setup({
           key: publicKey,
           email: user?.email || "",
-          amount: Math.round(amount * 100), // kobo
+          amount: Math.round(amount * 100),
           currency: "NGN",
           metadata: { user_id: user?.id },
           callback: (response: { reference: string }) => {
@@ -52,7 +89,6 @@ export function useFundWallet() {
       });
     },
     onSuccess: async (data) => {
-      // Verify the payment server-side
       try {
         const result = await callPaystack("verify", { reference: data.reference });
         toast.success(`Wallet funded! New balance: ₦${Number(result.balance).toLocaleString("en-NG", { minimumFractionDigits: 2 })}`);
@@ -66,6 +102,18 @@ export function useFundWallet() {
       if (err.message !== "Payment cancelled") {
         toast.error("Unable to initialize payment. Please try again.");
       }
+    },
+  });
+
+  const virtualAccountMutation = useMutation({
+    mutationFn: async ({ amount, gateway }: { amount: number; gateway: string }) => {
+      return callVirtualAccount(amount, gateway);
+    },
+    onSuccess: (data) => {
+      setVirtualAccountData(data);
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to generate payment account. Please try again.");
     },
   });
 
@@ -92,10 +140,21 @@ export function useFundWallet() {
     initMutation.mutate({ amount, publicKey });
   }, [initMutation]);
 
+  const initializeVirtualAccount = useCallback((amount: number, gateway: string) => {
+    virtualAccountMutation.mutate({ amount, gateway });
+  }, [virtualAccountMutation]);
+
+  const clearVirtualAccount = useCallback(() => {
+    setVirtualAccountData(null);
+  }, []);
+
   return {
     initializePayment,
+    initializeVirtualAccount,
+    clearVirtualAccount,
+    virtualAccountData,
     verifyPayment: useCallback((ref: string) => verifyMutation.mutate(ref), [verifyMutation]),
-    isInitializing: initMutation.isPending,
+    isInitializing: initMutation.isPending || virtualAccountMutation.isPending,
     isVerifying: verifyMutation.isPending,
   };
 }
