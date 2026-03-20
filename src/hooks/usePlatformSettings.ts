@@ -63,6 +63,7 @@ const defaults: PlatformSettings = {
   data_card_provider: "vtpass",
   exchange_rate_markup: 0,
   wallet_funding_fee: 50,
+  payment_gateway: "paystack",
 };
 
 export function usePlatformSettings() {
