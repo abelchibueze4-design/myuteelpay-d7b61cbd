@@ -446,7 +446,7 @@ const AdminSettings = () => {
                         </div>
                         <div className="space-y-2">
                             <Label>Wallet Funding Fee (₦)</Label>
-                            <p className="text-xs text-muted-foreground">Flat fee charged when users fund their wallet via Paystack</p>
+                            <p className="text-xs text-muted-foreground">Flat fee charged when users fund their wallet</p>
                             <Input
                                 type="number"
                                 min="0"
@@ -454,6 +454,20 @@ const AdminSettings = () => {
                                 onChange={(e) => setWalletFundingFee(e.target.value)}
                                 placeholder="e.g. 50"
                             />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Payment Gateway</Label>
+                            <p className="text-xs text-muted-foreground">Select which payment provider users use to fund their wallet</p>
+                            <Select value={paymentGateway} onValueChange={setPaymentGateway}>
+                                <SelectTrigger className="w-48 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="paystack">Paystack (Card/Bank)</SelectItem>
+                                    <SelectItem value="paymentpoint">PaymentPoint (Bank Transfer)</SelectItem>
+                                    <SelectItem value="xixapay">XixaPay (Bank Transfer)</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                     </CardContent>
                 </Card>
