@@ -16,7 +16,7 @@ function json(body: Record<string, unknown>, status = 200) {
   });
 }
 
-async function createForGateway(gateway: string, amount: number, user: any, profile: any) {
+async function createForGateway(gateway: string, amount: number, user: any, profile: any, isStatic: boolean = false) {
   const customerName = profile?.full_name || user.user_metadata?.full_name || "Customer";
   const customerEmail = profile?.email || user.email || "";
   const customerPhone = profile?.phone_number || user.user_metadata?.phone_number || "08000000000";
@@ -47,8 +47,8 @@ async function createForGateway(gateway: string, amount: number, user: any, prof
         phoneNumber: customerPhone,
         bankCode: ["20946", "20897"],
         businessId: PP_BUSINESS_ID,
-        accountType: "dynamic",
-        amount: amount,
+        accountType: isStatic ? "static" : "dynamic",
+        amount: isStatic ? undefined : amount,
         externalReference: externalRef,
         callbackUrl: callbackUrl,
       }),
@@ -98,8 +98,8 @@ async function createForGateway(gateway: string, amount: number, user: any, prof
         phoneNumber: customerPhone,
         bankCode: ["29007"],
         businessId: XX_BUSINESS_ID,
-        accountType: "dynamic",
-        amount: amount,
+        accountType: isStatic ? "static" : "dynamic",
+        amount: isStatic ? undefined : amount,
         externalReference: externalRef,
         callbackUrl: callbackUrl,
       }),
@@ -187,7 +187,7 @@ Deno.serve(async (req) => {
 
       // Call all gateways in parallel
       const results = await Promise.allSettled(
-        gatewayList.map(gw => createForGateway(gw, amount, user, profile))
+        gatewayList.map(gw => createForGateway(gw, amount, user, profile, false))
       );
 
       for (const result of results) {
@@ -238,6 +238,88 @@ Deno.serve(async (req) => {
         bankAccounts: allAccounts,
         message: "Transfer to any of the accounts below to fund your wallet",
         expiresIn: "30 minutes",
+      });
+    }
+
+    if (action === "get_static" && req.method === "POST") {
+      const { gateways, forceRefresh } = await req.json();
+
+      const adminClient = createClient(
+        SUPABASE_URL,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+
+      // Check existing static accounts
+      if (!forceRefresh) {
+        const { data: existingAccounts } = await adminClient
+          .from("user_virtual_accounts")
+          .select("*")
+          .eq("user_id", user.id);
+
+        if (existingAccounts && existingAccounts.length > 0) {
+          return json({
+            bankAccounts: existingAccounts.map((acc: any) => ({
+              bankName: acc.bank_name,
+              accountNumber: acc.account_number,
+              accountName: acc.account_name,
+              provider: acc.provider,
+            })),
+          });
+        }
+      } else {
+        // Clear existing to recreate
+        await adminClient
+          .from("user_virtual_accounts")
+          .delete()
+          .eq("user_id", user.id);
+      }
+
+      // No existing accounts, generate new ones
+      const { data: profile } = await adminClient
+        .from("profiles")
+        .select("full_name, phone_number, email")
+        .eq("id", user.id)
+        .single();
+
+      const gatewayList: string[] = gateways || ["paymentpoint"];
+      const allAccounts: any[] = [];
+      const errors: string[] = [];
+
+      const results = await Promise.allSettled(
+        gatewayList.map(gw => createForGateway(gw, 0, user, profile, true))
+      );
+
+      for (const result of results) {
+        if (result.status === "fulfilled") {
+          const r = result.value;
+          if (r.accounts && r.accounts.length > 0) {
+            allAccounts.push(...r.accounts);
+          }
+          if (r.error && r.accounts?.length === 0) {
+            errors.push(r.error);
+          }
+        } else {
+          errors.push(result.reason?.message || "Gateway error");
+        }
+      }
+
+      if (allAccounts.length === 0) {
+        return json({ error: errors.join("; ") || "Failed to generate accounts" }, 400);
+      }
+
+      // Save them to database
+      for (const acc of allAccounts) {
+        await adminClient.from("user_virtual_accounts").insert({
+          user_id: user.id,
+          bank_name: acc.bankName,
+          account_number: acc.accountNumber,
+          account_name: acc.accountName,
+          provider: acc.provider,
+        });
+      }
+
+      return json({
+        bankAccounts: allAccounts,
       });
     }
 
