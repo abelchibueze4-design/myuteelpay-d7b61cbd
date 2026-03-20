@@ -67,6 +67,7 @@ const AdminSettings = () => {
     const [dataCardProvider, setDataCardProvider] = useState("vtpass");
     const [exchangeRateMarkup, setExchangeRateMarkup] = useState("0");
     const [walletFundingFee, setWalletFundingFee] = useState("50");
+    const [paymentGateway, setPaymentGateway] = useState("paystack");
     
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
