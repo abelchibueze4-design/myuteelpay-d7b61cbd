@@ -96,7 +96,7 @@ async function createForGateway(gateway: string, amount: number, user: any, prof
         email: customerEmail,
         name: customerName,
         phoneNumber: customerPhone,
-        bankCode: ["20867"],
+        bankCode: ["29007"],
         businessId: XX_BUSINESS_ID,
         accountType: "dynamic",
         amount: amount,
