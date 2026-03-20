@@ -143,6 +143,7 @@ const AdminSettings = () => {
                 data_card_provider: dataCardProvider,
                 exchange_rate_markup: parseFloat(exchangeRateMarkup) || 0,
                 wallet_funding_fee: parseFloat(walletFundingFee) || 50,
+                payment_gateway: paymentGateway,
             };
 
             if (config?.id) {
