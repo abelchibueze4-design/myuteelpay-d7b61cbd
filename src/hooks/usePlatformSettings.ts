@@ -22,19 +22,17 @@ export interface PlatformSettings {
   service_status: "operational" | "degraded" | "outage";
   service_status_message: string;
   service_status_visible: boolean;
-  // Per-service API provider selection
   airtime_provider: ApiProvider;
   data_provider: ApiProvider;
   cable_provider: ApiProvider;
   electricity_provider: ApiProvider;
   edu_pins_provider: ApiProvider;
   data_card_provider: ApiProvider;
-  // Exchange rate markup percentage
   exchange_rate_markup: number;
-  // Wallet funding fee
   wallet_funding_fee: number;
-  // Payment gateway selection
   payment_gateway: PaymentGateway;
+  payment_gateways_enabled: PaymentGateway[];
+  paystack_enabled: boolean;
 }
 
 const defaults: PlatformSettings = {
@@ -64,6 +62,8 @@ const defaults: PlatformSettings = {
   exchange_rate_markup: 0,
   wallet_funding_fee: 50,
   payment_gateway: "paystack",
+  payment_gateways_enabled: ["paymentpoint", "xixapay"],
+  paystack_enabled: false,
 };
 
 export function usePlatformSettings() {

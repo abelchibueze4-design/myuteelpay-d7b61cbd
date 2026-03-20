@@ -14,6 +14,7 @@ import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Shield,
     Globe,
@@ -67,7 +68,11 @@ const AdminSettings = () => {
     const [dataCardProvider, setDataCardProvider] = useState("vtpass");
     const [exchangeRateMarkup, setExchangeRateMarkup] = useState("0");
     const [walletFundingFee, setWalletFundingFee] = useState("50");
-    const [paymentGateway, setPaymentGateway] = useState("paystack");
+    
+    // Payment gateways multi-select
+    const [paymentpointEnabled, setPaymentpointEnabled] = useState(true);
+    const [xixapayEnabled, setXixapayEnabled] = useState(true);
+    const [paystackEnabled, setPaystackEnabled] = useState(false);
     
     // Load settings from DB
     const { data: config, isLoading } = useQuery({
@@ -111,12 +116,21 @@ const AdminSettings = () => {
             setDataCardProvider(d.data_card_provider as string ?? "vtpass");
             setExchangeRateMarkup(String(d.exchange_rate_markup ?? "0"));
             setWalletFundingFee(String(d.wallet_funding_fee ?? "50"));
-            setPaymentGateway(d.payment_gateway as string ?? "paystack");
+            
+            // Multi-select gateways
+            const enabledGateways = (d.payment_gateways_enabled as string[]) ?? ["paymentpoint", "xixapay"];
+            setPaymentpointEnabled(enabledGateways.includes("paymentpoint"));
+            setXixapayEnabled(enabledGateways.includes("xixapay"));
+            setPaystackEnabled(d.paystack_enabled as boolean ?? false);
         }
     }, [config]);
 
     const saveMutation = useMutation({
         mutationFn: async () => {
+            const enabledGateways: string[] = [];
+            if (paymentpointEnabled) enabledGateways.push("paymentpoint");
+            if (xixapayEnabled) enabledGateways.push("xixapay");
+
             const configData = {
                 maintenance_mode: maintenanceMode,
                 new_signups_enabled: newSignupsEnabled,
@@ -143,7 +157,9 @@ const AdminSettings = () => {
                 data_card_provider: dataCardProvider,
                 exchange_rate_markup: parseFloat(exchangeRateMarkup) || 0,
                 wallet_funding_fee: parseFloat(walletFundingFee) || 50,
-                payment_gateway: paymentGateway,
+                payment_gateway: enabledGateways[0] || "paymentpoint",
+                payment_gateways_enabled: enabledGateways,
+                paystack_enabled: paystackEnabled,
             };
 
             if (config?.id) {
@@ -161,6 +177,7 @@ const AdminSettings = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["admin_site_config"] });
+            queryClient.invalidateQueries({ queryKey: ["platform-settings"] });
             toast.success("Platform settings saved successfully");
         },
         onError: (err: Error) => {
@@ -455,19 +472,41 @@ const AdminSettings = () => {
                                 placeholder="e.g. 50"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <Label>Payment Gateway</Label>
-                            <p className="text-xs text-muted-foreground">Select which payment provider users use to fund their wallet</p>
-                            <Select value={paymentGateway} onValueChange={setPaymentGateway}>
-                                <SelectTrigger className="w-48 text-xs">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="paystack">Paystack (Card/Bank)</SelectItem>
-                                    <SelectItem value="paymentpoint">PaymentPoint (Bank Transfer)</SelectItem>
-                                    <SelectItem value="xixapay">XixaPay (Bank Transfer)</SelectItem>
-                                </SelectContent>
-                            </Select>
+                        <div className="space-y-3">
+                            <Label>Payment Gateways</Label>
+                            <p className="text-xs text-muted-foreground">Enable one or more payment gateways. All enabled gateways will display account details simultaneously to users.</p>
+                            <div className="space-y-3 pt-1">
+                                <div className="flex items-center gap-3">
+                                    <Checkbox
+                                        id="gw-paymentpoint"
+                                        checked={paymentpointEnabled}
+                                        onCheckedChange={(checked) => setPaymentpointEnabled(!!checked)}
+                                    />
+                                    <label htmlFor="gw-paymentpoint" className="text-sm font-medium cursor-pointer">
+                                        PaymentPoint <span className="text-xs text-muted-foreground">(Bank Transfer)</span>
+                                    </label>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Checkbox
+                                        id="gw-xixapay"
+                                        checked={xixapayEnabled}
+                                        onCheckedChange={(checked) => setXixapayEnabled(!!checked)}
+                                    />
+                                    <label htmlFor="gw-xixapay" className="text-sm font-medium cursor-pointer">
+                                        XixaPay <span className="text-xs text-muted-foreground">(Bank Transfer)</span>
+                                    </label>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Checkbox
+                                        id="gw-paystack"
+                                        checked={paystackEnabled}
+                                        onCheckedChange={(checked) => setPaystackEnabled(!!checked)}
+                                    />
+                                    <label htmlFor="gw-paystack" className="text-sm font-medium cursor-pointer">
+                                        Paystack <span className="text-xs text-muted-foreground">(Card/Bank — currently disabled)</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
