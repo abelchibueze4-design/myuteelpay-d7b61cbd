@@ -111,6 +111,7 @@ const AdminSettings = () => {
             setDataCardProvider(d.data_card_provider as string ?? "vtpass");
             setExchangeRateMarkup(String(d.exchange_rate_markup ?? "0"));
             setWalletFundingFee(String(d.wallet_funding_fee ?? "50"));
+            setPaymentGateway(d.payment_gateway as string ?? "paystack");
         }
     }, [config]);
 
