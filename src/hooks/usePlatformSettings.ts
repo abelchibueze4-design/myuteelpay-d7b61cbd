@@ -33,6 +33,8 @@ export interface PlatformSettings {
   exchange_rate_markup: number;
   // Wallet funding fee
   wallet_funding_fee: number;
+  // Payment gateway selection
+  payment_gateway: PaymentGateway;
 }
 
 const defaults: PlatformSettings = {
