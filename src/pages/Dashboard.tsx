@@ -6,7 +6,7 @@ import {
   Gift, ArrowRight, Mail, MessageCircle, Users, Eye, EyeOff,
   Plus, History, Headphones, Share2, TrendingUp, ArrowDownLeft,
   ArrowUpRight, Activity, HelpCircle, Menu, Bell, ShieldCheck,
-  Moon, Sun, Plane, Building, CreditCard,
+  Moon, Sun, Plane, Building, CreditCard, Copy,
 } from "lucide-react";
 import { PageTransition, StaggerContainer, StaggerItem, ScaleTap } from "@/components/PageTransition";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
@@ -66,11 +66,10 @@ const Dashboard = () => {
   const [pinSetupOpen, setPinSetupOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [showBalance, setShowBalance] = useState(true);
+  const [fundMethod, setFundMethod] = useState<"select" | "virtual" | "paystack">("select");
 
   useEffect(() => {
     if (!isSettingsLoading && !settings.transactionPinEnabled) {
-      // Check if user has already skipped or we should force it.
-      // For now, let's just show it if not set.
       setPinSetupOpen(true);
     }
   }, [isSettingsLoading, settings.transactionPinEnabled]);
@@ -106,8 +105,6 @@ const Dashboard = () => {
   const bonusBalance = referrerBonus + signupBonus;
 
   const activeTab = searchParams.get("tab");
-
-  // No longer opening a dialog for settings
 
   const displayName = user?.user_metadata?.username || user?.user_metadata?.full_name || "User";
 
@@ -165,6 +162,8 @@ const Dashboard = () => {
   });
 
   const fundingFee = platformSettings.wallet_funding_fee || 50;
+  const enabledGateways = platformSettings.payment_gateways_enabled || [];
+  const paystackEnabled = platformSettings.paystack_enabled || false;
 
   const isLoading = !user;
 
@@ -175,7 +174,7 @@ const Dashboard = () => {
 
   if (isLoading) return <DashboardSkeleton />;
 
-  const handleFund = () => {
+  const handleFundVirtual = () => {
     const val = Number(amount);
     const minFund = platformSettings.min_wallet_fund || 100;
     if (!val || val < minFund) { toast.error(`Minimum amount is ₦${minFund.toLocaleString()}`); return; }
@@ -187,19 +186,20 @@ const Dashboard = () => {
       }
     }
     const totalWithFee = val + fundingFee;
-    const gateway = platformSettings.payment_gateway || "paystack";
+    initializeVirtualAccount(totalWithFee, enabledGateways);
+  };
 
-    if (gateway === "paystack") {
-      if (!paystackConfig?.public_key) {
-        toast.error("Payment system is not configured. Please try again later.");
-        return;
-      }
-      setFundOpen(false);
-      initializePayment(totalWithFee, paystackConfig.public_key);
-    } else {
-      // PaymentPoint or XixaPay — virtual account flow
-      initializeVirtualAccount(totalWithFee, gateway);
+  const handleFundPaystack = () => {
+    const val = Number(amount);
+    const minFund = platformSettings.min_wallet_fund || 100;
+    if (!val || val < minFund) { toast.error(`Minimum amount is ₦${minFund.toLocaleString()}`); return; }
+    if (!paystackConfig?.public_key) {
+      toast.error("Payment system is not configured. Please try again later.");
+      return;
     }
+    const totalWithFee = val + fundingFee;
+    setFundOpen(false);
+    initializePayment(totalWithFee, paystackConfig.public_key);
   };
 
   return (
@@ -284,7 +284,7 @@ const Dashboard = () => {
             </div>
 
             <div className="flex gap-2.5">
-              <Dialog open={fundOpen} onOpenChange={setFundOpen}>
+              <Dialog open={fundOpen} onOpenChange={(open) => { setFundOpen(open); if (!open) setFundMethod("select"); }}>
                 <DialogTrigger asChild>
                    <Button variant="ghost" className="flex-1 !bg-white !text-primary font-bold h-11 rounded-2xl text-sm gap-1.5 tap-target hover:!bg-white/90 shadow-lg shadow-black/10 border-0">
                      <Plus className="w-4 h-4 !text-primary" /> Add Money
@@ -296,32 +296,91 @@ const Dashboard = () => {
                       <Wallet className="w-5 h-5 text-primary" /> Fund Wallet
                     </DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4 pt-2">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Amount</label>
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-lg text-foreground">₦</span>
-                        <Input type="number" placeholder="0.00" min={100} value={amount} onChange={(e) => setAmount(e.target.value)} className="pl-9 h-14 text-xl font-black rounded-2xl border-2 focus-visible:ring-primary/20 bg-secondary/30" />
-                      </div>
-                      <p className="text-[10px] text-muted-foreground ml-1">Min: ₦100 · Fee: ₦{fundingFee} · Instant Crediting</p>
-                    </div>
-                    <div className="grid grid-cols-4 gap-2">
-                      {[500, 1000, 2000, 5000].map((v) => (
-                        <button key={v} onClick={() => setAmount(String(v))} className="py-2 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all text-xs font-bold tap-target">
-                          ₦{v.toLocaleString()}
+                  
+                  {fundMethod === "select" ? (
+                    <div className="space-y-3 pt-2">
+                      <p className="text-xs text-muted-foreground text-center">Choose a funding method</p>
+                      
+                      {/* Virtual Accounts Option */}
+                      {enabledGateways.length > 0 && (
+                        <button
+                          onClick={() => setFundMethod("virtual")}
+                          className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-border hover:border-primary hover:bg-primary/5 transition-all text-left tap-target"
+                        >
+                          <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <Landmark className="w-5 h-5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-foreground">Virtual Accounts</p>
+                            <p className="text-[10px] text-muted-foreground">Bank transfer via PaymentPoint & XixaPay</p>
+                          </div>
+                          <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
                         </button>
-                      ))}
+                      )}
+
+                      {/* Paystack Option (disabled) */}
+                      <button
+                        disabled
+                        className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-border opacity-50 cursor-not-allowed text-left relative"
+                      >
+                        <div className="w-11 h-11 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                          <CreditCard className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-foreground">Paystack</p>
+                          <p className="text-[10px] text-muted-foreground">Card & bank payments</p>
+                        </div>
+                        <Badge variant="secondary" className="text-[8px] shrink-0">Coming Soon</Badge>
+                      </button>
                     </div>
-                    <Button className="w-full h-12 rounded-2xl btn-gold text-sm font-bold" onClick={handleFund} disabled={isInitializing}>
-                      {isInitializing ? "Processing..." : "Continue to Payment"}
-                    </Button>
-                  </div>
+                  ) : fundMethod === "virtual" ? (
+                    <div className="space-y-4 pt-2">
+                      <button onClick={() => setFundMethod("select")} className="text-xs text-primary font-bold flex items-center gap-1">
+                        ← Back
+                      </button>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Amount</label>
+                        <div className="relative">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-lg text-foreground">₦</span>
+                          <Input type="number" placeholder="0.00" min={100} value={amount} onChange={(e) => setAmount(e.target.value)} className="pl-9 h-14 text-xl font-black rounded-2xl border-2 focus-visible:ring-primary/20 bg-secondary/30" />
+                        </div>
+                        <p className="text-[10px] text-muted-foreground ml-1">Min: ₦100 · Fee: ₦{fundingFee} · Instant Crediting</p>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2">
+                        {[500, 1000, 2000, 5000].map((v) => (
+                          <button key={v} onClick={() => setAmount(String(v))} className="py-2 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all text-xs font-bold tap-target">
+                            ₦{v.toLocaleString()}
+                          </button>
+                        ))}
+                      </div>
+                      <Button className="w-full h-12 rounded-2xl btn-gold text-sm font-bold" onClick={handleFundVirtual} disabled={isInitializing}>
+                        {isInitializing ? "Generating Accounts..." : "Generate Account Details"}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 pt-2">
+                      <button onClick={() => setFundMethod("select")} className="text-xs text-primary font-bold flex items-center gap-1">
+                        ← Back
+                      </button>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider ml-1">Amount</label>
+                        <div className="relative">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-lg text-foreground">₦</span>
+                          <Input type="number" placeholder="0.00" min={100} value={amount} onChange={(e) => setAmount(e.target.value)} className="pl-9 h-14 text-xl font-black rounded-2xl border-2 focus-visible:ring-primary/20 bg-secondary/30" />
+                        </div>
+                        <p className="text-[10px] text-muted-foreground ml-1">Min: ₦100 · Fee: ₦{fundingFee} · Instant Crediting</p>
+                      </div>
+                      <Button className="w-full h-12 rounded-2xl btn-gold text-sm font-bold" onClick={handleFundPaystack} disabled={isInitializing}>
+                        {isInitializing ? "Processing..." : "Pay with Paystack"}
+                      </Button>
+                    </div>
+                  )}
                 </DialogContent>
               </Dialog>
 
               {/* Virtual Account Bank Details Dialog */}
               <Dialog open={!!virtualAccountData} onOpenChange={(open) => { if (!open) clearVirtualAccount(); }}>
-                <DialogContent className="rounded-3xl border-none shadow-2xl max-w-[400px] mx-auto">
+                <DialogContent className="rounded-3xl border-none shadow-2xl max-w-[400px] mx-auto max-h-[85vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-lg font-bold flex items-center gap-2">
                       <Landmark className="w-5 h-5 text-primary" /> Bank Transfer Details
@@ -337,6 +396,11 @@ const Dashboard = () => {
                       <div className="space-y-3">
                         {virtualAccountData.bankAccounts.map((acc, i) => (
                           <div key={i} className="border border-border rounded-2xl p-4 space-y-2 bg-secondary/30">
+                            {acc.provider && (
+                              <div className="flex justify-end">
+                                <Badge variant="outline" className="text-[8px] font-bold">{acc.provider}</Badge>
+                              </div>
+                            )}
                             <div className="flex justify-between items-center">
                               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Bank</span>
                               <span className="text-sm font-bold text-foreground">{acc.bankName}</span>
@@ -351,7 +415,7 @@ const Dashboard = () => {
                                 className="text-sm font-black text-primary flex items-center gap-1.5 tap-target"
                               >
                                 {acc.accountNumber}
-                                <Share2 className="w-3 h-3" />
+                                <Copy className="w-3 h-3" />
                               </button>
                             </div>
                             <div className="flex justify-between items-center">
@@ -424,6 +488,14 @@ const Dashboard = () => {
               <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">KYC Verified — Premium Account</span>
             </div>
           </div>
+        )}
+
+        {/* Virtual Account Details — always visible on dashboard */}
+        {enabledGateways.length > 0 && (
+          <VirtualAccountsCard 
+            enabledGateways={enabledGateways}
+            fundingFee={fundingFee}
+          />
         )}
 
         <div>
@@ -554,5 +626,108 @@ const Dashboard = () => {
     </PageTransition>
   );
 };
+
+// Separate component for virtual accounts display on dashboard
+function VirtualAccountsCard({ enabledGateways, fundingFee }: { enabledGateways: string[]; fundingFee: number }) {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [accounts, setAccounts] = useState<any[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchAccounts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/virtual-account?action=create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ amount: 100 + fundingFee, gateways: enabledGateways }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
+      setAccounts(data.bankAccounts || []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fintech-card p-4 border border-primary/20 bg-primary/5">
+      <div className="flex items-center gap-2 mb-3">
+        <Landmark className="w-4 h-4 text-primary" />
+        <h3 className="text-xs font-extrabold text-foreground">Your Virtual Accounts</h3>
+      </div>
+      <p className="text-[10px] text-muted-foreground mb-3">
+        Transfer to any account below to fund your wallet instantly. Use "Add Money" to generate fresh account details for a specific amount.
+      </p>
+      
+      {!accounts && !loading && (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-full rounded-xl text-xs font-bold" 
+          onClick={fetchAccounts}
+          disabled={loading}
+        >
+          <Landmark className="w-3.5 h-3.5 mr-1.5" />
+          Show Account Details
+        </Button>
+      )}
+
+      {loading && (
+        <div className="flex items-center justify-center py-4">
+          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs text-muted-foreground ml-2">Generating accounts...</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="text-xs text-red-500 text-center py-2">
+          {error}
+          <button onClick={fetchAccounts} className="ml-2 text-primary font-bold underline">Retry</button>
+        </div>
+      )}
+
+      {accounts && accounts.length > 0 && (
+        <div className="space-y-2.5">
+          {accounts.map((acc: any, i: number) => (
+            <div key={i} className="border border-border rounded-xl p-3 bg-background/80 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">{acc.bankName}</span>
+                {acc.provider && <Badge variant="outline" className="text-[7px] h-4 px-1.5">{acc.provider}</Badge>}
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-black text-foreground tracking-wide">{acc.accountNumber}</span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(acc.accountNumber);
+                    toast.success("Copied!");
+                  }}
+                  className="p-1.5 hover:bg-secondary rounded-lg transition-colors tap-target"
+                >
+                  <Copy className="w-3.5 h-3.5 text-primary" />
+                </button>
+              </div>
+              <p className="text-[10px] text-muted-foreground">{acc.accountName}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default Dashboard;
