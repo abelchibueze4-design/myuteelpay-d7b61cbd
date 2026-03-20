@@ -78,8 +78,9 @@ Deno.serve(async (req) => {
       if (gateway === "paymentpoint") {
         const PP_SECRET = Deno.env.get("PAYMENTPOINT_SECRET_KEY");
         const PP_API_KEY = Deno.env.get("PAYMENTPOINT_API_KEY");
+        const PP_BUSINESS_ID = Deno.env.get("PAYMENTPOINT_BUSINESS_ID");
 
-        if (!PP_SECRET || !PP_API_KEY) {
+        if (!PP_SECRET || !PP_API_KEY || !PP_BUSINESS_ID) {
           return json({ error: "PaymentPoint is not configured" }, 500);
         }
 
@@ -98,7 +99,7 @@ Deno.serve(async (req) => {
             name: customerName,
             phoneNumber: customerPhone,
             bankCode: ["20946", "20897"],
-            businessId: PP_API_KEY,
+            businessId: PP_BUSINESS_ID,
             accountType: "dynamic",
             amount: amount,
             externalReference: externalRef,
