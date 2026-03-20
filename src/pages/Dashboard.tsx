@@ -57,7 +57,7 @@ const Dashboard = () => {
   const { data: isKycVerified } = useKycVerified();
   const { data: wallet } = useWallet();
   const { data: transactions } = useTransactions(5);
-  const { initializePayment, verifyPayment, isInitializing } = useFundWallet();
+  const { initializePayment, initializeVirtualAccount, clearVirtualAccount, virtualAccountData, verifyPayment, isInitializing } = useFundWallet();
   const { settings, isSettingsLoading } = useSecuritySettings();
   const { settings: platformSettings } = usePlatformSettings();
   const [searchParams, setSearchParams] = useSearchParams();
