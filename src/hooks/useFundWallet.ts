@@ -8,11 +8,12 @@ interface BankAccount {
   bankName: string;
   accountNumber: string;
   accountName: string;
+  provider?: string;
 }
 
 interface VirtualAccountResult {
-  gateway: string;
-  reference: string;
+  gateways: string[];
+  references: string[];
   amount: number;
   bankAccounts: BankAccount[];
   message: string;
@@ -41,7 +42,7 @@ async function callPaystack(action: string, body: Record<string, unknown>) {
   return data;
 }
 
-async function callVirtualAccount(amount: number, gateway: string) {
+async function callVirtualAccount(amount: number, gateways: string[]) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error("Not authenticated");
 
@@ -55,7 +56,7 @@ async function callVirtualAccount(amount: number, gateway: string) {
         Authorization: `Bearer ${session.access_token}`,
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       },
-      body: JSON.stringify({ amount, gateway }),
+      body: JSON.stringify({ amount, gateways }),
     }
   );
   const data = await res.json();
@@ -106,8 +107,8 @@ export function useFundWallet() {
   });
 
   const virtualAccountMutation = useMutation({
-    mutationFn: async ({ amount, gateway }: { amount: number; gateway: string }) => {
-      return callVirtualAccount(amount, gateway);
+    mutationFn: async ({ amount, gateways }: { amount: number; gateways: string[] }) => {
+      return callVirtualAccount(amount, gateways);
     },
     onSuccess: (data) => {
       setVirtualAccountData(data);
@@ -140,8 +141,8 @@ export function useFundWallet() {
     initMutation.mutate({ amount, publicKey });
   }, [initMutation]);
 
-  const initializeVirtualAccount = useCallback((amount: number, gateway: string) => {
-    virtualAccountMutation.mutate({ amount, gateway });
+  const initializeVirtualAccount = useCallback((amount: number, gateways: string[]) => {
+    virtualAccountMutation.mutate({ amount, gateways });
   }, [virtualAccountMutation]);
 
   const clearVirtualAccount = useCallback(() => {
