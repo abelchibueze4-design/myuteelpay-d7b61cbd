@@ -108,7 +108,8 @@ async function createForGateway(gateway: string, user: any, profile: any) {
       headers,
       body: JSON.stringify({
         email: customerEmail,
-        name: customerName,
+        firstName: customerName.split(" ")[0] || customerName,
+        lastName: customerName.split(" ").slice(1).join(" ") || customerName,
         phoneNumber: customerPhone,
         businessId: XX_BUSINESS_ID,
       }),
