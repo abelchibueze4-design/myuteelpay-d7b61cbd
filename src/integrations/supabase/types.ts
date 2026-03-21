@@ -482,6 +482,7 @@ export type Database = {
           transaction_pin_hash: string | null
           updated_at: string
           username: string | null
+          xixapay_customer_id: string | null
         }
         Insert: {
           address?: string | null
@@ -498,6 +499,7 @@ export type Database = {
           transaction_pin_hash?: string | null
           updated_at?: string
           username?: string | null
+          xixapay_customer_id?: string | null
         }
         Update: {
           address?: string | null
@@ -514,6 +516,7 @@ export type Database = {
           transaction_pin_hash?: string | null
           updated_at?: string
           username?: string | null
+          xixapay_customer_id?: string | null
         }
         Relationships: []
       }

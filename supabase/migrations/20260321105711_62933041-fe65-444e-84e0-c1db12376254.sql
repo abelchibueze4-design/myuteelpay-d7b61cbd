@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS xixapay_customer_id text DEFAULT NULL;
