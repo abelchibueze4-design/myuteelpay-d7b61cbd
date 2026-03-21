@@ -141,8 +141,9 @@ async function createForGateway(gateway: string, user: any, profile: any) {
         gender: "M",
         dateOfBirth: "1990-01-01",
         dob: "1990-01-01",
-        idType: "BVN",
-        id_type: "BVN",
+        idType: "bvn",
+        id_type: "bvn",
+        identificationType: "bvn",
         idNumber: "00000000000",
         id_number: "00000000000",
       };
