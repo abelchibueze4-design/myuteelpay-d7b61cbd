@@ -120,16 +120,15 @@ async function createForGateway(gateway: string, user: any, profile: any) {
       const lastName = nameParts.slice(1).join(" ") || firstName;
 
       const customerPayload = {
-        // XixaPay expects snake_case for name fields on customer creation.
         first_name: firstName,
         last_name: lastName,
-        // Keep camelCase fallbacks for compatibility across API versions.
         firstName,
         lastName,
         email: customerEmail,
         phoneNumber: customerPhone,
         phone_number: customerPhone,
         businessId: XX_BUSINESS_ID,
+        address: profile?.address || "Nigeria",
       };
 
       const customerRes = await fetch("https://api.xixapay.com/api/customer/create", {
