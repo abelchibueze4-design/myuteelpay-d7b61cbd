@@ -19,7 +19,16 @@ function json(body: Record<string, unknown>, status = 200) {
 async function createForGateway(gateway: string, amount: number, user: any, profile: any, isStatic: boolean = false) {
   const customerName = profile?.full_name || user.user_metadata?.full_name || "Customer";
   const customerEmail = profile?.email || user.email || "";
-  const customerPhone = profile?.phone_number || user.user_metadata?.phone_number || "08000000000";
+  let customerPhone = profile?.phone_number || user.user_metadata?.phone_number || "08000000000";
+  
+  // Ensure phone number is exactly 11 digits (Nigerian format)
+  customerPhone = customerPhone.replace(/\D/g, "");
+  if (customerPhone.startsWith("234") && customerPhone.length === 13) {
+    customerPhone = "0" + customerPhone.slice(3);
+  }
+  if (customerPhone.length !== 11) {
+    customerPhone = "08000000000";
+  }
 
   if (gateway === "paymentpoint") {
     const PP_SECRET = Deno.env.get("PAYMENTPOINT_SECRET_KEY");
