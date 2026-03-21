@@ -129,6 +129,11 @@ async function createForGateway(gateway: string, user: any, profile: any) {
         phone_number: customerPhone,
         businessId: XX_BUSINESS_ID,
         address: profile?.address || "Nigeria",
+        state: "Lagos",
+        country: "Nigeria",
+        gender: "M",
+        dateOfBirth: "1990-01-01",
+        dob: "1990-01-01",
       };
 
       const customerRes = await fetch("https://api.xixapay.com/api/customer/create", {
