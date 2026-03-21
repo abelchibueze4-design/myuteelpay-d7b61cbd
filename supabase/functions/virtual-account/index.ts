@@ -93,6 +93,8 @@ async function createForGateway(gateway: string, user: any, profile: any) {
     }
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const adminDb = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
     const callbackUrl = `${SUPABASE_URL}/functions/v1/webhooks?provider=xixapay`;
     const externalRef = `XX-${user.id.substring(0, 8)}-${Date.now()}`;
 
@@ -102,28 +104,53 @@ async function createForGateway(gateway: string, user: any, profile: any) {
       "api-key": XX_API_KEY,
     };
 
-    // Step 1: Create customer first via dedicated endpoint
-    const customerRes = await fetch("https://api.xixapay.com/api/customer/create", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        email: customerEmail,
-        firstName: customerName.split(" ")[0] || customerName,
-        lastName: customerName.split(" ").slice(1).join(" ") || customerName,
-        phoneNumber: customerPhone,
-        businessId: XX_BUSINESS_ID,
-      }),
-    });
+    // Step 1: Check if xixapay_customer_id already exists in DB
+    const { data: profileData } = await adminDb
+      .from("profiles")
+      .select("xixapay_customer_id")
+      .eq("id", user.id)
+      .single();
 
-    const customerData = await customerRes.json();
-    console.log("[virtual-account] XixaPay customer response:", JSON.stringify(customerData));
+    let customerId = profileData?.xixapay_customer_id;
 
-    const customerId = customerData?.customer?.customer_id;
+    // Step 2: If no customer_id, create one via XixaPay API
     if (!customerId) {
-      return { error: customerData?.message || "XixaPay customer creation failed", accounts: [] };
+      const nameParts = (customerName || "Customer").trim().split(/\s+/);
+      const firstName = nameParts[0] || "Customer";
+      const lastName = nameParts.slice(1).join(" ") || firstName;
+
+      const customerRes = await fetch("https://api.xixapay.com/api/customer/create", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email: customerEmail,
+          phoneNumber: customerPhone,
+          businessId: XX_BUSINESS_ID,
+        }),
+      });
+
+      const customerData = await customerRes.json();
+      console.log("[virtual-account] XixaPay customer response:", JSON.stringify(customerData));
+
+      customerId = customerData?.customer?.customer_id;
+      if (!customerId) {
+        return { error: customerData?.message || "XixaPay customer creation failed", accounts: [] };
+      }
+
+      // Save customer_id to profile for future use
+      await adminDb
+        .from("profiles")
+        .update({ xixapay_customer_id: customerId })
+        .eq("id", user.id);
+
+      console.log("[virtual-account] Saved xixapay_customer_id:", customerId);
+    } else {
+      console.log("[virtual-account] Using stored xixapay_customer_id:", customerId);
     }
 
-    // Step 2: Create virtual account with customer_id and correct bank codes
+    // Step 3: Create virtual account using stored customer_id
     const vaRes = await fetch("https://api.xixapay.com/api/v1/createVirtualAccount", {
       method: "POST",
       headers,
@@ -131,8 +158,7 @@ async function createForGateway(gateway: string, user: any, profile: any) {
         customer_id: customerId,
         bankCode: ["20867", "29007", "20987"],
         businessId: XX_BUSINESS_ID,
-        accountType: "dynamic",
-        amount: 50000,
+        accountType: "static",
         externalReference: externalRef,
         callbackUrl,
       }),
