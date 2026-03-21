@@ -102,15 +102,33 @@ async function createForGateway(gateway: string, user: any, profile: any) {
       "api-key": XX_API_KEY,
     };
 
-    // Try with raw customer data first (new customers)
-    const res = await fetch("https://api.xixapay.com/api/v1/createVirtualAccount", {
+    // Step 1: Create customer first via dedicated endpoint
+    const customerRes = await fetch("https://api.xixapay.com/api/customer/create", {
       method: "POST",
       headers,
       body: JSON.stringify({
         email: customerEmail,
         name: customerName,
         phoneNumber: customerPhone,
-        bankCode: ["29007"],
+        businessId: XX_BUSINESS_ID,
+      }),
+    });
+
+    const customerData = await customerRes.json();
+    console.log("[virtual-account] XixaPay customer response:", JSON.stringify(customerData));
+
+    const customerId = customerData?.customer?.customer_id;
+    if (!customerId) {
+      return { error: customerData?.message || "XixaPay customer creation failed", accounts: [] };
+    }
+
+    // Step 2: Create virtual account with customer_id and correct bank codes
+    const vaRes = await fetch("https://api.xixapay.com/api/v1/createVirtualAccount", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        customer_id: customerId,
+        bankCode: ["20867", "29007"],
         businessId: XX_BUSINESS_ID,
         accountType: "dynamic",
         amount: 50000,
@@ -119,43 +137,13 @@ async function createForGateway(gateway: string, user: any, profile: any) {
       }),
     });
 
-    const data = await res.json();
-    console.log("[virtual-account] XixaPay response:", JSON.stringify(data));
+    const vaData = await vaRes.json();
+    console.log("[virtual-account] XixaPay virtual account response:", JSON.stringify(vaData));
 
-    if (!res.ok || data.status !== "success") {
-      return { error: data.message || "XixaPay failed", accounts: [] };
-    }
-
-    let bankAccounts = data.bankAccounts || [];
-
-    // If empty but customer exists, retry with customer_id (Option 1 per docs)
-    if (bankAccounts.length === 0 && data.customer?.customer_id) {
-      console.log("[virtual-account] XixaPay: retrying with customer_id:", data.customer.customer_id);
-
-      const res2 = await fetch("https://api.xixapay.com/api/v1/createVirtualAccount", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          customer_id: data.customer.customer_id,
-          bankCode: ["29007"],
-          businessId: XX_BUSINESS_ID,
-          accountType: "dynamic",
-          amount: 50000,
-          externalReference: externalRef,
-          callbackUrl,
-        }),
-      });
-
-      const data2 = await res2.json();
-      console.log("[virtual-account] XixaPay retry response:", JSON.stringify(data2));
-
-      if (res2.ok && data2.bankAccounts?.length > 0) {
-        bankAccounts = data2.bankAccounts;
-      }
-    }
+    const bankAccounts = vaData.bankAccounts || [];
 
     if (bankAccounts.length === 0) {
-      return { error: "XixaPay returned no bank accounts", accounts: [] };
+      return { error: vaData?.message || "XixaPay returned no bank accounts", accounts: [] };
     }
 
     return {
