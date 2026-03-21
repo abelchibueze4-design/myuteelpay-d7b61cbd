@@ -71,66 +71,83 @@ Deno.serve(async (req: Request) => {
 
       if (payload.notification_status === "payment_successful" && payload.transaction_status === "success") {
         const grossAmount = Number(payload.amount_paid) || 0;
-        const customerEmail = payload.customer?.email;
+        const accountNumber = payload.virtual_account_number || payload.account_number || "";
+        const txnRef = payload.transaction_id || payload.reference || `PP-${Date.now()}`;
 
-        if (grossAmount > FUNDING_FEE && customerEmail) {
+        if (grossAmount > FUNDING_FEE) {
           const netAmount = grossAmount - FUNDING_FEE;
+          let userId: string | null = null;
 
-          const { data: pendingTxns } = await supabase
-            .from("transactions")
-            .select("id, user_id, reference, amount")
-            .eq("status", "pending")
-            .order("created_at", { ascending: false })
-            .limit(10);
-
-          let matchedTxn = null;
-          if (pendingTxns) {
-            for (const txn of pendingTxns) {
-              const { data: txnFull } = await supabase
-                .from("transactions")
-                .select("metadata")
-                .eq("id", txn.id)
-                .single();
-              const meta = txnFull?.metadata as any;
-              if (meta?.gateway === "paymentpoint") {
-                matchedTxn = txn;
-                reference = txn.reference || "";
-                break;
-              }
-            }
+          // Look up user via virtual_accounts table
+          if (accountNumber) {
+            const { data: va } = await supabase
+              .from("virtual_accounts")
+              .select("user_id")
+              .eq("account_number", accountNumber)
+              .eq("provider", "paymentpoint")
+              .single();
+            if (va) userId = va.user_id;
           }
 
-          if (matchedTxn) {
-            await supabase
-              .from("transactions")
-              .update({
-                status: "success",
-                amount: netAmount,
-                description: `Wallet funded ₦${netAmount} (paid ₦${grossAmount}, fee ₦${FUNDING_FEE})`,
-                metadata: {
-                  gateway: "paymentpoint",
-                  gross_amount: grossAmount,
-                  fee: FUNDING_FEE,
-                  net_amount: netAmount,
-                  webhook_payload: payload,
-                },
-              })
-              .eq("id", matchedTxn.id);
-
-            const { data: wallet } = await supabase
-              .from("wallets")
-              .select("balance")
-              .eq("id", matchedTxn.user_id)
+          // Fallback: try customer email -> profiles
+          if (!userId && payload.customer?.email) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("id")
+              .eq("email", payload.customer.email)
               .single();
+            if (profile) userId = profile.id;
+          }
 
-            if (wallet) {
+          if (userId) {
+            reference = txnRef;
+
+            // Idempotency: check if reference already processed
+            const { data: existing } = await supabase
+              .from("transactions")
+              .select("id")
+              .eq("reference", txnRef)
+              .eq("status", "success")
+              .maybeSingle();
+
+            if (!existing) {
               await supabase
-                .from("wallets")
-                .update({ balance: wallet.balance + netAmount, updated_at: new Date().toISOString() })
-                .eq("id", matchedTxn.user_id);
-            }
+                .from("transactions")
+                .insert({
+                  user_id: userId,
+                  type: "wallet_fund",
+                  amount: netAmount,
+                  status: "success",
+                  reference: txnRef,
+                  description: `Wallet funded ₦${netAmount} (paid ₦${grossAmount}, fee ₦${FUNDING_FEE})`,
+                  metadata: {
+                    gateway: "paymentpoint",
+                    gross_amount: grossAmount,
+                    fee: FUNDING_FEE,
+                    net_amount: netAmount,
+                    webhook_payload: payload,
+                  },
+                });
 
-            console.log(`[webhook] PaymentPoint: paid ₦${grossAmount}, fee ₦${FUNDING_FEE}, credited ₦${netAmount} to user ${matchedTxn.user_id}`);
+              const { data: wallet } = await supabase
+                .from("wallets")
+                .select("balance")
+                .eq("id", userId)
+                .single();
+
+              if (wallet) {
+                await supabase
+                  .from("wallets")
+                  .update({ balance: wallet.balance + netAmount, updated_at: new Date().toISOString() })
+                  .eq("id", userId);
+              }
+
+              console.log(`[webhook] PaymentPoint: paid ₦${grossAmount}, fee ₦${FUNDING_FEE}, credited ₦${netAmount} to user ${userId}`);
+            } else {
+              console.log(`[webhook] PaymentPoint: duplicate ref ${txnRef}, skipping`);
+            }
+          } else {
+            console.warn(`[webhook] PaymentPoint: could not identify user for account ${accountNumber}`);
           }
         } else if (grossAmount > 0 && grossAmount <= FUNDING_FEE) {
           console.warn(`[webhook] PaymentPoint: deposit ₦${grossAmount} rejected — below minimum (>₦${FUNDING_FEE})`);
