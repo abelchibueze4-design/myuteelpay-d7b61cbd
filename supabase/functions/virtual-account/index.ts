@@ -128,7 +128,7 @@ async function createForGateway(gateway: string, user: any, profile: any) {
       headers,
       body: JSON.stringify({
         customer_id: customerId,
-        bankCode: ["20867", "29007"],
+        bankCode: ["20867", "29007", "20987"],
         businessId: XX_BUSINESS_ID,
         accountType: "dynamic",
         amount: 50000,
