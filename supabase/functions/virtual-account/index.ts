@@ -119,16 +119,23 @@ async function createForGateway(gateway: string, user: any, profile: any) {
       const firstName = nameParts[0] || "Customer";
       const lastName = nameParts.slice(1).join(" ") || firstName;
 
+      const customerPayload = {
+        // XixaPay expects snake_case for name fields on customer creation.
+        first_name: firstName,
+        last_name: lastName,
+        // Keep camelCase fallbacks for compatibility across API versions.
+        firstName,
+        lastName,
+        email: customerEmail,
+        phoneNumber: customerPhone,
+        phone_number: customerPhone,
+        businessId: XX_BUSINESS_ID,
+      };
+
       const customerRes = await fetch("https://api.xixapay.com/api/customer/create", {
         method: "POST",
         headers,
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          email: customerEmail,
-          phoneNumber: customerPhone,
-          businessId: XX_BUSINESS_ID,
-        }),
+        body: JSON.stringify(customerPayload),
       });
 
       const customerData = await customerRes.json();
@@ -151,11 +158,12 @@ async function createForGateway(gateway: string, user: any, profile: any) {
     }
 
     // Step 3: Create virtual account using stored customer_id
-    const vaRes = await fetch("https://api.xixapay.com/api/v1/createVirtualAccount", {
+      const vaRes = await fetch("https://api.xixapay.com/api/v1/createVirtualAccount", {
       method: "POST",
       headers,
       body: JSON.stringify({
         customer_id: customerId,
+          customerId,
         bankCode: ["20867", "29007", "20987"],
         businessId: XX_BUSINESS_ID,
         accountType: "static",
