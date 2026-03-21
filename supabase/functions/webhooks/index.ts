@@ -3,6 +3,8 @@
 /// <reference lib="deno.ns" />
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+const FUNDING_FEE = 50; // ₦50 flat fee per deposit
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -19,7 +21,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const url = new URL(req.url);
-  const provider = url.searchParams.get("provider"); // 'paystack', 'kvdata', etc.
+  const provider = url.searchParams.get("provider");
 
   if (!provider) return json({ error: "Provider required" }, 400);
 
@@ -32,19 +34,13 @@ Deno.serve(async (req: Request) => {
     let reference = "";
     let eventType = "";
 
-    // 1. PROVIDER-SPECIFIC LOGIC (Signature Validation, Extraction)
     if (provider === "paystack") {
       eventType = payload.event;
       reference = payload.data?.reference;
-      
-      // Optional: Verify Paystack Signature
-      // const signature = req.headers.get("x-paystack-signature");
-      // ... verify ...
     } else if (provider === "kvdata") {
       eventType = "transaction_update";
       reference = payload.reference || payload.request_id;
     } else if (provider === "vtpass") {
-      // VTPass sends webhook callbacks with transaction status updates
       eventType = payload.type || "transaction_update";
       reference = payload.request_id || payload.requestId || payload.transaction_id || "";
 
@@ -55,11 +51,9 @@ Deno.serve(async (req: Request) => {
         return json({ error: "Invalid signature" }, 401);
       }
     } else if (provider === "paymentpoint") {
-      // PaymentPoint webhook for virtual account payments
       eventType = payload.notification_status || "payment_update";
       reference = payload.transaction_id || "";
 
-      // Verify PaymentPoint signature
       const ppSecret = Deno.env.get("PAYMENTPOINT_SECRET_KEY");
       const ppSignature = req.headers.get("paymentpoint-signature");
       if (ppSecret && ppSignature) {
@@ -72,26 +66,23 @@ Deno.serve(async (req: Request) => {
         const computed = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("");
         if (computed !== ppSignature) {
           console.warn("[webhook] PaymentPoint signature mismatch");
-          // Don't reject — some webhooks may not include signature
         }
       }
 
-      // Process PaymentPoint payment
       if (payload.notification_status === "payment_successful" && payload.transaction_status === "success") {
-        const amountPaid = Number(payload.amount_paid) || 0;
+        const grossAmount = Number(payload.amount_paid) || 0;
         const customerEmail = payload.customer?.email;
 
-        if (amountPaid > 0 && customerEmail) {
-          // Find the pending transaction by looking up customer
+        if (grossAmount > FUNDING_FEE && customerEmail) {
+          const netAmount = grossAmount - FUNDING_FEE;
+
           const { data: pendingTxns } = await supabase
             .from("transactions")
             .select("id, user_id, reference, amount")
             .eq("status", "pending")
-            .eq("amount", amountPaid)
             .order("created_at", { ascending: false })
-            .limit(5);
+            .limit(10);
 
-          // Match by metadata gateway
           let matchedTxn = null;
           if (pendingTxns) {
             for (const txn of pendingTxns) {
@@ -110,16 +101,22 @@ Deno.serve(async (req: Request) => {
           }
 
           if (matchedTxn) {
-            // Update transaction to success
             await supabase
               .from("transactions")
               .update({
                 status: "success",
-                metadata: { gateway: "paymentpoint", webhook_payload: payload },
+                amount: netAmount,
+                description: `Wallet funded ₦${netAmount} (paid ₦${grossAmount}, fee ₦${FUNDING_FEE})`,
+                metadata: {
+                  gateway: "paymentpoint",
+                  gross_amount: grossAmount,
+                  fee: FUNDING_FEE,
+                  net_amount: netAmount,
+                  webhook_payload: payload,
+                },
               })
               .eq("id", matchedTxn.id);
 
-            // Credit wallet
             const { data: wallet } = await supabase
               .from("wallets")
               .select("balance")
@@ -129,32 +126,33 @@ Deno.serve(async (req: Request) => {
             if (wallet) {
               await supabase
                 .from("wallets")
-                .update({ balance: wallet.balance + amountPaid, updated_at: new Date().toISOString() })
+                .update({ balance: wallet.balance + netAmount, updated_at: new Date().toISOString() })
                 .eq("id", matchedTxn.user_id);
             }
 
-            console.log(`[webhook] PaymentPoint: credited ₦${amountPaid} to user ${matchedTxn.user_id}`);
+            console.log(`[webhook] PaymentPoint: paid ₦${grossAmount}, fee ₦${FUNDING_FEE}, credited ₦${netAmount} to user ${matchedTxn.user_id}`);
           }
+        } else if (grossAmount > 0 && grossAmount <= FUNDING_FEE) {
+          console.warn(`[webhook] PaymentPoint: deposit ₦${grossAmount} rejected — below minimum (>₦${FUNDING_FEE})`);
         }
       }
     } else if (provider === "xixapay") {
-      // XixaPay webhook for virtual account payments
       eventType = payload.notification_status || "payment_update";
       reference = payload.transaction_id || "";
 
-      // Process XixaPay payment (same format as PaymentPoint)
       if (payload.notification_status === "payment_successful" && payload.transaction_status === "success") {
-        const amountPaid = Number(payload.amount_paid) || 0;
+        const grossAmount = Number(payload.amount_paid) || 0;
         const customerEmail = payload.customer?.email;
 
-        if (amountPaid > 0 && customerEmail) {
+        if (grossAmount > FUNDING_FEE && customerEmail) {
+          const netAmount = grossAmount - FUNDING_FEE;
+
           const { data: pendingTxns } = await supabase
             .from("transactions")
             .select("id, user_id, reference, amount")
             .eq("status", "pending")
-            .eq("amount", amountPaid)
             .order("created_at", { ascending: false })
-            .limit(5);
+            .limit(10);
 
           let matchedTxn = null;
           if (pendingTxns) {
@@ -178,7 +176,15 @@ Deno.serve(async (req: Request) => {
               .from("transactions")
               .update({
                 status: "success",
-                metadata: { gateway: "xixapay", webhook_payload: payload },
+                amount: netAmount,
+                description: `Wallet funded ₦${netAmount} (paid ₦${grossAmount}, fee ₦${FUNDING_FEE})`,
+                metadata: {
+                  gateway: "xixapay",
+                  gross_amount: grossAmount,
+                  fee: FUNDING_FEE,
+                  net_amount: netAmount,
+                  webhook_payload: payload,
+                },
               })
               .eq("id", matchedTxn.id);
 
@@ -191,17 +197,19 @@ Deno.serve(async (req: Request) => {
             if (wallet) {
               await supabase
                 .from("wallets")
-                .update({ balance: wallet.balance + amountPaid, updated_at: new Date().toISOString() })
+                .update({ balance: wallet.balance + netAmount, updated_at: new Date().toISOString() })
                 .eq("id", matchedTxn.user_id);
             }
 
-            console.log(`[webhook] XixaPay: credited ₦${amountPaid} to user ${matchedTxn.user_id}`);
+            console.log(`[webhook] XixaPay: paid ₦${grossAmount}, fee ₦${FUNDING_FEE}, credited ₦${netAmount} to user ${matchedTxn.user_id}`);
           }
+        } else if (grossAmount > 0 && grossAmount <= FUNDING_FEE) {
+          console.warn(`[webhook] XixaPay: deposit ₦${grossAmount} rejected — below minimum (>₦${FUNDING_FEE})`);
         }
       }
     }
 
-    // 2. INSERT INTO DB (Trigger will handle the business logic)
+    // Insert webhook event into DB (trigger handles Paystack/KVData/VTPass)
     const { data, error } = await supabase
       .from("webhook_events")
       .insert({
