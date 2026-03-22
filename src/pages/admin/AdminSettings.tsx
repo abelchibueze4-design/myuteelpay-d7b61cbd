@@ -118,9 +118,8 @@ const AdminSettings = () => {
             setWalletFundingFee(String(d.wallet_funding_fee ?? "50"));
             
             // Multi-select gateways
-            const enabledGateways = (d.payment_gateways_enabled as string[]) ?? ["paymentpoint", "xixapay"];
+            const enabledGateways = (d.payment_gateways_enabled as string[]) ?? ["paymentpoint"];
             setPaymentpointEnabled(enabledGateways.includes("paymentpoint"));
-            setXixapayEnabled(enabledGateways.includes("xixapay"));
             setPaystackEnabled(d.paystack_enabled as boolean ?? false);
         }
     }, [config]);
