@@ -486,16 +486,6 @@ const AdminSettings = () => {
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Checkbox
-                                        id="gw-xixapay"
-                                        checked={xixapayEnabled}
-                                        onCheckedChange={(checked) => setXixapayEnabled(!!checked)}
-                                    />
-                                    <label htmlFor="gw-xixapay" className="text-sm font-medium cursor-pointer">
-                                        XixaPay <span className="text-xs text-muted-foreground">(Bank Transfer)</span>
-                                    </label>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <Checkbox
                                         id="gw-paystack"
                                         checked={paystackEnabled}
                                         onCheckedChange={(checked) => setPaystackEnabled(!!checked)}

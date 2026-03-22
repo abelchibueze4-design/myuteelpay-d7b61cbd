@@ -62,7 +62,7 @@ const defaults: PlatformSettings = {
   exchange_rate_markup: 0,
   wallet_funding_fee: 50,
   payment_gateway: "paystack",
-  payment_gateways_enabled: ["paymentpoint", "xixapay"],
+  payment_gateways_enabled: ["paymentpoint"],
   paystack_enabled: false,
 };
 

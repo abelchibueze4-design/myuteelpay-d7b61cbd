@@ -257,18 +257,14 @@ Deno.serve(async (req) => {
       }
 
       for (const ref of references) {
-        const gw = ref.startsWith("PP-") ? "paymentpoint" : "xixapay";
         await adminClient.from("transactions").insert({
           user_id: user.id,
           type: "wallet_fund",
           amount: amount,
           status: "pending",
           reference: ref,
-          description: `Wallet fund via ${gw} (pending bank transfer)`,
-          metadata: { gateway: gw, bank_accounts: allAccounts.filter(a =>
-            (gw === "paymentpoint" && a.provider === "PaymentPoint") ||
-            (gw === "xixapay" && a.provider === "XixaPay")
-          )},
+          description: `Wallet fund via paymentpoint (pending bank transfer)`,
+          metadata: { gateway: "paymentpoint", bank_accounts: allAccounts },
         });
       }
 
