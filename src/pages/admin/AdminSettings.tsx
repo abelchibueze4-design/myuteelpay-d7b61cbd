@@ -128,7 +128,6 @@ const AdminSettings = () => {
         mutationFn: async () => {
             const enabledGateways: string[] = [];
             if (paymentpointEnabled) enabledGateways.push("paymentpoint");
-            if (xixapayEnabled) enabledGateways.push("xixapay");
 
             const configData = {
                 maintenance_mode: maintenanceMode,
