@@ -84,7 +84,6 @@ Deno.serve(async (req: Request) => {
               .from("virtual_accounts")
               .select("user_id")
               .eq("account_number", accountNumber)
-              .eq("provider", "paymentpoint")
               .single();
             if (va) userId = va.user_id;
           }
