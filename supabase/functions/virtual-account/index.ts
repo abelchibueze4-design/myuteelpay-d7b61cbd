@@ -78,7 +78,7 @@ async function createForGateway(gateway: string, user: any, profile: any) {
         bankName: acc.bankName,
         accountNumber: acc.accountNumber,
         accountName: acc.accountName,
-        provider: "PaymentPoint",
+        provider: "paymentpoint",
       })),
     };
   }
