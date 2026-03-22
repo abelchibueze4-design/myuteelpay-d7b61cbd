@@ -71,7 +71,7 @@ const AdminSettings = () => {
     
     // Payment gateways multi-select
     const [paymentpointEnabled, setPaymentpointEnabled] = useState(true);
-    const [xixapayEnabled, setXixapayEnabled] = useState(true);
+    
     const [paystackEnabled, setPaystackEnabled] = useState(false);
     
     // Load settings from DB
