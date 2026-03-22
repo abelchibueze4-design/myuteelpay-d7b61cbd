@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type ApiProvider = "kvdata" | "vtpass";
-export type PaymentGateway = "paystack" | "paymentpoint" | "xixapay";
+export type PaymentGateway = "paystack" | "paymentpoint";
 
 export interface PlatformSettings {
   maintenance_mode: boolean;
