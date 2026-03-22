@@ -83,130 +83,6 @@ async function createForGateway(gateway: string, user: any, profile: any) {
     };
   }
 
-  if (gateway === "xixapay") {
-    const XX_SECRET = Deno.env.get("XIXAPAY_SECRET_KEY");
-    const XX_API_KEY = Deno.env.get("XIXAPAY_API_KEY");
-    const XX_BUSINESS_ID = Deno.env.get("XIXAPAY_BUSINESS_ID");
-
-    if (!XX_SECRET || !XX_API_KEY || !XX_BUSINESS_ID) {
-      return { error: "XixaPay is not configured", accounts: [] };
-    }
-
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const adminDb = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-    const callbackUrl = `${SUPABASE_URL}/functions/v1/webhooks?provider=xixapay`;
-    const externalRef = `XX-${user.id.substring(0, 8)}-${Date.now()}`;
-
-    const headers = {
-      "Authorization": `Bearer ${XX_SECRET}`,
-      "Content-Type": "application/json",
-      "api-key": XX_API_KEY,
-    };
-
-    // Step 1: Check if xixapay_customer_id already exists in DB
-    const { data: profileData } = await adminDb
-      .from("profiles")
-      .select("xixapay_customer_id")
-      .eq("id", user.id)
-      .single();
-
-    let customerId = profileData?.xixapay_customer_id;
-
-    // Step 2: If no customer_id, create one via XixaPay API
-    if (!customerId) {
-      const nameParts = (customerName || "Customer").trim().split(/\s+/);
-      const firstName = nameParts[0] || "Customer";
-      const lastName = nameParts.slice(1).join(" ") || firstName;
-
-      const customerPayload = {
-        first_name: firstName,
-        last_name: lastName,
-        firstName,
-        lastName,
-        email: customerEmail,
-        phoneNumber: customerPhone,
-        phone_number: customerPhone,
-        businessId: XX_BUSINESS_ID,
-        address: profile?.address || "Nigeria",
-        state: "Lagos",
-        city: "Lagos",
-        lga: "Ikeja",
-        zipCode: "100001",
-        postalCode: "100001",
-        postal_code: "100001",
-        postcode: "100001",
-        zip: "100001",
-        country: "Nigeria",
-        gender: "M",
-        dateOfBirth: "1990-01-01",
-        dob: "1990-01-01",
-        idType: "bvn",
-        id_type: "bvn",
-        identificationType: "bvn",
-        idNumber: "00000000000",
-        id_number: "00000000000",
-      };
-
-      const customerRes = await fetch("https://api.xixapay.com/api/customer/create", {
-        method: "POST",
-        headers,
-        body: JSON.stringify(customerPayload),
-      });
-
-      const customerData = await customerRes.json();
-      console.log("[virtual-account] XixaPay customer response:", JSON.stringify(customerData));
-
-      customerId = customerData?.customer?.customer_id;
-      if (!customerId) {
-        return { error: customerData?.message || "XixaPay customer creation failed", accounts: [] };
-      }
-
-      // Save customer_id to profile for future use
-      await adminDb
-        .from("profiles")
-        .update({ xixapay_customer_id: customerId })
-        .eq("id", user.id);
-
-      console.log("[virtual-account] Saved xixapay_customer_id:", customerId);
-    } else {
-      console.log("[virtual-account] Using stored xixapay_customer_id:", customerId);
-    }
-
-    // Step 3: Create virtual account using stored customer_id
-      const vaRes = await fetch("https://api.xixapay.com/api/v1/createVirtualAccount", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        customer_id: customerId,
-          customerId,
-        bankCode: ["20867", "29007", "20987"],
-        businessId: XX_BUSINESS_ID,
-        accountType: "static",
-        externalReference: externalRef,
-        callbackUrl,
-      }),
-    });
-
-    const vaData = await vaRes.json();
-    console.log("[virtual-account] XixaPay virtual account response:", JSON.stringify(vaData));
-
-    const bankAccounts = vaData.bankAccounts || [];
-
-    if (bankAccounts.length === 0) {
-      return { error: vaData?.message || "XixaPay returned no bank accounts", accounts: [] };
-    }
-
-    return {
-      reference: externalRef,
-      accounts: bankAccounts.map((acc: any) => ({
-        bankName: acc.bankName,
-        accountNumber: acc.accountNumber,
-        accountName: acc.accountName,
-        provider: "XixaPay",
-      })),
-    };
-  }
 
   return { error: "Unknown gateway", accounts: [] };
 }
@@ -381,18 +257,14 @@ Deno.serve(async (req) => {
       }
 
       for (const ref of references) {
-        const gw = ref.startsWith("PP-") ? "paymentpoint" : "xixapay";
         await adminClient.from("transactions").insert({
           user_id: user.id,
           type: "wallet_fund",
           amount: amount,
           status: "pending",
           reference: ref,
-          description: `Wallet fund via ${gw} (pending bank transfer)`,
-          metadata: { gateway: gw, bank_accounts: allAccounts.filter(a =>
-            (gw === "paymentpoint" && a.provider === "PaymentPoint") ||
-            (gw === "xixapay" && a.provider === "XixaPay")
-          )},
+          description: `Wallet fund via paymentpoint (pending bank transfer)`,
+          metadata: { gateway: "paymentpoint", bank_accounts: allAccounts },
         });
       }
 

@@ -71,7 +71,7 @@ const AdminSettings = () => {
     
     // Payment gateways multi-select
     const [paymentpointEnabled, setPaymentpointEnabled] = useState(true);
-    const [xixapayEnabled, setXixapayEnabled] = useState(true);
+    
     const [paystackEnabled, setPaystackEnabled] = useState(false);
     
     // Load settings from DB
@@ -118,9 +118,8 @@ const AdminSettings = () => {
             setWalletFundingFee(String(d.wallet_funding_fee ?? "50"));
             
             // Multi-select gateways
-            const enabledGateways = (d.payment_gateways_enabled as string[]) ?? ["paymentpoint", "xixapay"];
+            const enabledGateways = (d.payment_gateways_enabled as string[]) ?? ["paymentpoint"];
             setPaymentpointEnabled(enabledGateways.includes("paymentpoint"));
-            setXixapayEnabled(enabledGateways.includes("xixapay"));
             setPaystackEnabled(d.paystack_enabled as boolean ?? false);
         }
     }, [config]);
@@ -129,7 +128,6 @@ const AdminSettings = () => {
         mutationFn: async () => {
             const enabledGateways: string[] = [];
             if (paymentpointEnabled) enabledGateways.push("paymentpoint");
-            if (xixapayEnabled) enabledGateways.push("xixapay");
 
             const configData = {
                 maintenance_mode: maintenanceMode,
@@ -484,16 +482,6 @@ const AdminSettings = () => {
                                     />
                                     <label htmlFor="gw-paymentpoint" className="text-sm font-medium cursor-pointer">
                                         PaymentPoint <span className="text-xs text-muted-foreground">(Bank Transfer)</span>
-                                    </label>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <Checkbox
-                                        id="gw-xixapay"
-                                        checked={xixapayEnabled}
-                                        onCheckedChange={(checked) => setXixapayEnabled(!!checked)}
-                                    />
-                                    <label htmlFor="gw-xixapay" className="text-sm font-medium cursor-pointer">
-                                        XixaPay <span className="text-xs text-muted-foreground">(Bank Transfer)</span>
                                     </label>
                                 </div>
                                 <div className="flex items-center gap-3">

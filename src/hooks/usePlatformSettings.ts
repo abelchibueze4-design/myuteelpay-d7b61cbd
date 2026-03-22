@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type ApiProvider = "kvdata" | "vtpass";
-export type PaymentGateway = "paystack" | "paymentpoint" | "xixapay";
+export type PaymentGateway = "paystack" | "paymentpoint";
 
 export interface PlatformSettings {
   maintenance_mode: boolean;
@@ -62,7 +62,7 @@ const defaults: PlatformSettings = {
   exchange_rate_markup: 0,
   wallet_funding_fee: 50,
   payment_gateway: "paystack",
-  payment_gateways_enabled: ["paymentpoint", "xixapay"],
+  payment_gateways_enabled: ["paymentpoint"],
   paystack_enabled: false,
 };
 
