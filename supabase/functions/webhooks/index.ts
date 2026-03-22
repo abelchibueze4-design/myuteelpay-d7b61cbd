@@ -8,7 +8,7 @@ const FUNDING_FEE = 50; // ₦50 flat fee per deposit
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-paystack-signature, paymentpoint-signature, x-xixapay-signature",
+    "authorization, x-client-info, apikey, content-type, x-paystack-signature, paymentpoint-signature",
 };
 
 const json = (body: unknown, status = 200) =>
