@@ -610,14 +610,18 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                  {/* Token/PIN display */}
                 {(() => {
                   const tokenInfo = extractTokenOrPin(t);
-                  if (!tokenInfo) return null;
+                  if (!tokenInfo || tokenInfo.length === 0) return null;
                   return (
-                    <div className="mx-6 mt-4 mb-0 bg-secondary rounded-2xl p-4 border-2 border-primary/20">
-                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1">{tokenInfo.label}</p>
-                      <p className="text-lg font-mono font-black tracking-wider text-primary break-all">{tokenInfo.value}</p>
-                      {tokenInfo.serial && (
-                        <p className="text-xs text-muted-foreground mt-1">Serial: <span className="font-bold">{tokenInfo.serial}</span></p>
-                      )}
+                    <div className="mx-6 mt-4 mb-0 space-y-2">
+                      {tokenInfo.map((ti, idx) => (
+                        <div key={idx} className="bg-secondary rounded-2xl p-4 border-2 border-primary/20">
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1">{ti.label}</p>
+                          <p className="text-lg font-mono font-black tracking-wider text-primary break-all">{ti.value}</p>
+                          {ti.serial && (
+                            <p className="text-xs text-muted-foreground mt-1">Serial: <span className="font-bold">{ti.serial}</span></p>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   );
                 })()}
