@@ -345,13 +345,13 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
             <div class="row"><span class="label">Date & Time</span><span class="value">${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm:ss")}</span></div>
             <div class="row"><span class="label">Payment Method</span><span class="value">Wallet Balance</span></div>
           </div>
-          ${tokenInfo ? `
+          ${tokenInfo && tokenInfo.length > 0 ? tokenInfo.map(ti => `
           <div class="token-section">
-            <p class="token-label">${tokenInfo.label}</p>
-            <p class="token-value">${tokenInfo.value}</p>
-            ${tokenInfo.serial ? `<p class="token-serial">Serial: ${tokenInfo.serial}</p>` : ''}
+            <p class="token-label">${ti.label}</p>
+            <p class="token-value">${ti.value}</p>
+            ${ti.serial ? `<p class="token-serial">Serial: ${ti.serial}</p>` : ''}
           </div>
-          ` : ''}
+          `).join('') : ''}
           <div class="qr-section">
             <svg id="qr-placeholder" width="80" height="80"></svg>
             <p>Scan to verify this transaction</p>
