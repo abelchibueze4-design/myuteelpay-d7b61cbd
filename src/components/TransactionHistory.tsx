@@ -65,46 +65,76 @@ const STATUS_COLORS: Record<string, string> = {
 
 const WHATSAPP_NUMBER = "2349022334478";
 
-// Extract token/pin from transaction metadata
-function extractTokenOrPin(t: any): { label: string; value: string; serial?: string } | null {
+// Extract token/pin from transaction metadata — supports multiple items (edu pins, data cards)
+function extractTokenOrPin(t: any): { label: string; value: string; serial?: string }[] | null {
   const meta = t.metadata;
   if (!meta) return null;
 
   const response = meta.kvdata_response || meta.vtpass_response;
   if (!response) return null;
 
+  const results: { label: string; value: string; serial?: string }[] = [];
+
   // Electricity tokens
   if (t.type === "electricity") {
     const token =
       response.token || response.Token ||
       response.purchased_code || response.mainToken ||
-      response.content?.transactions?.purchased_code || 
+      response.content?.transactions?.purchased_code ||
+      response.maintoken || response.creditToken ||
       meta.token || meta.Token || "";
-    if (token) return { label: "Electricity Token", value: String(token) };
+    if (token) results.push({ label: "Electricity Token", value: String(token) });
   }
 
-  // Edu pins
+  // Edu pins — handle cards array for multiple pins
   if (t.type === "edu_pin") {
-    const pin =
-      response.pin || response.Pin ||
-      response.purchased_code ||
-      response.content?.transactions?.purchased_code || "";
-    const serial = response.serial || response.Serial || 
-      response.content?.transactions?.unique_element || "";
-    if (pin) return { label: "PIN", value: String(pin), serial: serial ? String(serial) : undefined };
+    if (response.cards && Array.isArray(response.cards) && response.cards.length > 0) {
+      response.cards.forEach((card: any, idx: number) => {
+        const pin = card.Pin || card.pin || card.purchased_code || "";
+        const serial = card.Serial || card.serial || "";
+        if (pin) results.push({
+          label: response.cards.length > 1 ? `PIN #${idx + 1}` : "PIN",
+          value: String(pin),
+          serial: serial ? String(serial) : undefined,
+        });
+      });
+    }
+    if (results.length === 0) {
+      const pin =
+        response.pin || response.Pin ||
+        response.purchased_code ||
+        response.content?.transactions?.purchased_code ||
+        response.token || response.Token || "";
+      const serial = response.serial || response.Serial ||
+        response.content?.transactions?.unique_element || "";
+      if (pin) results.push({ label: "PIN", value: String(pin), serial: serial ? String(serial) : undefined });
+    }
   }
 
-  // Data card pins
+  // Data card pins — handle cards array
   if (t.type === "data_card") {
-    const pin =
-      response.pin || response.Pin ||
-      response.purchased_code ||
-      response.content?.transactions?.purchased_code || "";
-    const serial = response.serial || response.Serial || "";
-    if (pin) return { label: "Data Card PIN", value: String(pin), serial: serial ? String(serial) : undefined };
+    if (response.cards && Array.isArray(response.cards) && response.cards.length > 0) {
+      response.cards.forEach((card: any, idx: number) => {
+        const pin = card.Pin || card.pin || card.purchased_code || "";
+        const serial = card.Serial || card.serial || "";
+        if (pin) results.push({
+          label: response.cards.length > 1 ? `Data Card PIN #${idx + 1}` : "Data Card PIN",
+          value: String(pin),
+          serial: serial ? String(serial) : undefined,
+        });
+      });
+    }
+    if (results.length === 0) {
+      const pin =
+        response.pin || response.Pin ||
+        response.purchased_code ||
+        response.content?.transactions?.purchased_code || "";
+      const serial = response.serial || response.Serial || "";
+      if (pin) results.push({ label: "Data Card PIN", value: String(pin), serial: serial ? String(serial) : undefined });
+    }
   }
 
-  return null;
+  return results.length > 0 ? results : null;
 }
 
 interface TransactionHistoryProps {
