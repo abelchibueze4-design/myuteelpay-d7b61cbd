@@ -99,10 +99,12 @@ export const SetupTransactionPinModal = ({
               <Label htmlFor="setup-pin">Transaction PIN (4 digits)</Label>
               <Input
                 id="setup-pin"
-                type="password"
+                type="tel"
                 inputMode="numeric"
                 maxLength={4}
                 placeholder="••••"
+                autoComplete="off"
+                name="transaction-pin-setup"
                 value={pin}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, "");
@@ -123,10 +125,12 @@ export const SetupTransactionPinModal = ({
               <Label htmlFor="setup-confirm-pin">Confirm PIN</Label>
               <Input
                 id="setup-confirm-pin"
-                type="password"
+                type="tel"
                 inputMode="numeric"
                 maxLength={4}
                 placeholder="••••"
+                autoComplete="off"
+                name="transaction-pin-confirm"
                 value={confirmPin}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, "");

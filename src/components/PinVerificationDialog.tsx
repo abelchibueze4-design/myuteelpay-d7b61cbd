@@ -167,6 +167,8 @@ export const PinVerificationDialog = ({
                 onChange={(e) => handleInputChange(e.target.value)}
                 className={verifyError ? "border-destructive" : ""}
                 disabled={isLoading}
+                autoComplete="off"
+                name="transaction-pin-verify"
               />
               {verifyError && (
                 <p className="text-xs text-destructive mt-1">{verifyError}</p>
