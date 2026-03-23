@@ -65,46 +65,76 @@ const STATUS_COLORS: Record<string, string> = {
 
 const WHATSAPP_NUMBER = "2349022334478";
 
-// Extract token/pin from transaction metadata
-function extractTokenOrPin(t: any): { label: string; value: string; serial?: string } | null {
+// Extract token/pin from transaction metadata — supports multiple items (edu pins, data cards)
+function extractTokenOrPin(t: any): { label: string; value: string; serial?: string }[] | null {
   const meta = t.metadata;
   if (!meta) return null;
 
   const response = meta.kvdata_response || meta.vtpass_response;
   if (!response) return null;
 
+  const results: { label: string; value: string; serial?: string }[] = [];
+
   // Electricity tokens
   if (t.type === "electricity") {
     const token =
       response.token || response.Token ||
       response.purchased_code || response.mainToken ||
-      response.content?.transactions?.purchased_code || 
+      response.content?.transactions?.purchased_code ||
+      response.maintoken || response.creditToken ||
       meta.token || meta.Token || "";
-    if (token) return { label: "Electricity Token", value: String(token) };
+    if (token) results.push({ label: "Electricity Token", value: String(token) });
   }
 
-  // Edu pins
+  // Edu pins — handle cards array for multiple pins
   if (t.type === "edu_pin") {
-    const pin =
-      response.pin || response.Pin ||
-      response.purchased_code ||
-      response.content?.transactions?.purchased_code || "";
-    const serial = response.serial || response.Serial || 
-      response.content?.transactions?.unique_element || "";
-    if (pin) return { label: "PIN", value: String(pin), serial: serial ? String(serial) : undefined };
+    if (response.cards && Array.isArray(response.cards) && response.cards.length > 0) {
+      response.cards.forEach((card: any, idx: number) => {
+        const pin = card.Pin || card.pin || card.purchased_code || "";
+        const serial = card.Serial || card.serial || "";
+        if (pin) results.push({
+          label: response.cards.length > 1 ? `PIN #${idx + 1}` : "PIN",
+          value: String(pin),
+          serial: serial ? String(serial) : undefined,
+        });
+      });
+    }
+    if (results.length === 0) {
+      const pin =
+        response.pin || response.Pin ||
+        response.purchased_code ||
+        response.content?.transactions?.purchased_code ||
+        response.token || response.Token || "";
+      const serial = response.serial || response.Serial ||
+        response.content?.transactions?.unique_element || "";
+      if (pin) results.push({ label: "PIN", value: String(pin), serial: serial ? String(serial) : undefined });
+    }
   }
 
-  // Data card pins
+  // Data card pins — handle cards array
   if (t.type === "data_card") {
-    const pin =
-      response.pin || response.Pin ||
-      response.purchased_code ||
-      response.content?.transactions?.purchased_code || "";
-    const serial = response.serial || response.Serial || "";
-    if (pin) return { label: "Data Card PIN", value: String(pin), serial: serial ? String(serial) : undefined };
+    if (response.cards && Array.isArray(response.cards) && response.cards.length > 0) {
+      response.cards.forEach((card: any, idx: number) => {
+        const pin = card.Pin || card.pin || card.purchased_code || "";
+        const serial = card.Serial || card.serial || "";
+        if (pin) results.push({
+          label: response.cards.length > 1 ? `Data Card PIN #${idx + 1}` : "Data Card PIN",
+          value: String(pin),
+          serial: serial ? String(serial) : undefined,
+        });
+      });
+    }
+    if (results.length === 0) {
+      const pin =
+        response.pin || response.Pin ||
+        response.purchased_code ||
+        response.content?.transactions?.purchased_code || "";
+      const serial = response.serial || response.Serial || "";
+      if (pin) results.push({ label: "Data Card PIN", value: String(pin), serial: serial ? String(serial) : undefined });
+    }
   }
 
-  return null;
+  return results.length > 0 ? results : null;
 }
 
 interface TransactionHistoryProps {
@@ -233,8 +263,10 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       `Description: ${t.description || "N/A"}`,
     ];
     if (tokenInfo) {
-      lines.push(`${tokenInfo.label}: ${tokenInfo.value}`);
-      if (tokenInfo.serial) lines.push(`Serial: ${tokenInfo.serial}`);
+      tokenInfo.forEach((ti) => {
+        lines.push(`${ti.label}: ${ti.value}`);
+        if (ti.serial) lines.push(`Serial: ${ti.serial}`);
+      });
     }
     lines.push(`\nPowered by UteelPay — www.uteelpay.com`);
     const text = lines.join("\n");
@@ -313,13 +345,13 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
             <div class="row"><span class="label">Date & Time</span><span class="value">${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm:ss")}</span></div>
             <div class="row"><span class="label">Payment Method</span><span class="value">Wallet Balance</span></div>
           </div>
-          ${tokenInfo ? `
+          ${tokenInfo && tokenInfo.length > 0 ? tokenInfo.map(ti => `
           <div class="token-section">
-            <p class="token-label">${tokenInfo.label}</p>
-            <p class="token-value">${tokenInfo.value}</p>
-            ${tokenInfo.serial ? `<p class="token-serial">Serial: ${tokenInfo.serial}</p>` : ''}
+            <p class="token-label">${ti.label}</p>
+            <p class="token-value">${ti.value}</p>
+            ${ti.serial ? `<p class="token-serial">Serial: ${ti.serial}</p>` : ''}
           </div>
-          ` : ''}
+          `).join('') : ''}
           <div class="qr-section">
             <svg id="qr-placeholder" width="80" height="80"></svg>
             <p>Scan to verify this transaction</p>
@@ -578,14 +610,18 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                  {/* Token/PIN display */}
                 {(() => {
                   const tokenInfo = extractTokenOrPin(t);
-                  if (!tokenInfo) return null;
+                  if (!tokenInfo || tokenInfo.length === 0) return null;
                   return (
-                    <div className="mx-6 mt-4 mb-0 bg-secondary rounded-2xl p-4 border-2 border-primary/20">
-                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1">{tokenInfo.label}</p>
-                      <p className="text-lg font-mono font-black tracking-wider text-primary break-all">{tokenInfo.value}</p>
-                      {tokenInfo.serial && (
-                        <p className="text-xs text-muted-foreground mt-1">Serial: <span className="font-bold">{tokenInfo.serial}</span></p>
-                      )}
+                    <div className="mx-6 mt-4 mb-0 space-y-2">
+                      {tokenInfo.map((ti, idx) => (
+                        <div key={idx} className="bg-secondary rounded-2xl p-4 border-2 border-primary/20">
+                          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1">{ti.label}</p>
+                          <p className="text-lg font-mono font-black tracking-wider text-primary break-all">{ti.value}</p>
+                          {ti.serial && (
+                            <p className="text-xs text-muted-foreground mt-1">Serial: <span className="font-bold">{ti.serial}</span></p>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   );
                 })()}
