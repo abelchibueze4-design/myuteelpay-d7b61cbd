@@ -263,8 +263,10 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       `Description: ${t.description || "N/A"}`,
     ];
     if (tokenInfo) {
-      lines.push(`${tokenInfo.label}: ${tokenInfo.value}`);
-      if (tokenInfo.serial) lines.push(`Serial: ${tokenInfo.serial}`);
+      tokenInfo.forEach((ti) => {
+        lines.push(`${ti.label}: ${ti.value}`);
+        if (ti.serial) lines.push(`Serial: ${ti.serial}`);
+      });
     }
     lines.push(`\nPowered by UteelPay — www.uteelpay.com`);
     const text = lines.join("\n");
