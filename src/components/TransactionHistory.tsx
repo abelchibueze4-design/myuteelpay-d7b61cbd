@@ -340,10 +340,11 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
             <h3>Transaction Details</h3>
             <div class="row"><span class="label">Service</span><span class="value">${TYPE_LABELS[t.type] || t.type}</span></div>
             <div class="row"><span class="label">Description</span><span class="value">${t.description || 'N/A'}</span></div>
+            ${t.metadata?.admin_funded ? '<div class="row"><span class="label">Funded By</span><span class="value" style="color:#d97706;font-weight:800;">Admin</span></div>' : ''}
             <div class="row"><span class="label">Reference</span><span class="value">${t.reference || t.id}</span></div>
             <div class="row"><span class="label">Transaction ID</span><span class="value" style="font-size:10px;">${t.id}</span></div>
             <div class="row"><span class="label">Date & Time</span><span class="value">${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm:ss")}</span></div>
-            <div class="row"><span class="label">Payment Method</span><span class="value">Wallet Balance</span></div>
+            <div class="row"><span class="label">Payment Method</span><span class="value">${t.metadata?.admin_funded ? 'Admin Credit' : 'Wallet Balance'}</span></div>
           </div>
           ${tokenInfo && tokenInfo.length > 0 ? tokenInfo.map(ti => `
           <div class="token-section">
