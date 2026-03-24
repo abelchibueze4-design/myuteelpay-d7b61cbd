@@ -629,13 +629,20 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 {/* Details */}
                 <div className="px-6 py-4 space-y-0">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-3">Transaction Details</p>
+                  {t.metadata?.admin_funded && (
+                    <div className="flex items-center gap-2 p-3 mb-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                      <Shield className="w-4 h-4 text-amber-600 shrink-0" />
+                      <p className="text-xs font-bold text-amber-700 dark:text-amber-400">Funded by Admin</p>
+                    </div>
+                  )}
                   {[
                     ["Service", TYPE_LABELS[t.type] || t.type],
                     ["Description", t.description || "N/A"],
+                    ...(t.metadata?.admin_funded ? [["Funded By", "Admin"]] : []),
                     ["Reference", t.reference || t.id],
                     ["Transaction ID", t.id],
                     ["Date & Time", format(parseISO(t.created_at), "MMM d, yyyy · HH:mm:ss")],
-                    ["Payment Method", "Wallet Balance"],
+                    ["Payment Method", t.metadata?.admin_funded ? "Admin Credit" : "Wallet Balance"],
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between items-start gap-4 py-2 border-b border-border/30 last:border-0">
                       <span className="text-xs text-muted-foreground font-medium shrink-0">{label}</span>
