@@ -98,6 +98,16 @@ Deno.serve(async (req: Request) => {
             if (profile) userId = profile.id;
           }
 
+          // Fallback: try receiver account_number against all stored virtual accounts
+          if (!userId && payload.receiver?.account_number) {
+            const { data: va2 } = await supabase
+              .from("virtual_accounts")
+              .select("user_id")
+              .eq("account_number", payload.receiver.account_number)
+              .single();
+            if (va2) userId = va2.user_id;
+          }
+
           if (userId) {
             reference = txnRef;
 
