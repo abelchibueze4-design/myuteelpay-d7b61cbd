@@ -258,6 +258,7 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       `Service: ${TYPE_LABELS[t.type] || t.type}`,
       `Amount: ${formatAmount(t.amount, t.type)}`,
       `Status: ${t.status.toUpperCase()}`,
+      ...(t.metadata?.admin_funded ? [`Funded By: Admin`] : []),
       `Reference: ${t.reference || t.id}`,
       `Date: ${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")}`,
       `Description: ${t.description || "N/A"}`,
