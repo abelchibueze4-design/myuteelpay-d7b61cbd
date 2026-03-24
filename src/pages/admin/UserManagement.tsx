@@ -82,6 +82,7 @@ const UserManagement = () => {
                     status: "success" as any,
                     description: walletNote || "Admin wallet credit",
                     reference: `ADM-CR-${Date.now()}`,
+                    metadata: { admin_funded: true, note: walletNote || "Admin wallet credit" },
                 });
                 if (txError) throw txError;
             } else {

@@ -7,7 +7,7 @@ import { format, parseISO, isAfter, isBefore, startOfDay, endOfDay } from "date-
 import {
   Search, Filter, ArrowDownLeft, ArrowUpRight, X,
   Calendar, RotateCcw, FileText, Download, ChevronRight,
-  Receipt, MessageCircle, Printer, CalendarIcon, RotateCw, Copy, Share2,
+  Receipt, MessageCircle, Printer, CalendarIcon, RotateCw, Copy, Share2, Shield,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import logo from "@/assets/logo.png";
@@ -258,6 +258,7 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
       `Service: ${TYPE_LABELS[t.type] || t.type}`,
       `Amount: ${formatAmount(t.amount, t.type)}`,
       `Status: ${t.status.toUpperCase()}`,
+      ...(t.metadata?.admin_funded ? [`Funded By: Admin`] : []),
       `Reference: ${t.reference || t.id}`,
       `Date: ${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm")}`,
       `Description: ${t.description || "N/A"}`,
@@ -340,10 +341,11 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
             <h3>Transaction Details</h3>
             <div class="row"><span class="label">Service</span><span class="value">${TYPE_LABELS[t.type] || t.type}</span></div>
             <div class="row"><span class="label">Description</span><span class="value">${t.description || 'N/A'}</span></div>
+            ${t.metadata?.admin_funded ? '<div class="row"><span class="label">Funded By</span><span class="value" style="color:#d97706;font-weight:800;">Admin</span></div>' : ''}
             <div class="row"><span class="label">Reference</span><span class="value">${t.reference || t.id}</span></div>
             <div class="row"><span class="label">Transaction ID</span><span class="value" style="font-size:10px;">${t.id}</span></div>
             <div class="row"><span class="label">Date & Time</span><span class="value">${format(parseISO(t.created_at), "MMM d, yyyy · HH:mm:ss")}</span></div>
-            <div class="row"><span class="label">Payment Method</span><span class="value">Wallet Balance</span></div>
+            <div class="row"><span class="label">Payment Method</span><span class="value">${t.metadata?.admin_funded ? 'Admin Credit' : 'Wallet Balance'}</span></div>
           </div>
           ${tokenInfo && tokenInfo.length > 0 ? tokenInfo.map(ti => `
           <div class="token-section">
@@ -629,13 +631,20 @@ const TransactionHistory = ({ defaultType = "all", filter = "all" }: Transaction
                 {/* Details */}
                 <div className="px-6 py-4 space-y-0">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-3">Transaction Details</p>
+                  {t.metadata?.admin_funded && (
+                    <div className="flex items-center gap-2 p-3 mb-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                      <Shield className="w-4 h-4 text-amber-600 shrink-0" />
+                      <p className="text-xs font-bold text-amber-700 dark:text-amber-400">Funded by Admin</p>
+                    </div>
+                  )}
                   {[
                     ["Service", TYPE_LABELS[t.type] || t.type],
                     ["Description", t.description || "N/A"],
+                    ...(t.metadata?.admin_funded ? [["Funded By", "Admin"]] : []),
                     ["Reference", t.reference || t.id],
                     ["Transaction ID", t.id],
                     ["Date & Time", format(parseISO(t.created_at), "MMM d, yyyy · HH:mm:ss")],
-                    ["Payment Method", "Wallet Balance"],
+                    ["Payment Method", t.metadata?.admin_funded ? "Admin Credit" : "Wallet Balance"],
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between items-start gap-4 py-2 border-b border-border/30 last:border-0">
                       <span className="text-xs text-muted-foreground font-medium shrink-0">{label}</span>
